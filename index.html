@@ -500,11 +500,6 @@ function chooseRandom(isAppeal = false) {
     return;
   }
 
-  // ➤ 確保不要重複
-  let finalIndex;
-  let attempts = 0;
-  do {
-    finalIndex = secureRandomIndex(currentList.length);
     attempts++;
   } while (finalIndex === lastIndex && attempts < 5);
   lastIndex = finalIndex;
