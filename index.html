@@ -145,6 +145,10 @@
       opacity: 0;
       transform: scale(0.5);
       transition: all 0.6s ease;
+        white-space: nowrap;             /* 不換行 */
+  overflow: hidden;                /* 超出隱藏 */
+  text-overflow: ellipsis;        /* 加上省略號（可選） */
+  font-size: clamp(1.2em, 5vw, 2em); /* 自動縮放文字大小，避免換行 */
     }
     .result-card.show {
       opacity: 1;
@@ -234,7 +238,7 @@
   </style>
 </head>
 <body>
-<h1><img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/icon.png" alt="icon" width="64">
+<h1><img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/icon.png" alt="icon" width="32">
 選擇小幫手</h1>
 
 <div class="nav">
