@@ -236,14 +236,27 @@
   100% { transform: translateY(-100%); }
 }
 .current-list-label {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.label-left {
+  text-align: left;
+  font-size: 1.2em;
+  margin-bottom: 4px;
+  padding-left: 12px;
+}
+
+.select-center {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 0.5em;
-  font-size: 1.2em;
-  margin: 10px 0;
-  flex-wrap: wrap;
-  text-align: center;
+  width: 100%;
+}
+
+.select-center select {
+  min-width: 160px;
+  max-width: 80vw;
+  font-size: 1em;
 }
 
   </style>
@@ -259,7 +272,9 @@
 
 <div class="page active" id="randomPage">
   <div class="current-list-label">
-    目前清單：<select id="topMemorySelect" onchange="switchMemoryFromTop()">
+  <div class="label-left">目前清單：</div>
+  <div class="select-center">
+    <select id="topMemorySelect" onchange="switchMemoryFromTop()">
       <option value="">-- 請選擇 --</option>
     </select>
   </div>
