@@ -281,14 +281,6 @@
 </div>
 
 <script>
-let lastIndex = -1; // 記錄上次抽到的 index
-function secureRandomIndex(max) {
-  const arr = new Uint32Array(1);
-  window.crypto.getRandomValues(arr);
-  return Math.floor(arr[0] / (2**32) * max);
-}
-
-
 let currentList = [];
 let memoryData = JSON.parse(localStorage.getItem('memoryData')) || {};
 let currentListName = "";
