@@ -501,13 +501,8 @@ function chooseRandom(isAppeal = false) {
   }
 
   // 🟡 修正重複判斷區塊
-  let finalIndex;
-  let attempts = 0;
-  do {
-    finalIndex = secureRandomIndex(currentList.length);
-    attempts++;
-  } while (finalIndex === lastIndex && attempts < 5);
-  lastIndex = finalIndex;
+  let finalIndex = secureRandomIndex(currentList.length);
+lastIndex = finalIndex;
 
   // 顯示 slotMachine 並啟動動畫
   slotMachine.innerHTML = '';
