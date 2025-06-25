@@ -281,6 +281,14 @@
 </div>
 
 <script>
+let lastIndex = -1; // 記錄上次抽到的 index
+function secureRandomIndex(max) {
+  const arr = new Uint32Array(1);
+  window.crypto.getRandomValues(arr);
+  return Math.floor(arr[0] / (2**32) * max);
+}
+
+
 let currentList = [];
 let memoryData = JSON.parse(localStorage.getItem('memoryData')) || {};
 let currentListName = "";
@@ -448,6 +456,15 @@ renderCurrentList();
 
 let appealCount = 3;
 
+let appealCount = 3;
+let lastIndex = -1; // 記錄上次的結果位置
+
+function secureRandomIndex(max) {
+  const arr = new Uint32Array(1);
+  window.crypto.getRandomValues(arr);
+  return Math.floor(arr[0] / (2**32) * max);
+}
+
 function chooseRandom(isAppeal = false) {
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
@@ -464,30 +481,34 @@ function chooseRandom(isAppeal = false) {
     return;
   }
 
-  // 顯示 slotMachine 並啟動淡入動畫
+  // ➤ 確保不要重複
+  let finalIndex;
+  let attempts = 0;
+  do {
+    finalIndex = secureRandomIndex(currentList.length);
+    attempts++;
+  } while (finalIndex === lastIndex && attempts < 5);
+  lastIndex = finalIndex;
+
+  // 顯示 slotMachine 並啟動動畫
   slotMachine.innerHTML = '';
   slotMachine.classList.add('show');
 
-  // 準備大量假選項 + 真正結果（90 個）
-  const finalIndex = Math.floor(Math.random() * currentList.length);
   const spinList = [];
   for (let i = 0; i < 90; i++) {
-    spinList.push(currentList[Math.floor(Math.random() * currentList.length)]);
+    spinList.push(currentList[secureRandomIndex(currentList.length)]);
   }
   spinList.push(currentList[finalIndex]);
 
-  // 組 slotContent
   const slotContent = document.createElement('div');
   slotContent.className = 'slot-content';
   slotContent.style.animation = 'none';
   slotContent.innerHTML = spinList.map(item => `<div>${item}</div>`).join('');
   slotMachine.appendChild(slotContent);
 
-  // 啟動動畫
   void slotContent.offsetWidth;
-  slotContent.style.animation = 'spinScroll 3.2s ease-out forwards'; // ⏱ 時間延長
+  slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
 
-  // 結束後處理結果與上訴
   setTimeout(() => {
     resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
     resultCard.classList.add('show', 'glow');
@@ -512,8 +533,9 @@ function chooseRandom(isAppeal = false) {
       finalText.style.color = '#b34400';
       appealArea.appendChild(finalText);
     }
-  }, 3300); // 動畫完成後執行
+  }, 3300);
 }
+
 
   const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
 document.querySelectorAll('link[rel="icon"], link[rel="manifest"]').forEach(el => {
