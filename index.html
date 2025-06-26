@@ -591,6 +591,7 @@ function chooseRandom(isAppeal = false) {
   resultCard.classList.remove('show', 'glow');
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
+  resultCard.textContent = '🎰 正在抽籤...';
   
     // 🔻 清除上一個影片（避免多個影片殘留）
   const oldWrapper = document.querySelector('.video-wrapper');
