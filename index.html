@@ -602,7 +602,7 @@ function chooseRandom(isAppeal = false) {
 
   const randomBtn = document.querySelector('.btn-primary');
   document.querySelector('.random-container').insertBefore(wrapper, resultCard);
-
+wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
   
 
   // ✅ 加這段：播放過程中就不要撐開太多空間
@@ -706,7 +706,7 @@ if ('serviceWorker' in navigator) {
     .catch(err => console.log('SW 註冊失敗', err));
 }
 
-wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
 </script>
 </body>
 </html>
