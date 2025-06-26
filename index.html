@@ -592,7 +592,7 @@ function chooseRandom(isAppeal = false) {
   wrapper.appendChild(video);
   setTimeout(() => wrapper.classList.add('show'), 50);
   const randomBtn = document.querySelector('.btn-primary');
-randomBtn.insertAdjacentElement('afterend', wrapper);
+document.querySelector('.random-container').insertBefore(wrapper, resultCard);
 
   video.onended = () => {
     wrapper.classList.add("glow-out");
