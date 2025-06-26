@@ -273,22 +273,23 @@
 }
 
 .video-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 20px;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 16 / 9;
+  margin: 20px auto;
+  position: relative;
   overflow: hidden;
-  pointer-events: none;
-  z-index: 99;
+  border-radius: 20px;
   box-shadow: 0 0 20px rgba(255, 223, 0, 0.4);
+  pointer-events: none;
   transition: opacity 0.5s ease;
   animation: fadeIn 0.6s ease;
 }
 
 .custom-video {
   width: 100%;
-  max-width: 340px;
+  height: 100%;
+  object-fit: cover;
   border-radius: 20px;
   mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
   mask-composite: exclude;
