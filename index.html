@@ -158,6 +158,20 @@
       animation: multiGlow 1.8s ease-out;
       animation-fill-mode: both;
     }
+    @keyframes fadeOutShrink {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+.result-card.fade-out {
+  animation: fadeOutShrink 0.4s ease forwards;
+}
     @keyframes multiGlow {
       0%   { box-shadow: 0 0 0 transparent; }
       20%  { box-shadow: 0 0 20px #ffd700; }
@@ -590,8 +604,14 @@ function chooseRandom(isAppeal = false) {
 
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
-  resultCard.textContent = ''; // ✅ 清空文字
-resultCard.classList.remove('show', 'glow', 'reveal', 'transitioning'); // ✅ 不顯示結果
+  // 先執行淡出動畫，再清空文字與 class
+resultCard.classList.remove('show', 'glow', 'reveal', 'transitioning');
+resultCard.classList.add('fade-out');
+
+setTimeout(() => {
+  resultCard.textContent = '';
+  resultCard.classList.remove('fade-out');
+}, 400); // 時間與動畫一致 // ✅ 不顯示結果
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
   document.getElementById('effectSelectorContainer').style.display = 'none';
