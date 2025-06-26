@@ -605,6 +605,7 @@ function chooseRandom(isAppeal = false) {
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
   // 先執行淡出動畫，再清空文字與 class
+document.getElementById('effectSelectorContainer').style.display = 'none';
 resultCard.style.transition = 'all 0.4s ease';
 resultCard.style.opacity = '0';
 resultCard.style.transform = 'scale(0.6)';
