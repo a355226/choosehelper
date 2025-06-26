@@ -322,6 +322,17 @@
   from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
   to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
+.result-card.transitioning {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.result-card.reveal {
+  transition: all 0.6s ease;
+  opacity: 1;
+  transform: scale(1);
+}
+
   </style>
 </head>
 <body>
@@ -610,15 +621,50 @@ wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
   // ✅ 加這段：播放過程中就不要撐開太多空間
   wrapper.style.maxHeight = '240px';
 
-  video.onended = () => {
-    // ✅ 結束後，直接縮小並移除
-    wrapper.style.maxHeight = '0px';
+video.onended = () => {
+  wrapper.classList.add('glow-out'); // ✅ 播放淡出動畫
+  setTimeout(() => {
+    wrapper.remove();
+
+    // 加入過場效果
+    resultCard.classList.remove('show', 'glow');
+    resultCard.classList.add('transitioning');
+    lastIndex = secureRandomIndex(currentList.length);
+    resultCard.textContent = `🎉 ${currentList[lastIndex]}`;
+
+    // 淡入顯示結果
     setTimeout(() => {
-      wrapper.remove();
-      lastIndex = secureRandomIndex(currentList.length);
-      revealResult();
+      resultCard.classList.remove('transitioning');
+      resultCard.classList.add('reveal', 'show', 'glow');
+    }, 100);
+
+    // 延遲出現「上訴」或「認命吧」文字
+    setTimeout(() => {
+      const appealArea = document.getElementById('appealArea');
+      appealArea.innerHTML = '';
+      if (appealCount > 0) {
+        const btn = document.createElement('button');
+        btn.textContent = `上訴！（剩餘${appealCount}次）`;
+        btn.className = 'btn-pink';
+        btn.style.marginTop = '20px';
+        btn.style.backgroundColor = ['#ffe6e6', '#ffb3b3', '#ff6666'][3 - appealCount] || '#ff6666';
+        btn.style.color = '#800000';
+        btn.onclick = () => {
+          appealCount--;
+          chooseRandom(true);
+        };
+        appealArea.appendChild(btn);
+      } else {
+        const finalText = document.createElement('div');
+        finalText.textContent = '認命吧，這就是最好的選擇！';
+        finalText.style.marginTop = '20px';
+        finalText.style.fontWeight = 'bold';
+        finalText.style.color = '#b34400';
+        appealArea.appendChild(finalText);
+      }
     }, 300);
-  };
+  }, 300); // 與 glow-out 動畫時間一致
+};
 } else {
   resultCard.textContent = '🎰 正在抽籤...';
   resultCard.classList.add('show');
