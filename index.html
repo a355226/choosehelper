@@ -588,10 +588,10 @@ function chooseRandom(isAppeal = false) {
 
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
-  resultCard.classList.remove('show', 'glow');
+  resultCard.textContent = ''; // ✅ 清空文字
+resultCard.classList.remove('show', 'glow', 'reveal', 'transitioning'); // ✅ 不顯示結果
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
-  resultCard.textContent = '🎰 正在抽籤...';
   
     // 🔻 清除上一個影片（避免多個影片殘留）
   const oldWrapper = document.querySelector('.video-wrapper');
