@@ -544,7 +544,11 @@ function chooseRandom(isAppeal = false) {
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
-    video.onended = () => revealResult();
+    video.onended = () => {
+  lastIndex = secureRandomIndex(currentList.length);
+  revealResult();
+};
+
     appealArea.appendChild(video);
   } else {
     resultCard.textContent = '🎰 正在抽籤...';
