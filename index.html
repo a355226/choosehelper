@@ -290,7 +290,8 @@
   width: 100%;
   max-width: 340px;
   border-radius: 20px;
-  mask-image: radial-gradient(circle, rgba(0,0,0,1) 70%, rgba(0,0,0,0.3) 100%);
+  mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+  mask-composite: exclude;
 }
 
 .video-wrapper.glow-out {
@@ -580,29 +581,24 @@ function chooseRandom(isAppeal = false) {
   video.playsInline = true;
   video.muted = true;
   video.className = "custom-video";
-  
+
   const wrapper = document.createElement('div');
   wrapper.className = 'video-wrapper';
   wrapper.appendChild(video);
   appealArea.appendChild(wrapper);
 
   video.onended = () => {
-    // 動畫發散
     wrapper.classList.add("glow-out");
     setTimeout(() => {
       wrapper.remove();
       lastIndex = secureRandomIndex(currentList.length);
       revealResult();
-    }, 1000); // 等動畫播完再進入結果
+    }, 1000);
   };
-}
-
-    appealArea.appendChild(video);
-  } else {
-    resultCard.textContent = '🎰 正在抽籤...';
-    resultCard.classList.add('show');
-    runSlotAnimation();
-  }
+} else {
+  resultCard.textContent = '🎰 正在抽籤...';
+  resultCard.classList.add('show');
+  runSlotAnimation();
 }
 
 function updateCurrentList() {
