@@ -561,9 +561,6 @@ function chooseRandom(isAppeal = false) {
     return;
   }
 
-  // 🟡 修正重複判斷區塊
-  let finalIndex = secureRandomIndex(currentList.length);
-lastIndex = finalIndex;
 
   const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
 document.querySelectorAll('link[rel="icon"], link[rel="manifest"]').forEach(el => {
