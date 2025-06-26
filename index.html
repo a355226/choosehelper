@@ -260,6 +260,17 @@
   text-align: center;       /* ← 控制開啟下拉選單時的選項置中 */
   text-align-last: center;  /* ← 控制已選文字在框中置中 */
 }
+#effectSelect {
+  font-size: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  width: auto;
+  min-width: 140px;
+  background-color: #fff9db;
+  text-align-last: center;
+  font-weight: bold;
+}
 
   </style>
 </head>
@@ -512,29 +523,36 @@ function chooseRandom(isAppeal = false) {
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
+  const effect = document.getElementById('effectSelect')?.value || 'default';
 
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
-const effect = document.getElementById('effectSelect')?.value || 'default';
-resultCard.classList.remove('show', 'glow');
-slotMachine.innerHTML = '';
-slotMachine.classList.remove('show');
-appealArea.innerHTML = '';
+  resultCard.classList.remove('show', 'glow');
+  slotMachine.innerHTML = '';
+  slotMachine.classList.remove('show');
 
-if (effect === 'video001') {
-  const video = document.createElement('video');
-  video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4";
-  video.width = 320;
-  video.autoplay = true;
-  video.playsInline = true;
-  video.muted = true;
-  video.onended = () => revealResult();
-  appealArea.appendChild(video);
-} else {
-  resultCard.textContent = '🎰 正在抽籤...';
-  resultCard.classList.add('show');
-  runSlotAnimation();
+  if (currentList.length === 0) {
+    resultCard.textContent = '請先輸入選項';
+    resultCard.classList.add('show', 'glow');
+    return;
+  }
+
+  if (effect === 'video001') {
+    const video = document.createElement('video');
+    video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4";
+    video.width = 320;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.muted = true;
+    video.onended = () => revealResult();
+    appealArea.appendChild(video);
+  } else {
+    resultCard.textContent = '🎰 正在抽籤...';
+    resultCard.classList.add('show');
+    runSlotAnimation();
+  }
 }
+
 
 
   if (currentList.length === 0) {
@@ -546,6 +564,28 @@ if (effect === 'video001') {
   // 🟡 修正重複判斷區塊
   let finalIndex = secureRandomIndex(currentList.length);
 lastIndex = finalIndex;
+
+  const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
+document.querySelectorAll('link[rel="icon"], link[rel="manifest"]').forEach(el => {
+  if (el.href) {
+    el.href += (el.href.includes('?') ? '&' : '?') + 'v=' + v;
+  }
+});
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js?v=' + v)
+    .then(reg => console.log('SW 註冊成功', reg.scope))
+    .catch(err => console.log('SW 註冊失敗', err));
+}
+function updateCurrentList() {
+  if (!currentListName) {
+    alert("⚠️ 尚未選擇任何記憶清單，請先選擇一個要更新的清單");
+    return;
+  }
+  memoryData[currentListName] = [...currentList];
+  saveMemoryData();
+  alert(`✅ 已更新清單：「${currentListName}」`);
+  updateMemorySelect(); // 可選，有時候會刷新下拉選單顯示狀態
+}
 
  function runSlotAnimation() {
   const slotMachine = document.getElementById('slotMachine');
@@ -576,30 +616,7 @@ lastIndex = finalIndex;
     revealResult();
   }, 3300);
 }
-
-
-  const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
-document.querySelectorAll('link[rel="icon"], link[rel="manifest"]').forEach(el => {
-  if (el.href) {
-    el.href += (el.href.includes('?') ? '&' : '?') + 'v=' + v;
-  }
-});
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js?v=' + v)
-    .then(reg => console.log('SW 註冊成功', reg.scope))
-    .catch(err => console.log('SW 註冊失敗', err));
-}
-function updateCurrentList() {
-  if (!currentListName) {
-    alert("⚠️ 尚未選擇任何記憶清單，請先選擇一個要更新的清單");
-    return;
-  }
-  memoryData[currentListName] = [...currentList];
-  saveMemoryData();
-  alert(`✅ 已更新清單：「${currentListName}」`);
-  updateMemorySelect(); // 可選，有時候會刷新下拉選單顯示狀態
-}
-
+  
   function revealResult() {
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
