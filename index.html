@@ -605,13 +605,8 @@ function chooseRandom(isAppeal = false) {
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
   // 先執行淡出動畫，再清空文字與 class
-resultCard.classList.remove('show', 'glow', 'reveal', 'transitioning');
-resultCard.classList.add('fade-out');
-
-setTimeout(() => {
-  resultCard.textContent = '';
-  resultCard.classList.remove('fade-out');
-}, 400); // 時間與動畫一致 // ✅ 不顯示結果
+resultCard.className = 'result-card'; // 移除所有動畫 class
+resultCard.textContent = '';
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
   document.getElementById('effectSelectorContainer').style.display = 'none';
@@ -670,7 +665,7 @@ video.onended = () => {
         const btn = document.createElement('button');
         btn.textContent = `上訴！（剩餘${appealCount}次）`;
         btn.className = 'btn-pink';
-        btn.style.marginTop = '20px';
+        btn.style.marginTop = '40px';
         btn.style.backgroundColor = ['#ffe6e6', '#ffb3b3', '#ff6666'][3 - appealCount] || '#ff6666';
         btn.style.color = '#800000';
         btn.onclick = () => {
@@ -687,6 +682,8 @@ video.onended = () => {
         appealArea.appendChild(finalText);
       }
     }, 300);
+      // ✅ 補上特效選單重新出現
+  document.getElementById('effectSelectorContainer').style.display = 'block';
   }, 300); // 與 glow-out 動畫時間一致
 };
 } else {
