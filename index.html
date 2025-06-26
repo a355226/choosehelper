@@ -276,13 +276,14 @@
   width: 100%;
   max-width: 420px;
   aspect-ratio: 16 / 9;
-  margin: 5px auto 30px auto;;
+  margin: 5px auto 20px auto;
   position: relative;
   overflow: hidden;
   border-radius: 20px;
   box-shadow: 0 0 20px rgba(255, 223, 0, 0.4);
   pointer-events: none;
-  transition: opacity 0.5s 
+  max-height: 240px;          /* ✅ 限制最大高度 */
+  transition: max-height 0.3s ease;
 }
 /* 新增顯示 class */
 .video-wrapper.show {
@@ -586,7 +587,7 @@ function chooseRandom(isAppeal = false) {
   if (oldWrapper) oldWrapper.remove();
 
 
-  if (effect === 'video001') {
+ if (effect === 'video001') {
   const video = document.createElement('video');
   video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4";
   video.autoplay = true;
@@ -597,17 +598,23 @@ function chooseRandom(isAppeal = false) {
   const wrapper = document.createElement('div');
   wrapper.className = 'video-wrapper';
   wrapper.appendChild(video);
-  setTimeout(() => wrapper.classList.add('show'), 50);
+
   const randomBtn = document.querySelector('.btn-primary');
-document.querySelector('.random-container').insertBefore(wrapper, resultCard);
+  document.querySelector('.random-container').insertBefore(wrapper, resultCard);
+
+  setTimeout(() => wrapper.classList.add('show'), 50);
+
+  // ✅ 加這段：播放過程中就不要撐開太多空間
+  wrapper.style.maxHeight = '240px';
 
   video.onended = () => {
-    wrapper.classList.add("glow-out");
+    // ✅ 結束後，直接縮小並移除
+    wrapper.style.maxHeight = '0px';
     setTimeout(() => {
       wrapper.remove();
       lastIndex = secureRandomIndex(currentList.length);
       revealResult();
-    }, 1000);
+    }, 300);
   };
 } else {
   resultCard.textContent = '🎰 正在抽籤...';
