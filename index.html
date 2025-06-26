@@ -261,15 +261,16 @@
   text-align-last: center;  /* ← 控制已選文字在框中置中 */
 }
 #effectSelect {
+  appearance: none; /* ✅ 移除系統樣式 */
   font-size: 16px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid #aaa;
-  width: auto;
-  min-width: 140px;
-  background-color: #fff9db;
-  text-align-last: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid #ffd700;
+  background-color: #fff7c0;
   font-weight: bold;
+  text-align-last: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  cursor: pointer;
 }
 
 .video-wrapper {
@@ -361,7 +362,7 @@
   </div>
 </div>
 
-  <div style="margin-top: 40px; text-align: center;">
+  <div style="margin-top: 60px; text-align: center;">
   <label for="effectSelect" style="font-weight: bold;">🎬：</label>
   <select id="effectSelect" onchange="handleEffectChange()">
     <option value="default">預設</option>
