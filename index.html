@@ -745,6 +745,8 @@ function updateCurrentList() {
     finalText.style.color = '#b34400';
     appealArea.appendChild(finalText);
   }
+  // ✅ 顯示特效選單回來
+document.getElementById('effectSelectorContainer').style.display = 'block';
 }
   const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
 document.querySelectorAll('link[rel="icon"], link[rel="manifest"]').forEach(el => {
