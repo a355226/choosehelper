@@ -363,7 +363,7 @@
   </div>
 </div>
 
-  <div style="margin-top: 80px; text-align: center;">
+  <div id="effectSelectorContainer" style="margin-top: 40px; text-align: center;">
   <label for="effectSelect" style="font-weight: bold;">🎬：</label>
   <select id="effectSelect" onchange="handleEffectChange()">
     <option value="default">預設</option>
@@ -594,6 +594,7 @@ function chooseRandom(isAppeal = false) {
 resultCard.classList.remove('show', 'glow', 'reveal', 'transitioning'); // ✅ 不顯示結果
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
+  document.getElementById('effectSelectorContainer').style.display = 'none';
   
     // 🔻 清除上一個影片（避免多個影片殘留）
   const oldWrapper = document.querySelector('.video-wrapper');
