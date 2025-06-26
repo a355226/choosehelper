@@ -282,12 +282,12 @@
   box-shadow: 0 0 20px rgba(255, 223, 0, 0.4);
   pointer-events: none;
   max-height: 240px;          /* ✅ 限制最大高度 */
-  transition: max-height 0.3s ease;
+  min-height: 200px;       /* ✅ 預留高度避免畫面突然撐開 */
+  opacity: 0;              /* ✅ 一開始隱藏 */
+  transition: opacity 0.3s ease;
 }
-/* 新增顯示 class */
 .video-wrapper.show {
-  opacity: 1;
-  transform: scale(1);
+  opacity: 1;              /* ✅ 出現時淡入 */
 }
 
 .custom-video {
@@ -587,6 +587,10 @@ function chooseRandom(isAppeal = false) {
 
 
  if (effect === 'video001') {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'video-wrapper';
+  wrapper.appendChild(video);
+  
   const video = document.createElement('video');
   video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4";
   video.autoplay = true;
@@ -594,14 +598,12 @@ function chooseRandom(isAppeal = false) {
   video.muted = true;
   video.className = "custom-video";
 
-  const wrapper = document.createElement('div');
-  wrapper.className = 'video-wrapper';
-  wrapper.appendChild(video);
+  setTimeout(() => wrapper.classList.add('show'), 50);
 
   const randomBtn = document.querySelector('.btn-primary');
   document.querySelector('.random-container').insertBefore(wrapper, resultCard);
 
-  setTimeout(() => wrapper.classList.add('show'), 50);
+  
 
   // ✅ 加這段：播放過程中就不要撐開太多空間
   wrapper.style.maxHeight = '240px';
@@ -703,6 +705,8 @@ if ('serviceWorker' in navigator) {
     .then(reg => console.log('SW 註冊成功', reg.scope))
     .catch(err => console.log('SW 註冊失敗', err));
 }
+
+wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
 </script>
 </body>
 </html>
