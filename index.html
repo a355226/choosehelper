@@ -289,6 +289,16 @@
   </div>
 </div>
 
+  <div style="margin-top: 40px; text-align: center;">
+  <label for="effectSelect" style="font-weight: bold;">🎬 選擇方式：</label>
+  <select id="effectSelect" onchange="handleEffectChange()">
+    <option value="default">預設</option>
+    <option value="video001">恐怖貞子</option>
+    <!-- 可持續新增：<option value="video002">爆炸特效</option> 等等 -->
+  </select>
+</div>
+
+
 <div class="page" id="editPage">
   <div class="section-title">📂 切換清單：</div>
   <select id="memorySelect" onchange="loadMemoryList()">
@@ -505,8 +515,27 @@ function chooseRandom(isAppeal = false) {
 
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
+const effect = document.getElementById('effectSelect')?.value || 'default';
+resultCard.classList.remove('show', 'glow');
+slotMachine.innerHTML = '';
+slotMachine.classList.remove('show');
+appealArea.innerHTML = '';
+
+if (effect === 'video001') {
+  const video = document.createElement('video');
+  video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4";
+  video.width = 320;
+  video.autoplay = true;
+  video.playsInline = true;
+  video.muted = true;
+  video.onended = () => revealResult();
+  appealArea.appendChild(video);
+} else {
   resultCard.textContent = '🎰 正在抽籤...';
-  resultCard.classList.remove('show', 'glow');
+  resultCard.classList.add('show');
+  runSlotAnimation();
+}
+
 
   if (currentList.length === 0) {
     resultCard.textContent = '請先輸入選項';
@@ -518,9 +547,13 @@ function chooseRandom(isAppeal = false) {
   let finalIndex = secureRandomIndex(currentList.length);
 lastIndex = finalIndex;
 
-  // 顯示 slotMachine 並啟動動畫
-  slotMachine.innerHTML = '';
-  slotMachine.classList.add('show');
+ function runSlotAnimation() {
+  const slotMachine = document.getElementById('slotMachine');
+  const resultCard = document.getElementById('resultCard');
+  const appealArea = document.getElementById('appealArea');
+
+  let finalIndex = secureRandomIndex(currentList.length);
+  lastIndex = finalIndex;
 
   const spinList = [];
   for (let i = 0; i < 90; i++) {
@@ -532,35 +565,15 @@ lastIndex = finalIndex;
   slotContent.className = 'slot-content';
   slotContent.style.animation = 'none';
   slotContent.innerHTML = spinList.map(item => `<div>${item}</div>`).join('');
+  slotMachine.innerHTML = '';
   slotMachine.appendChild(slotContent);
 
+  slotMachine.classList.add('show');
   void slotContent.offsetWidth;
   slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
 
   setTimeout(() => {
-    resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
-    resultCard.classList.add('show', 'glow');
-
-    if (appealCount > 0) {
-      const btn = document.createElement('button');
-      btn.textContent = `上訴！（剩餘${appealCount}次）`;
-      btn.className = 'btn-pink';
-      btn.style.marginTop = '20px';
-      btn.style.backgroundColor = ['#ffe6e6', '#ffb3b3', '#ff6666'][3 - appealCount] || '#ff6666';
-      btn.style.color = '#800000';
-      btn.onclick = () => {
-        appealCount--;
-        chooseRandom(true);
-      };
-      appealArea.appendChild(btn);
-    } else {
-      const finalText = document.createElement('div');
-      finalText.textContent = '認命吧，這就是最好的選擇！';
-      finalText.style.marginTop = '20px';
-      finalText.style.fontWeight = 'bold';
-      finalText.style.color = '#b34400';
-      appealArea.appendChild(finalText);
-    }
+    revealResult();
   }, 3300);
 }
 
@@ -586,6 +599,37 @@ function updateCurrentList() {
   alert(`✅ 已更新清單：「${currentListName}」`);
   updateMemorySelect(); // 可選，有時候會刷新下拉選單顯示狀態
 }
+
+  function revealResult() {
+  const resultCard = document.getElementById('resultCard');
+  const appealArea = document.getElementById('appealArea');
+
+  const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
+  resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
+  resultCard.classList.add('show', 'glow');
+
+  if (appealCount > 0) {
+    const btn = document.createElement('button');
+    btn.textContent = `上訴！（剩餘${appealCount}次）`;
+    btn.className = 'btn-pink';
+    btn.style.marginTop = '20px';
+    btn.style.backgroundColor = ['#ffe6e6', '#ffb3b3', '#ff6666'][3 - appealCount] || '#ff6666';
+    btn.style.color = '#800000';
+    btn.onclick = () => {
+      appealCount--;
+      chooseRandom(true);
+    };
+    appealArea.appendChild(btn);
+  } else {
+    const finalText = document.createElement('div');
+    finalText.textContent = '認命吧，這就是最好的選擇！';
+    finalText.style.marginTop = '20px';
+    finalText.style.fontWeight = 'bold';
+    finalText.style.color = '#b34400';
+    appealArea.appendChild(finalText);
+  }
+}
+
 </script>
 </body>
 </html>
