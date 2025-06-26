@@ -588,16 +588,18 @@ function chooseRandom(isAppeal = false) {
 
  if (effect === 'video001') {
   const wrapper = document.createElement('div');
-  wrapper.className = 'video-wrapper';
-  wrapper.appendChild(video);
-  
-  const video = document.createElement('video');
-  video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4";
-  video.autoplay = true;
-  video.playsInline = true;
-  video.muted = true;
-  video.className = "custom-video";
+wrapper.className = 'video-wrapper';
+document.querySelector('.random-container').insertBefore(wrapper, resultCard);  // 插入位置先插好
 
+const video = document.createElement('video');
+video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4";
+video.autoplay = true;
+video.playsInline = true;
+video.muted = true;
+video.className = "custom-video";
+
+wrapper.appendChild(video);  // 現在才 append 是正確的
+setTimeout(() => wrapper.classList.add('show'), 50);
   setTimeout(() => wrapper.classList.add('show'), 50);
 
   const randomBtn = document.querySelector('.btn-primary');
