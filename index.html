@@ -280,7 +280,7 @@
   padding: 8px 16px;
   border-radius: 8px;
   border: 2px solid #ffd700;
-  background-color: #fff7c0;
+  background-color: #d8e5e8;
   font-weight: bold;
   width: auto;
   text-align-last: center;
@@ -605,11 +605,16 @@ function chooseRandom(isAppeal = false) {
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
   // 先執行淡出動畫，再清空文字與 class
-resultCard.className = 'result-card'; // 移除所有動畫 class
-resultCard.textContent = '';
-  slotMachine.innerHTML = '';
-  slotMachine.classList.remove('show');
-  document.getElementById('effectSelectorContainer').style.display = 'none';
+resultCard.style.transition = 'all 0.4s ease';
+resultCard.style.opacity = '0';
+resultCard.style.transform = 'scale(0.6)';
+setTimeout(() => {
+  resultCard.textContent = '';
+  resultCard.className = 'result-card'; // 清除所有 class
+  resultCard.style.opacity = '';
+  resultCard.style.transform = '';
+  resultCard.style.transition = '';
+}, 400);
   
     // 🔻 清除上一個影片（避免多個影片殘留）
   const oldWrapper = document.querySelector('.video-wrapper');
