@@ -300,6 +300,7 @@
   <input type="text" id="foodInput" placeholder="請輸入" />
   <button class="btn-primary" onclick="addFood()">加入</button>
   <button class="btn-lightblue" onclick="saveCurrentList()">建立此清單</button>
+  <button class="btn-lightblue" onclick="updateCurrentList()">更新目前清單</button>
   <button class="btn-pink"  onclick="clearAllItems()">全部清除</button>
   <div class="section-title">📃 目前清單：</div>
   <ul id="foodList"></ul>
@@ -562,7 +563,16 @@ if ('serviceWorker' in navigator) {
     .then(reg => console.log('SW 註冊成功', reg.scope))
     .catch(err => console.log('SW 註冊失敗', err));
 }
-
+function updateCurrentList() {
+  if (!currentListName) {
+    alert("⚠️ 尚未選擇任何記憶清單，請先選擇一個要更新的清單");
+    return;
+  }
+  memoryData[currentListName] = [...currentList];
+  saveMemoryData();
+  alert(`✅ 已更新清單：「${currentListName}」`);
+  updateMemorySelect(); // 可選，有時候會刷新下拉選單顯示狀態
+}
 </script>
 </body>
 </html>
