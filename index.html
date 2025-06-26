@@ -321,7 +321,20 @@ function showPage(id) {
   document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
   const btn = id === 'randomPage' ? document.querySelectorAll('.nav button')[0] : document.querySelectorAll('.nav button')[1];
   btn.classList.add('active');
+
+  // 🔻 新增這段：如果是切換到 randomPage，就重設 slotMachine 狀態
+  if (id === 'randomPage') {
+    const slotMachine = document.getElementById('slotMachine');
+    const resultCard = document.getElementById('resultCard');
+    const appealArea = document.getElementById('appealArea');
+    slotMachine.innerHTML = '';
+    slotMachine.classList.remove('show');
+    resultCard.textContent = '請先建立清單';
+    resultCard.classList.remove('glow', 'show');
+    appealArea.innerHTML = '';
+  }
 }
+
 
 function saveMemoryData() {
   localStorage.setItem('memoryData', JSON.stringify(memoryData));
