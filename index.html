@@ -620,6 +620,10 @@ setTimeout(() => {
     // 🔻 清除上一個影片（避免多個影片殘留）
   const oldWrapper = document.querySelector('.video-wrapper');
   if (oldWrapper) oldWrapper.remove();
+  
+  // ✅ 重置拉霸動畫區塊
+  slotMachine.innerHTML = '';
+  slotMachine.classList.remove('show');
 
 
  if (effect === 'video001') {
