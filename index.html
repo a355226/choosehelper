@@ -591,8 +591,8 @@ function chooseRandom(isAppeal = false) {
   wrapper.className = 'video-wrapper';
   wrapper.appendChild(video);
   setTimeout(() => wrapper.classList.add('show'), 50);
-  const effectSelector = document.getElementById('effectSelect');
-effectSelector.parentElement.insertAdjacentElement('beforebegin', wrapper);
+  const randomBtn = document.querySelector('.btn-primary');
+randomBtn.insertAdjacentElement('afterend', wrapper);
 
   video.onended = () => {
     wrapper.classList.add("glow-out");
