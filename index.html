@@ -243,6 +243,17 @@
   animation: spinScroll 3.2s ease-out forwards;
 }
 
+  .slot-content > div {
+  height: 60px;          /* 每格固定高度，與 slot-machine 一致 */
+  line-height: 60px;     /* 文字垂直置中 */
+  flex-shrink: 0;        /* 不被壓縮 */
+}
+.slot-content {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+
 @keyframes spinScroll {
   0%   { transform: translateY(0); }
   100% { transform: translateY(-100%); }
