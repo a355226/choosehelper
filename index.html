@@ -434,6 +434,7 @@ function showPage(id) {
     resultCard.textContent = '請先建立清單';
     resultCard.classList.remove('glow', 'show');
     appealArea.innerHTML = '';
+    enableRandomButton(); // ✅ 每次切到 randomPage 就重啟按鈕
   }
 
   // 🔻 加這段：切換頁面時切換特效選單顯示
@@ -705,6 +706,7 @@ video.onended = () => {
         appealArea.appendChild(finalText);
       }
     }, 300);
+    enableRandomButton(); // 👉 播完恢復按鈕
       // ✅ 補上特效選單重新出現
   document.getElementById('effectSelectorContainer').style.display = 'block';
   }, 300); // 與 glow-out 動畫時間一致
@@ -803,6 +805,14 @@ const randomBtn = document.querySelector('.btn-primary');
 randomBtn.classList.remove('disabled');
 randomBtn.disabled = false;
 
+enableRandomButton(); // 👉 抽完恢復按鈕
+
+
+function enableRandomButton() {
+  const randomBtn = document.querySelector('.btn-primary');
+  randomBtn.classList.remove('disabled');
+  randomBtn.disabled = false;
+}
 
 </script>
 </body>
