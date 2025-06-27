@@ -799,6 +799,9 @@ if ('serviceWorker' in navigator) {
     .then(reg => console.log('SW 註冊成功', reg.scope))
     .catch(err => console.log('SW 註冊失敗', err));
 }
+const randomBtn = document.querySelector('.btn-primary');
+randomBtn.classList.remove('disabled');
+randomBtn.disabled = false;
 
 
 </script>
