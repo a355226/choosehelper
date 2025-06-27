@@ -353,6 +353,16 @@
   box-shadow: none !important;
   transform: none !important;
 }
+.fade-out-smooth {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.fade-in-smooth {
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
   </style>
 </head>
 <body>
@@ -606,115 +616,40 @@ function secureRandomIndex(max) {
 }
 
 function chooseRandom(isAppeal = false) {
-  const randomBtn = document.querySelector('.btn-primary');
-if (!isAppeal && randomBtn.classList.contains('disabled')) return;
-randomBtn.classList.add('disabled'); // 套用禁用樣式
-randomBtn.disabled = true; // 防止連點
+  randomBtn.classList.add('disabled');
+  randomBtn.disabled = true;
+
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
+  const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
+ slotMachine.style.display = ''; 
+
   const effect = document.getElementById('effectSelect')?.value || 'default';
 
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
-  // 先執行淡出動畫，再清空文字與 class
-document.getElementById('effectSelectorContainer').style.display = 'none';
-resultCard.style.transition = 'all 0.4s ease';
-resultCard.style.opacity = '0';
-resultCard.style.transform = 'scale(0.6)';
-setTimeout(() => {
-  resultCard.textContent = '';
-  resultCard.className = 'result-card'; // 清除所有 class
-  resultCard.style.opacity = '';
-  resultCard.style.transform = '';
-  resultCard.style.transition = '';
-}, 400);
-  
-    // 🔻 清除上一個影片（避免多個影片殘留）
+
+  // ➤ 清除影片區
   const oldWrapper = document.querySelector('.video-wrapper');
   if (oldWrapper) oldWrapper.remove();
-  
-  // ✅ 重置拉霸動畫區塊
+
+  // ➤ 重置拉霸動畫
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
 
+  // ✅ 淡出特效選單
+  effectContainer.classList.remove('fade-in-smooth');
+  effectContainer.classList.add('fade-out-smooth');
 
- if (effect === 'video001') {
-  const wrapper = document.createElement('div');
-wrapper.className = 'video-wrapper';
-document.querySelector('.random-container').insertBefore(wrapper, resultCard);  // 插入位置先插好
+  if (effect === 'video001') {
+      playVideoEffect(resultCard);
+  } else {
+      resultCard.textContent = '🎰 正在抽籤...';
+      resultCard.classList.add('show', 'glow');
 
-const video = document.createElement('video');
-video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4";
-video.autoplay = true;
-video.playsInline = true;
-video.muted = true;
-video.className = "custom-video";
-
-wrapper.appendChild(video);  // 現在才 append 是正確的
-setTimeout(() => wrapper.classList.add('show'), 50);
-  setTimeout(() => wrapper.classList.add('show'), 50);
-
-  const randomBtn = document.querySelector('.btn-primary');
-  document.querySelector('.random-container').insertBefore(wrapper, resultCard);
-wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  
-
-  // ✅ 加這段：播放過程中就不要撐開太多空間
-  wrapper.style.maxHeight = '240px';
-
-video.onended = () => {
-  wrapper.classList.add('glow-out'); // ✅ 播放淡出動畫
-  setTimeout(() => {
-    wrapper.remove();
-
-    // 加入過場效果
-    resultCard.classList.remove('show', 'glow');
-    resultCard.classList.add('transitioning');
-    lastIndex = secureRandomIndex(currentList.length);
-    resultCard.textContent = `🎉 ${currentList[lastIndex]}`;
-
-    // 淡入顯示結果
-    setTimeout(() => {
-      resultCard.classList.remove('transitioning');
-      resultCard.classList.add('reveal', 'show', 'glow');
-    }, 100);
-
-    // 延遲出現「上訴」或「認命吧」文字
-    setTimeout(() => {
-      const appealArea = document.getElementById('appealArea');
-      appealArea.innerHTML = '';
-      if (appealCount > 0) {
-        const btn = document.createElement('button');
-        btn.textContent = `上訴！（剩餘${appealCount}次）`;
-        btn.className = 'btn-pink';
-        btn.style.marginTop = '40px';
-        btn.style.backgroundColor = ['#ffe6e6', '#ffb3b3', '#ff6666'][3 - appealCount] || '#ff6666';
-        btn.style.color = '#800000';
-        btn.onclick = () => {
-          appealCount--;
-          chooseRandom(true);
-        };
-        appealArea.appendChild(btn);
-      } else {
-        const finalText = document.createElement('div');
-        finalText.textContent = '認命吧，這就是最好的選擇！';
-        finalText.style.marginTop = '20px';
-        finalText.style.fontWeight = 'bold';
-        finalText.style.color = '#b34400';
-        appealArea.appendChild(finalText);
-      }
-    }, 300);
-    enableRandomButton(); // 👉 播完恢復按鈕
-      // ✅ 補上特效選單重新出現
-  document.getElementById('effectSelectorContainer').style.display = 'block';
-  }, 300); // 與 glow-out 動畫時間一致
-};
-} else {
-  resultCard.textContent = '🎰 正在抽籤...';
-  resultCard.classList.add('show');
-  runSlotAnimation();
-}
+      runSlotAnimation();
+  }
 }
 
 function updateCurrentList() {
@@ -757,10 +692,11 @@ function updateCurrentList() {
     revealResult();
   }, 3300);
 }
-  
-  function revealResult() {
+function revealResult() {
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
+  const slotMachine = document.getElementById('slotMachine');
+  const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
 
   const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
   resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
@@ -786,10 +722,18 @@ function updateCurrentList() {
     finalText.style.color = '#b34400';
     appealArea.appendChild(finalText);
   }
-  enableRandomButton(); // 👉 抽完恢復按鈕
-  // ✅ 顯示特效選單回來
-document.getElementById('effectSelectorContainer').style.display = 'block';
+  enableRandomButton();
+
+// ✅ 淡出 slot-machine
+slotMachine.classList.remove('show');
+slotMachine.style.display = 'none';
+
+// ✅ 恢復特效選單顯示
+effectContainer.classList.remove('fade-out-smooth');
+effectContainer.classList.add('fade-in-smooth');
+
 }
+
   const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
 document.querySelectorAll('link[rel="icon"], link[rel="manifest"]').forEach(el => {
   if (el.href) {
@@ -813,6 +757,20 @@ function enableRandomButton() {
   randomBtn.classList.remove('disabled');
   randomBtn.disabled = false;
 }
+
+function fadeOutAndHide(element) {
+    element.classList.add('fade-out-smooth');
+
+    const onTransitionEnd = () => {
+        element.classList.remove('fade-out-smooth');
+        element.classList.remove('show'); // ⚠️ 關鍵：移除 show，防止 display:block 重現
+        element.style.display = 'none';
+        element.removeEventListener('transitionend', onTransitionEnd);
+    };
+
+    element.addEventListener('transitionend', onTransitionEnd);
+}
+
 
 </script>
 </body>
