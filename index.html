@@ -244,7 +244,7 @@
 
 @keyframes spinScroll {
   0%   { transform: translateY(0); }
-  100% { transform: translateY(-5400px); }
+  100% { transform: translateY(-100%); }
 }
 .current-list-label {
   width: 100%;
@@ -346,21 +346,7 @@
   opacity: 1;
   transform: scale(1);
 }
-.slot-content {
-  display: flex;
-  flex-direction: column;
-  animation: spinScroll 3.2s ease-out forwards;
 
-  /* ✅ 強制 slot 區塊最小高度（確保不因內容撐大） */
-  min-height: 6000px;
-}
-
-.slot-content > div {
-  height: 60px;
-  line-height: 60px;
-  text-align: center;
-  flex-shrink: 0;
-}
   </style>
 </head>
 <body>
@@ -739,17 +725,11 @@ function updateCurrentList() {
   lastIndex = finalIndex;
 
   const spinList = [];
+  for (let i = 0; i < 90; i++) {
+    spinList.push(currentList[secureRandomIndex(currentList.length)]);
+  }
+  spinList.push(currentList[finalIndex]);
 
-// 加入幾個空白元素，讓第一項目下移一些
-for (let i = 0; i < 5; i++) {
-  spinList.push('');
-}
-
-for (let i = 0; i < 90; i++) {
-  spinList.push(currentList[secureRandomIndex(currentList.length)]);
-}
-
-spinList.push(currentList[finalIndex]);
   const slotContent = document.createElement('div');
   slotContent.className = 'slot-content';
   slotContent.style.animation = 'none';
