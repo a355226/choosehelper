@@ -212,8 +212,7 @@
       cursor: pointer;
     }
 .slot-machine {
-  display: none; /* ← 初始不顯示 */
-  height: 60px;
+  height: 60px;                   /* 保持高度 */
   overflow: hidden;
   position: relative;
   margin: 20px auto 0;
@@ -227,14 +226,16 @@
   text-align: center;
   color: #b34400;
   border: 3px dashed #ffe066;
-  opacity: 0;
-  transition: all 0.4s ease;
+  opacity: 0;                     /* 初始透明 */
+  visibility: hidden;             /* 初始不可見但佔位 */
+  transition: opacity 0.4s ease;
 }
 
 .slot-machine.show {
-  display: block;
-  opacity: 1;
+  opacity: 1;                     /* 顯示時淡入 */
+  visibility: visible;            /* 顯示時可見 */
 }
+
 
 .slot-content {
   display: flex;
