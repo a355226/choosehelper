@@ -432,6 +432,10 @@ function showPage(id) {
     resultCard.classList.remove('glow', 'show');
     appealArea.innerHTML = '';
   }
+  🔻 加這段：切換頁面時切換特效選單顯示
+  const effectContainer = document.getElementById('effectSelectorContainer');
+  effectContainer.style.display = (id === 'randomPage') ? 'block' : 'none';
+}
 }
 
 
