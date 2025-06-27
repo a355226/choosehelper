@@ -346,7 +346,13 @@
   opacity: 1;
   transform: scale(1);
 }
-
+.btn-primary.disabled {
+  background-color: #ddd !important;
+  color: #999 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
   </style>
 </head>
 <body>
@@ -599,6 +605,11 @@ function secureRandomIndex(max) {
 }
 
 function chooseRandom(isAppeal = false) {
+  const randomBtn = document.querySelector('.btn-primary');
+if (randomBtn.classList.contains('disabled')) return; // 已禁用就不執行
+
+randomBtn.classList.add('disabled'); // 套用禁用樣式
+randomBtn.disabled = true; // 防止連點
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
