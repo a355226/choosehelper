@@ -259,8 +259,8 @@
 
 
 @keyframes spinScroll {
-  0%   { transform: translateY(0); }
-  100% { transform: translateY(calc(-100% + 60px)); } /* 最後停留顯示最後一個 item */
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
 }
 
 .current-list-label {
@@ -766,8 +766,8 @@ function updateCurrentList() {
   slotMachine.innerHTML = '';
   slotMachine.appendChild(slotContent);
 
-  // 改為添加 visible 類而非 show，避免 DOM reflow
-  slotMachine.classList.add('visible');
+  slotMachine.classList.add('show');
+// 移除所有 slotMachine.classList.add('visible') 與 remove('visible')
 
   void slotContent.offsetWidth; // 強制 reflow 開始動畫
   slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
@@ -777,8 +777,8 @@ function updateCurrentList() {
 
     // 延遲隱藏（用透明度而非移除類別）
     setTimeout(() => {
-      slotMachine.classList.remove('visible');
-    }, 400);
+    slotMachine.classList.remove('show');
+}, 400);
   }, 3300);
 }
 
