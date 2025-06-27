@@ -129,10 +129,12 @@
       margin-left: 10px;
       flex-shrink: 0;
     }
-    .random-container {
-      text-align: center;
-      margin-top: 20px;
-    }
+   .random-container {
+  text-align: center;
+  margin-top: 20px;
+  position: relative;      /* 新增：讓裡面的 slot-machine 能定位 */
+  height: 120px;           /* 新增：固定高度（視覺一致，避免跳動） */
+}
     .result-card {
       margin-top: 30px;
       padding: 30px;
@@ -212,10 +214,12 @@
       cursor: pointer;
     }
 .slot-machine {
+  position: absolute;          /* 新增：絕對定位 */
+  top: 0;                      /* 新增：貼齊容器上方 */
+  left: 50%;                   /* 新增：水平置中 */
+  transform: translateX(-50%); /* 新增：水平置中修正 */
   height: 60px;
   overflow: hidden;
-  position: relative;
-  margin: 20px auto 0;
   width: 80%;
   max-width: 300px;
   background: white;
@@ -226,18 +230,13 @@
   text-align: center;
   color: #b34400;
   border: 3px dashed #ffe066;
-  opacity: 0; /* 初始透明 */
+  opacity: 0;                   /* 初始隱藏 */
+  pointer-events: none;         /* 點不到 */
   transition: opacity 0.4s ease;
 }
 
-.slot-machine.visible {
-  opacity: 1; /* 顯示時淡入 */
-}
 .slot-machine.show {
-  display: block;
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);  /* 保持位置固定 */
+  opacity: 1;                   /* 顯示時淡入 */
 }
 
 
