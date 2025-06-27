@@ -346,7 +346,10 @@
   opacity: 1;
   transform: scale(1);
 }
-
+.slot-content > div {
+  height: 60px;
+  line-height: 60px;
+}
   </style>
 </head>
 <body>
@@ -725,11 +728,17 @@ function updateCurrentList() {
   lastIndex = finalIndex;
 
   const spinList = [];
-  for (let i = 0; i < 90; i++) {
-    spinList.push(currentList[secureRandomIndex(currentList.length)]);
-  }
-  spinList.push(currentList[finalIndex]);
 
+// 加入幾個空白元素，讓第一項目下移一些
+for (let i = 0; i < 5; i++) {
+  spinList.push('');
+}
+
+for (let i = 0; i < 90; i++) {
+  spinList.push(currentList[secureRandomIndex(currentList.length)]);
+}
+
+spinList.push(currentList[finalIndex]);
   const slotContent = document.createElement('div');
   slotContent.className = 'slot-content';
   slotContent.style.animation = 'none';
