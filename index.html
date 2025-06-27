@@ -79,16 +79,15 @@
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       transition: all 0.2s ease;
     }
-    .btn-primary:hover {
-      background-color: #35a4af;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-      transform: translateY(-2px);
-    }
-    .btn-primary:active {
-      background-color: #2d8e98;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
-      transform: translateY(1px);
-    }
+.btn-primary:hover {
+  background-color: #35a4af;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.btn-primary:active {
+  background-color: #2d8e98;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
+}
     .btn-yellow {
       background-color: #fff3b0;
       color: #333;
@@ -392,7 +391,19 @@
   opacity: 1;
   transition: opacity 0.6s ease;
 }
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
 
+.shake {
+  animation: shake 0.4s;
+  will-change: transform; /* 提前通知瀏覽器加速渲染，減少撕裂 */
+}
   </style>
 </head>
 <body>
@@ -646,6 +657,18 @@ function secureRandomIndex(max) {
 }
 
 function chooseRandom(isAppeal = false) {
+  if (!currentListName || currentList.length === 0) {
+    const randomBtn = document.querySelector('.btn-primary');
+    randomBtn.classList.add('shake');
+
+    // 同時彈出提示
+    setTimeout(() => {
+      alert("🚫 請先選擇清單");
+      randomBtn.classList.remove('shake');
+    }, 50);
+
+    return;
+  } 
   randomBtn.classList.add('disabled');
   randomBtn.disabled = true;
 
