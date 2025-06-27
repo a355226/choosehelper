@@ -271,20 +271,40 @@
   text-align: center;       /* ← 控制開啟下拉選單時的選項置中 */
   text-align-last: center;  /* ← 控制已選文字在框中置中 */
 }
-#effectSelect {
-  appearance: none; /* ✅ 移除系統樣式 */
-  font-size: 16px;
-  padding: 8px 16px;
-  color:#3C3C3C;
-  border-radius: 8px;
-  border: 2px solid #ffd700;
-  background-color: #f7f7e1;
-  font-weight: bold;
-  width: auto;
-  text-align-last: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  cursor: pointer;
+#effectSelectorContainer {
+  margin: 20px auto 0 auto;
+  text-align: center;
 }
+
+#effectSelect {
+  appearance: none;
+  font-size: 16px;
+  padding: 10px 16px;
+  color: #666;
+  background-color: #f0f9ff;  /* 與整體底色統一 */
+  border: none;               /* 移除邊框 */
+  border-radius: 8px;
+  font-weight: 500;
+  width: auto;
+  max-width: 80vw;
+  text-align-last: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#effectSelect:hover {
+  background-color: #e0f4ff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+#effectSelect:focus {
+  outline: none;
+  background-color: #d0ecff;
+  box-shadow: 0 0 0 3px rgba(61, 184, 196, 0.2);
+}
+
+
 
 .video-wrapper {
   width: 100%;
@@ -392,7 +412,7 @@
 </div>
 
   <div id="effectSelectorContainer" style="margin-top: 40px; text-align: center;">
-  <label for="effectSelect" style="font-weight: bold;">🎬：</label>
+  <label for="effectSelect" style="font-weight: bold;"></label>
   <select id="effectSelect" onchange="handleEffectChange()">
     <option value="default">預設</option>
     <option value="video001">恐怖貞子</option>
@@ -642,14 +662,16 @@ function chooseRandom(isAppeal = false) {
   effectContainer.classList.remove('fade-in-smooth');
   effectContainer.classList.add('fade-out-smooth');
 
-  if (effect === 'video001') {
-      playVideoEffect(resultCard);
-  } else {
-      resultCard.textContent = '🎰 正在抽籤...';
-      resultCard.classList.add('show', 'glow');
+if (effect === 'video001') {
+resultCard.style.display = 'none';  // 直接隱藏（不卡動畫）
+playVideoEffect(resultCard);
 
-      runSlotAnimation();
-  }
+} else {
+    resultCard.textContent = '🎰 正在抽籤...';
+    resultCard.classList.add('show', 'glow');
+    runSlotAnimation();
+}
+
 }
 
 function updateCurrentList() {
@@ -697,6 +719,7 @@ function revealResult() {
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
   const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
+resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
 
   const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
   resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
@@ -771,6 +794,34 @@ function fadeOutAndHide(element) {
     element.addEventListener('transitionend', onTransitionEnd);
 }
 
+function playVideoEffect(resultCard) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'video-wrapper';
+    document.querySelector('.random-container').insertBefore(wrapper, resultCard);
+
+    const video = document.createElement('video');
+    video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4"; // 你的恐怖貞子影片網址
+    video.autoplay = true;
+    video.playsInline = true;
+    video.muted = true;
+    video.className = "custom-video";
+
+    wrapper.appendChild(video);
+
+    // 出現動畫
+    setTimeout(() => {
+        wrapper.classList.add('show');
+    }, 50);
+
+    // 播放完畢後淡出並顯示結果
+    video.onended = () => {
+        wrapper.classList.add('glow-out');
+        setTimeout(() => {
+            wrapper.remove();
+            revealResult(); // 顯示最終結果
+        }, 1000);
+    };
+}
 
 </script>
 </body>
