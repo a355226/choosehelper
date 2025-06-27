@@ -607,8 +607,7 @@ function secureRandomIndex(max) {
 
 function chooseRandom(isAppeal = false) {
   const randomBtn = document.querySelector('.btn-primary');
-if (randomBtn.classList.contains('disabled')) return; // 已禁用就不執行
-
+if (!isAppeal && randomBtn.classList.contains('disabled')) return;
 randomBtn.classList.add('disabled'); // 套用禁用樣式
 randomBtn.disabled = true; // 防止連點
   const resultCard = document.getElementById('resultCard');
@@ -787,6 +786,7 @@ function updateCurrentList() {
     finalText.style.color = '#b34400';
     appealArea.appendChild(finalText);
   }
+  enableRandomButton(); // 👉 抽完恢復按鈕
   // ✅ 顯示特效選單回來
 document.getElementById('effectSelectorContainer').style.display = 'block';
 }
@@ -805,7 +805,7 @@ const randomBtn = document.querySelector('.btn-primary');
 randomBtn.classList.remove('disabled');
 randomBtn.disabled = false;
 
-enableRandomButton(); // 👉 抽完恢復按鈕
+
 
 
 function enableRandomButton() {
