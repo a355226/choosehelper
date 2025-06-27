@@ -212,7 +212,7 @@
       cursor: pointer;
     }
 .slot-machine {
-  height: 60px;                   /* 保持高度 */
+  height: 60px;
   overflow: hidden;
   position: relative;
   margin: 20px auto 0;
@@ -226,11 +226,13 @@
   text-align: center;
   color: #b34400;
   border: 3px dashed #ffe066;
-  opacity: 0;                     /* 初始透明 */
-  visibility: hidden;             /* 初始不可見但佔位 */
+  opacity: 0; /* 初始透明 */
   transition: opacity 0.4s ease;
 }
 
+.slot-machine.visible {
+  opacity: 1; /* 顯示時淡入 */
+}
 .slot-machine.show {
   display: block;
   opacity: 1;
@@ -765,16 +767,21 @@ function updateCurrentList() {
   slotMachine.innerHTML = '';
   slotMachine.appendChild(slotContent);
 
-  slotMachine.classList.add('show');
-  void slotContent.offsetWidth;
+  // 改為添加 visible 類而非 show，避免 DOM reflow
+  slotMachine.classList.add('visible');
+
+  void slotContent.offsetWidth; // 強制 reflow 開始動畫
   slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
 
-setTimeout(() => {
-  revealResult();
   setTimeout(() => {
-    slotMachine.classList.remove('show');
-  }, 200); // 延遲隱藏避免與 resultCard 交疊造成跳動
-}, 3300);
+    revealResult();
+
+    // 延遲隱藏（用透明度而非移除類別）
+    setTimeout(() => {
+      slotMachine.classList.remove('visible');
+    }, 400);
+  }, 3300);
+}
 
   
   function revealResult() {
