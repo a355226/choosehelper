@@ -129,11 +129,10 @@
       margin-left: 10px;
       flex-shrink: 0;
     }
-.random-container {
-  text-align: center;
-  margin-top: 20px;
-  min-height: 260px; /* ✅ 根據 slot + result 內容調整，高度穩定不跳動 */
-}
+    .random-container {
+      text-align: center;
+      margin-top: 20px;
+    }
     .result-card {
       margin-top: 30px;
       padding: 30px;
@@ -213,9 +212,8 @@
       cursor: pointer;
     }
 .slot-machine {
-  height: 60px;        /* ✅ 保留 */
-  visibility: hidden;  /* ✅ 取代 display: none，不破壞版面 */
-  opacity: 0;
+  display: none; /* ← 初始不顯示 */
+  height: 60px;
   overflow: hidden;
   position: relative;
   margin: 30px auto 0;
@@ -229,11 +227,12 @@
   text-align: center;
   color: #b34400;
   border: 3px dashed #ffe066;
+  opacity: 0;
   transition: all 0.4s ease;
 }
 
 .slot-machine.show {
-  visibility: visible;
+  display: block;
   opacity: 1;
 }
 
