@@ -354,6 +354,26 @@
   box-shadow: none !important;
   transform: none !important;
 }
+.result-area {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+
+.slot-machine {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+.result-card {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
   </style>
 </head>
 <body>
@@ -372,14 +392,15 @@
     <select id="topMemorySelect" onchange="switchMemoryFromTop()">
       <option value="">-- 請選擇 --</option>
     </select>
-  </div>
-  </div>
   <div class="random-container">
-    <button class="btn-primary" style="width:100%; font-size:20px;" onclick="chooseRandom()">🎲 隨機選 🎲</button>
+  <button class="btn-primary" style="width:100%; font-size:20px;" onclick="chooseRandom()">🎲 隨機選 🎲</button>
+  
+  <div class="result-area">
+    <div id="slotMachine" class="slot-machine"></div>
     <div id="resultCard" class="result-card">請先建立清單</div>
-<div id="slotMachine" class="slot-machine"></div>
-    <div id="appealArea"></div>
   </div>
+
+  <div id="appealArea"></div>
 </div>
 
   <div id="effectSelectorContainer" style="margin-top: 40px; text-align: center;">
