@@ -888,14 +888,18 @@ effectContainer.style.top = (rect.top + scrollTop) + 'px';
         wrapper.classList.add('show');
     }, 50);
 
-    // 播放完畢後淡出並顯示結果
-    video.onended = () => {
-        wrapper.classList.add('glow-out');
-        setTimeout(() => {
-            wrapper.remove();
-            revealResult(); // 顯示最終結果
-        }, 0);
-    };
+video.onended = () => {
+    wrapper.classList.add('glow-out');
+    setTimeout(() => {
+        wrapper.remove();
+
+        // ✅ 播放影片後恢復原本定位
+        effectContainer.style.position = 'absolute';
+        effectContainer.style.top = '';
+
+        revealResult(); // 顯示最終結果
+    }, 0);
+};
 }
 
   function handleEffectChange() {
