@@ -729,10 +729,8 @@ if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect
     playVideoEffect(resultCard, effect);
 } else {
    // ✅ 拉霸前固定 Effect Selector 避免被推下
-    const rect = effectContainer.getBoundingClientRect();
-    const scrollTop = window.scrollY || window.pageYOffset;
-    effectContainer.style.position = 'fixed';
-    effectContainer.style.top = (rect.top + scrollTop) + 'px';
+effectContainer.style.position = 'fixed';
+effectContainer.style.top = window.effectSelectorStableTop + 'px';
     resultCard.textContent = '🎰 正在抽籤...';
     resultCard.classList.add('show', 'glow');
     runSlotAnimation();
@@ -764,6 +762,8 @@ const rect = effectContainer.getBoundingClientRect();
 const scrollTop = window.scrollY || window.pageYOffset;
 effectContainer.style.position = 'fixed';
 effectContainer.style.top = (rect.top + scrollTop) + 'px';
+// 清除暫存穩定位置
+delete window.effectSelectorStableTop;
   const slotMachine = document.getElementById('slotMachine');
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
@@ -793,6 +793,12 @@ effectContainer.style.top = (rect.top + scrollTop) + 'px';
   }, 3300);
 }
 function revealResult() {
+  // 測量穩定位置一次記錄
+if (!window.effectSelectorStableTop) {
+    const rect = effectContainer.getBoundingClientRect();
+    const scrollTop = window.scrollY || window.pageYOffset;
+    window.effectSelectorStableTop = rect.top + scrollTop;
+}
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
