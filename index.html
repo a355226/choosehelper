@@ -467,9 +467,106 @@
   animation: refreshFadeScale 0.5s ease;
 }
 
+body.dark-mode {
+  background-color: #1e1e1e;
+  color: #ddd;
+}
+
+body.dark-mode .nav {
+  background-color: #333;
+}
+
+body.dark-mode .nav button {
+  background-color: #555;
+  color: #eee;
+}
+
+body.dark-mode .nav button.active {
+  background-color: #888;
+}
+
+body.dark-mode .page {
+  background-color: #1e1e1e;
+}
+
+body.dark-mode h1 {
+  color: #eee;
+}
+
+body.dark-mode .btn-primary {
+  background-color: #555;
+  color: #ddd;
+}
+
+body.dark-mode .btn-primary:hover {
+  background-color: #666;
+}
+
+body.dark-mode .btn-pink {
+  background-color: #664;
+  color: #ddd;
+}
+
+body.dark-mode .btn-lightblue {
+  background-color: #334;
+  color: #ddd;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode button {
+  background-color: #333;
+  color: #ddd;
+  border: 1px solid #555;
+}
+
+body.dark-mode li {
+  background: #333;
+  color: #ddd;
+}
+
+body.dark-mode .result-card {
+  background: linear-gradient(145deg, #333, #444);
+  color: #ffe066;
+}
+
+body.dark-mode #effectSelect {
+  background-color: #333;
+  color: #ddd;
+}
+
+body.dark-mode .slot-machine {
+  background-color: #333;
+  color: #ffe066;
+  border-color: #555;
+}
+
+body.dark-mode .footer-note {
+  color: #666;
+}
+
+
   </style>
 </head>
 <body>
+<button id="darkModeToggle" title="切換深色模式" style="
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 999;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+">🌙</button>
+
 <h1><img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/icon.png" alt="icon" width="32">
 選擇小幫手</h1>
 
@@ -1015,7 +1112,27 @@ video.onended = () => {
     localStorage.setItem('lastEffect', effect);
 }
 
+// 深色模式切換與記憶
+const darkModeToggle = document.getElementById('darkModeToggle');
+if (localStorage.getItem('darkMode') === 'enabled') {
+  document.body.classList.add('dark-mode');
+  darkModeToggle.textContent = '☀️';
+}
+
+darkModeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  if (document.body.classList.contains('dark-mode')) {
+    localStorage.setItem('darkMode', 'enabled');
+    darkModeToggle.textContent = '☀️';
+  } else {
+    localStorage.setItem('darkMode', 'disabled');
+    darkModeToggle.textContent = '🌙';
+  }
+});
+
 </script>
   <div class="footer-note">Designed by KJ&nbsp;&nbsp;</div>
+
+
 </body>
 </html>
