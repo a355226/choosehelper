@@ -646,7 +646,12 @@ function showPage(id) {
     const appealArea = document.getElementById('appealArea');
     slotMachine.innerHTML = '';
     slotMachine.classList.remove('show');
+    if (!currentListName || currentList.length === 0) {
     resultCard.textContent = '請先建立清單';
+} else {
+    resultCard.textContent = `清單「${currentListName}」已載入，請按下方按鈕抽選`;
+}
+
     resultCard.classList.remove('glow', 'show');
     appealArea.innerHTML = '';
     enableRandomButton(); // ✅ 每次切到 randomPage 就重啟按鈕
