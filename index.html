@@ -495,7 +495,9 @@ function showPage(id) {
   // 🔻 加這段：切換頁面時切換特效選單顯示
   const effectContainer = document.getElementById('effectSelectorContainer');
   effectContainer.style.display = (id === 'randomPage') ? 'block' : 'none';
+
 }
+
 
 
 function saveMemoryData() {
@@ -710,7 +712,11 @@ if (effect === 'random') {
 effectContainer.style.height = effectContainer.offsetHeight + "px";
   // ✅ 淡出特效選單
   effectContainer.classList.remove('fade-in-smooth');
-  effectContainer.classList.add('fade-out-smooth');
+effectContainer.classList.add('fade-out-smooth');
+setTimeout(() => {
+    effectContainer.style.display = 'none';
+}, 600); // 與 transition 時間相同
+
 
 if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
     resultCard.style.display = 'none';  // 直接隱藏（不卡動畫）
@@ -805,15 +811,14 @@ resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
 // ✅ 淡出 slot-machine
 slotMachine.classList.remove('show');
 slotMachine.style.display = 'none';
-
-// ✅ 恢復特效選單顯示
-effectContainer.classList.remove('fade-out-smooth');
-effectContainer.classList.add('fade-in-smooth');
-effectContainer.classList.remove('fade-out-smooth');
-effectContainer.classList.add('fade-in-smooth');
+// 恢復特效選單顯示
 setTimeout(() => {
-  effectContainer.style.height = '';
-}, 700);
+    effectContainer.style.display = 'block';
+    effectContainer.classList.remove('fade-out-smooth');
+    effectContainer.classList.add('fade-in-smooth');
+}, 200); // 延遲避免與結果顯示衝突，可依需求微調
+
+
 }
 
   const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
