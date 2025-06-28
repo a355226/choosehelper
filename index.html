@@ -819,10 +819,10 @@ slotMachine.classList.remove('show');
 slotMachine.style.display = 'none';
 // 恢復特效選單顯示
 setTimeout(() => {
-    effectContainer.style.display = 'block';
+    effectContainer.style.visibility = 'visible';
     effectContainer.classList.remove('fade-out-smooth');
     effectContainer.classList.add('fade-in-smooth');
-}, 200); // 延遲避免與結果顯示衝突，可依需求微調
+}, 200);
 
 
 }
