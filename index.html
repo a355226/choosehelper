@@ -706,6 +706,8 @@ if (effect === 'random') {
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
 
+// ✅ 加上高度鎖定
+effectContainer.style.height = effectContainer.offsetHeight + "px";
   // ✅ 淡出特效選單
   effectContainer.classList.remove('fade-in-smooth');
   effectContainer.classList.add('fade-out-smooth');
@@ -807,7 +809,11 @@ slotMachine.style.display = 'none';
 // ✅ 恢復特效選單顯示
 effectContainer.classList.remove('fade-out-smooth');
 effectContainer.classList.add('fade-in-smooth');
-
+effectContainer.classList.remove('fade-out-smooth');
+effectContainer.classList.add('fade-in-smooth');
+setTimeout(() => {
+  effectContainer.style.height = '';
+}, 700);
 }
 
   const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
@@ -837,6 +843,7 @@ function enableRandomButton() {
 function fadeOutAndHide(element) {
     element.classList.add('fade-out-smooth');
 }
+
 
 function playVideoEffect(resultCard, effect) {
     const wrapper = document.createElement('div');
