@@ -388,12 +388,14 @@
 .fade-out-smooth {
   opacity: 0;
   transition: opacity 0.6s ease;
-  pointer-events: none;
 }
+
 .fade-in-smooth {
-  opacity: 1;
-  transition: opacity 0.6s ease;
+    opacity: 1;
+    transition: opacity 0.6s ease;
+    visibility: visible; /* ✅ 加上這行 */
 }
+
 @keyframes shake {
   0% { transform: translateX(0); }
   20% { transform: translateX(-6px); }
@@ -407,6 +409,64 @@
   animation: shake 0.4s;
   will-change: transform; /* 提前通知瀏覽器加速渲染，減少撕裂 */
 }
+
+@keyframes dropAndShrink {
+  0% {
+    opacity: 0;
+    transform: translateY(-150px) scale(1.4);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.result-card.drop-in {
+  animation: dropAndShrink 0.7s ease forwards;
+}
+@keyframes fadeInEffectSelector {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.fade-in-anim {
+  animation: fadeInEffectSelector 0.6s ease forwards;
+}
+@keyframes fadeInEffectSelector {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.fade-in-anim {
+  animation: fadeInEffectSelector 0.6s ease forwards;
+}
+.fade-out-smooth {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+@keyframes refreshFadeScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+    filter: brightness(1.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.result-card.refresh-fade-scale {
+  animation: refreshFadeScale 0.5s ease;
+}
+
   </style>
 </head>
 <body>
@@ -713,13 +773,14 @@ if (effect === 'random') {
 
 // ✅ 僅第一次隨機選 / 上訴時淡出，之後過程中不會再次淡出
 if (effectContainer.style.display !== 'none') {
-    effectContainer.classList.remove('fade-in-smooth');
+    effectContainer.classList.remove('fade-in-smooth', 'fade-in-anim');
     effectContainer.classList.add('fade-out-smooth');
     setTimeout(() => {
-    effectContainer.style.visibility = 'hidden'; // ✅ 改這行
-    effectContainer.classList.remove('fade-out-smooth');
-}, 600);
+        effectContainer.style.visibility = 'hidden';
+        effectContainer.classList.remove('fade-out-smooth');
+    }, 600);
 }
+
 
 
 
@@ -740,6 +801,10 @@ if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect
 
     resultCard.textContent = '🎰 正在抽籤...';
     resultCard.classList.add('show', 'glow');
+// 放在此處
+resultCard.classList.remove('drop-in');
+void resultCard.offsetWidth;
+resultCard.classList.add('drop-in');
     runSlotAnimation();
 }
 
@@ -795,20 +860,37 @@ const effectContainer = document.getElementById('effectSelectorContainer');
 }
 function revealResult() {
   const effectContainer = document.getElementById('effectSelectorContainer');
+
   // 測量穩定位置一次記錄
-if (!window.effectSelectorStableTop) {
+  if (!window.effectSelectorStableTop) {
     const rect = effectContainer.getBoundingClientRect();
     const scrollTop = window.scrollY || window.pageYOffset;
     window.effectSelectorStableTop = rect.top + scrollTop;
-}
+  }
+
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
-resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
+  resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
 
   const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
-  resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
-  resultCard.classList.add('show', 'glow');
+resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
+resultCard.classList.add('show', 'glow', 'drop-in');
+
+// ✅ 僅在「預設特效」時套用刷新動畫
+const currentEffect = document.getElementById('effectSelect').value;
+if (currentEffect === 'default' || currentEffect === 'random') {
+    resultCard.classList.remove('refresh-fade-scale'); // 重置
+    void resultCard.offsetWidth; // 強制重排以觸發動畫
+    resultCard.classList.add('refresh-fade-scale');
+}
+
+
+  // ✅ 刷新特效：在結果顯示時套用一次刷新動畫
+  resultCard.classList.add('refresh-pulse');
+  resultCard.addEventListener('animationend', () => {
+    resultCard.classList.remove('refresh-pulse');
+  }, { once: true });
 
   if (appealCount > 0) {
     const btn = document.createElement('button');
@@ -832,22 +914,26 @@ resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
   }
   enableRandomButton();
 
-// ✅ 淡出 slot-machine
-slotMachine.classList.remove('show');
-slotMachine.style.display = 'none';
-// 恢復特效選單顯示
-// 拉霸結束後恢復原本定位
-effectContainer.style.position = 'absolute';
-effectContainer.style.top = '';
-delete window.effectSelectorStableTop; // ✅ 恢復後清除暫存
+  // ✅ 淡出 slot-machine
+  slotMachine.classList.remove('show');
+  slotMachine.style.display = 'none';
+
+  // 拉霸結束後恢復原本定位
+  effectContainer.style.position = 'absolute';
+  effectContainer.style.top = '';
+  delete window.effectSelectorStableTop; // ✅ 恢復後清除暫存
+
+  // ✅ 修正淡入效果確實觸發
 setTimeout(() => {
+    effectContainer.classList.remove('fade-in-anim', 'fade-in-smooth', 'fade-out-smooth');
     effectContainer.style.visibility = 'visible';
-    effectContainer.classList.remove('fade-out-smooth');
-    effectContainer.classList.add('fade-in-smooth');
-}, 600);
+    void effectContainer.offsetWidth;                // 強制重排以確保動畫觸發
+    effectContainer.classList.add('fade-in-anim');   // 執行動畫
+}, 100);
 
 
 }
+
 
   const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
 document.querySelectorAll('link[rel="icon"], link[rel="manifest"]').forEach(el => {
@@ -933,3 +1019,4 @@ video.onended = () => {
   <div class="footer-note">Designed by KJ&nbsp;&nbsp;</div>
 </body>
 </html>
+
