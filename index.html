@@ -832,90 +832,82 @@ function secureRandomIndex(max) {
 }
 
 function chooseRandom(isAppeal = false) {
-  if (!currentListName || currentList.length === 0) {
-    const randomBtn = document.querySelector('.btn-primary');
-    randomBtn.classList.add('shake');
+    if (!currentListName || currentList.length === 0) {
+        const randomBtn = document.querySelector('.btn-primary');
+        randomBtn.classList.add('shake');
+        setTimeout(() => {
+            alert("🚫 請先選擇清單");
+            randomBtn.classList.remove('shake');
+        }, 50);
+        return;
+    }
 
-    // 同時彈出提示
-    setTimeout(() => {
-      alert("🚫 請先選擇清單");
-      randomBtn.classList.remove('shake');
-    }, 50);
+    randomBtn.classList.add('disabled');
+    randomBtn.disabled = true;
 
-    return;
-  } 
-  randomBtn.classList.add('disabled');
-  randomBtn.disabled = true;
+    const resultCard = document.getElementById('resultCard');
+    const appealArea = document.getElementById('appealArea');
+    const slotMachine = document.getElementById('slotMachine');
+    const effectContainer = document.getElementById('effectSelectorContainer');
 
-  const resultCard = document.getElementById('resultCard');
-  const appealArea = document.getElementById('appealArea');
-  const slotMachine = document.getElementById('slotMachine');
-  const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
- slotMachine.style.display = ''; 
+    slotMachine.style.display = '';
 
-  let effect = document.getElementById('effectSelect')?.value || 'default';
+    let effect = document.getElementById('effectSelect')?.value || 'default';
 
-// 如果是隨機，從 default 與 5 個影片隨機選一個
-if (effect === 'random') {
-    const options = ['default', 'video001', 'video002', 'video003', 'video004', 'video005'];
-    effect = options[Math.floor(Math.random() * options.length)];
-}
+    // 隨機特效抽選
+    if (effect === 'random') {
+        const options = ['default', 'video001', 'video002', 'video003', 'video004', 'video005'];
+        effect = options[Math.floor(Math.random() * options.length)];
+    }
 
+    if (!isAppeal) appealCount = 3;
+    appealArea.innerHTML = '';
 
-  if (!isAppeal) appealCount = 3;
-  appealArea.innerHTML = '';
+    // 移除舊影片
+    const oldWrapper = document.querySelector('.video-wrapper');
+    if (oldWrapper) oldWrapper.remove();
 
-  // ➤ 清除影片區
-  const oldWrapper = document.querySelector('.video-wrapper');
-  if (oldWrapper) oldWrapper.remove();
+    // 重置拉霸
+    slotMachine.innerHTML = '';
+    slotMachine.classList.remove('show');
 
-  // ➤ 重置拉霸動畫
-  slotMachine.innerHTML = '';
-  slotMachine.classList.remove('show');
+    // 隱藏特效選擇器
+    if (effectContainer.style.display !== 'none') {
+        effectContainer.classList.remove('fade-in-smooth', 'fade-in-anim');
+        effectContainer.classList.add('fade-out-smooth');
+        setTimeout(() => {
+            effectContainer.style.visibility = 'hidden';
+            effectContainer.classList.remove('fade-out-smooth');
+        }, 600);
+    }
 
-// ✅ 僅第一次隨機選 / 上訴時淡出，之後過程中不會再次淡出
-if (effectContainer.style.display !== 'none') {
-    effectContainer.classList.remove('fade-in-smooth', 'fade-in-anim');
-    effectContainer.classList.add('fade-out-smooth');
-    setTimeout(() => {
-        effectContainer.style.visibility = 'hidden';
-        effectContainer.classList.remove('fade-out-smooth');
-    }, 600);
-}
+    // ✅ 若為影片特效，播放影片並完全 return，避免誤觸發拉霸
+    if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
+        console.log('[Info] 影片模式，播放影片特效並跳過 runSlotAnimation');
+        resultCard.style.display = 'none';
+        playVideoEffect(resultCard, effect);
+        return; // ⬅️ 直接中止
+    }
 
+    // ⬇️ 若非影片特效，執行拉霸流程
 
-
-
-
-if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
-    resultCard.style.display = 'none';
-    playVideoEffect(resultCard, effect);
-} else {
-    // ✅ 拉霸前記錄穩定位置（首次執行時記錄）
     if (!window.effectSelectorStableTop) {
         const rect = effectContainer.getBoundingClientRect();
         const scrollTop = window.scrollY || window.pageYOffset;
         window.effectSelectorStableTop = rect.top + scrollTop;
     }
-    // ✅ 使用穩定位置鎖定 Effect Selector，避免被推下
     effectContainer.style.position = 'fixed';
     effectContainer.style.top = window.effectSelectorStableTop + 'px';
 
     resultCard.textContent = '🎰 正在抽籤...';
     resultCard.classList.add('show', 'glow');
-// 放在此處
-resultCard.classList.remove('drop-in');
-void resultCard.offsetWidth;
-resultCard.classList.add('drop-in');
-    if (!['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
+    resultCard.classList.remove('drop-in');
+    void resultCard.offsetWidth;
+    resultCard.classList.add('drop-in');
+
     runSlotAnimation();
-} else {
-    console.log('[防止誤觸發] 影片模式 skip runSlotAnimation');
 }
 
-}
-
-}
 
 function updateCurrentList() {
   if (!currentListName) {
