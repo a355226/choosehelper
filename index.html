@@ -434,11 +434,15 @@
 
   <div id="effectSelectorContainer" style="margin-top: 80px; text-align: center;">
   <label for="effectSelect" style="font-weight: bold;"></label>
-  <select id="effectSelect" onchange="handleEffectChange()">
-    <option value="default">預設</option>
-    <option value="video001">恐怖貞子</option>
-    <!-- 可持續新增：<option value="video002">爆炸特效</option> 等等 -->
-  </select>
+<select id="effectSelect" onchange="handleEffectChange()">
+  <option value="default">預設</option>
+  <option value="video001">恐怖貞子</option>
+  <option value="video002">德州撲克</option>
+  <option value="video003">可愛貓咪</option>
+  <option value="video004">外星生物</option>
+  <option value="video005">尾牙抽獎</option>
+  <option value="random">隨機</option>
+</select>
 </div>
 
 
@@ -678,7 +682,14 @@ function chooseRandom(isAppeal = false) {
   const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
  slotMachine.style.display = ''; 
 
-  const effect = document.getElementById('effectSelect')?.value || 'default';
+  let effect = document.getElementById('effectSelect')?.value || 'default';
+
+// 如果是隨機，從 default 與 5 個影片隨機選一個
+if (effect === 'random') {
+    const options = ['default', 'video001', 'video002', 'video003', 'video004', 'video005'];
+    effect = options[Math.floor(Math.random() * options.length)];
+}
+
 
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
@@ -697,7 +708,8 @@ function chooseRandom(isAppeal = false) {
 
 if (effect === 'video001') {
 resultCard.style.display = 'none';  // 直接隱藏（不卡動畫）
-playVideoEffect(resultCard);
+playVideoEffect(resultCard, effect);
+
 
 } else {
     resultCard.textContent = '🎰 正在抽籤...';
@@ -716,7 +728,13 @@ function updateCurrentList() {
   saveMemoryData();
   alert(`✅ 已更新清單：「${currentListName}」`);
   updateMemorySelect(); // 可選，有時候會刷新下拉選單顯示狀態
+// ✅ 套用上次使用的特效
+const lastEffect = localStorage.getItem('lastEffect') || 'default';
+const effectSelect = document.getElementById('effectSelect');
+if (effectSelect) {
+    effectSelect.value = lastEffect;
 }
+
 
  function runSlotAnimation() {
   const slotMachine = document.getElementById('slotMachine');
@@ -827,13 +845,21 @@ function fadeOutAndHide(element) {
     element.addEventListener('transitionend', onTransitionEnd);
 }
 
-function playVideoEffect(resultCard) {
+function playVideoEffect(resultCard, effect) {
     const wrapper = document.createElement('div');
     wrapper.className = 'video-wrapper';
     document.querySelector('.random-container').insertBefore(wrapper, resultCard);
 
     const video = document.createElement('video');
-    video.src = "https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4"; // 你的恐怖貞子影片網址
+    const videoMap = {
+    'video001': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4',
+    'video002': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video002.mp4',
+    'video003': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video003.mp4',
+    'video004': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video004.mp4',
+    'video005': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video005.mp4',
+};
+video.src = videoMap[effect] || videoMap['video001'];
+
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
@@ -855,6 +881,12 @@ function playVideoEffect(resultCard) {
         }, 1000);
     };
 }
+
+  function handleEffectChange() {
+    const effect = document.getElementById('effectSelect').value;
+    localStorage.setItem('lastEffect', effect);
+}
+
 
 </script>
   <div class="footer-note">Designed by KJ&nbsp;&nbsp;</div>
