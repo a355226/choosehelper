@@ -709,16 +709,19 @@ if (effect === 'random') {
   slotMachine.classList.remove('show');
 
 // ✅ 加上高度鎖定
+// ✅ 加上高度鎖定
 effectContainer.style.height = effectContainer.offsetHeight + "px";
-// ✅ 修正淡出不自然問題
-if (!effectContainer.classList.contains('fade-out-smooth')) {
+
+// ✅ 僅第一次隨機選 / 上訴時淡出，之後過程中不會再次淡出
+if (effectContainer.style.display !== 'none') {
     effectContainer.classList.remove('fade-in-smooth');
     effectContainer.classList.add('fade-out-smooth');
     setTimeout(() => {
         effectContainer.style.display = 'none';
-        effectContainer.classList.remove('fade-out-smooth'); // 重置，避免多次閃爍
+        effectContainer.classList.remove('fade-out-smooth'); // 重置，避免下次卡住
     }, 600);
 }
+
 
 
 
