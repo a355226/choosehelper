@@ -794,6 +794,7 @@ const effectContainer = document.getElementById('effectSelectorContainer');
   }, 3300);
 }
 function revealResult() {
+  const effectContainer = document.getElementById('effectSelectorContainer');
   // 測量穩定位置一次記錄
 if (!window.effectSelectorStableTop) {
     const rect = effectContainer.getBoundingClientRect();
