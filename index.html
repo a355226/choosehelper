@@ -715,7 +715,7 @@ if (effect === 'random') {
 if (effectContainer.style.display !== 'none') {
     effectContainer.classList.remove('fade-in-smooth');
     effectContainer.classList.add('fade-out-smooth');
-    ssetTimeout(() => {
+    setTimeout(() => {
     effectContainer.style.visibility = 'hidden'; // ✅ 改這行
     effectContainer.classList.remove('fade-out-smooth');
 }, 600);
