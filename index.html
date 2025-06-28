@@ -960,7 +960,7 @@ const effectContainer = document.getElementById('effectSelectorContainer');
     revealResult();
   }, 3300);
 }
-function revealResult() {
+function revealResult(currentEffect)  {
   const effectContainer = document.getElementById('effectSelectorContainer');
 
   // 測量穩定位置一次記錄
@@ -985,15 +985,13 @@ requestAnimationFrame(() => {
     });
 });
 
-
-
-// ✅ 僅在「預設特效」時套用刷新動畫
-const currentEffect = document.getElementById('effectSelect').value;
-if (currentEffect === 'default' || currentEffect === 'random') {
-    resultCard.classList.remove('refresh-fade-scale'); // 重置
-    void resultCard.offsetWidth; // 強制重排以觸發動畫
-    resultCard.classList.add('refresh-fade-scale');
-}
+    // ✅ 修正核心：顯式使用傳入的 currentEffect
+    currentEffect = currentEffect || document.getElementById('effectSelect').value;
+    if (currentEffect === 'default' || currentEffect === 'random') {
+        resultCard.classList.remove('refresh-fade-scale');
+        void resultCard.offsetWidth;
+        resultCard.classList.add('refresh-fade-scale');
+    }
 
 
   // ✅ 刷新特效：在結果顯示時套用一次刷新動畫
@@ -1115,7 +1113,7 @@ video.onended = () => {
         effectContainer.style.position = 'absolute';
         effectContainer.style.top = '';
 
-        revealResult(); // 顯示最終結果
+        revealResult(effect);// 顯示最終結果
     }, 1000);
 };
 }
