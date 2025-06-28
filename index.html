@@ -651,6 +651,10 @@ function importList() {
 updateMemorySelect();
 renderCurrentList();
 
+// ✅ 修正：恢復上次使用的特效（讓 effectSelect 記住使用者選擇）
+const lastEffect = localStorage.getItem('lastEffect') || 'default';
+document.getElementById('effectSelect').value = lastEffect;
+
 let appealCount = 3;
 let lastIndex = -1; // 記錄上次的結果位置
 
