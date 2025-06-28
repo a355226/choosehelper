@@ -836,15 +836,6 @@ function enableRandomButton() {
 
 function fadeOutAndHide(element) {
     element.classList.add('fade-out-smooth');
-
-    const onTransitionEnd = () => {
-        element.classList.remove('fade-out-smooth');
-        element.classList.remove('show'); // ⚠️ 關鍵：移除 show，防止 display:block 重現
-        element.style.display = 'none';
-        element.removeEventListener('transitionend', onTransitionEnd);
-    };
-
-    element.addEventListener('transitionend', onTransitionEnd);
 }
 
 function playVideoEffect(resultCard, effect) {
