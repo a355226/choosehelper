@@ -715,10 +715,10 @@ if (effect === 'random') {
 if (effectContainer.style.display !== 'none') {
     effectContainer.classList.remove('fade-in-smooth');
     effectContainer.classList.add('fade-out-smooth');
-    setTimeout(() => {
-        effectContainer.style.display = 'none';
-        effectContainer.classList.remove('fade-out-smooth'); // 重置，避免下次卡住
-    }, 600);
+    ssetTimeout(() => {
+    effectContainer.style.visibility = 'hidden'; // ✅ 改這行
+    effectContainer.classList.remove('fade-out-smooth');
+}, 600);
 }
 
 
