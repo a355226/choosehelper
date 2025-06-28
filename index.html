@@ -977,7 +977,10 @@ function revealResult() {
 
   const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
 resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
+resultCard.classList.remove('drop-in'); // 防止動畫無效
+void resultCard.offsetWidth;            // 強制重排觸發重新播放
 resultCard.classList.add('show', 'glow', 'drop-in');
+
 
 // ✅ 僅在「預設特效」時套用刷新動畫
 const currentEffect = document.getElementById('effectSelect').value;
