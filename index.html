@@ -711,10 +711,6 @@ if (effect === 'random') {
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
 
-// ✅ 加上高度鎖定
-// ✅ 加上高度鎖定
-effectContainer.style.height = effectContainer.offsetHeight + "px";
-
 // ✅ 僅第一次隨機選 / 上訴時淡出，之後過程中不會再次淡出
 if (effectContainer.style.display !== 'none') {
     effectContainer.classList.remove('fade-in-smooth');
