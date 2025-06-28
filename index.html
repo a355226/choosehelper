@@ -725,12 +725,19 @@ if (effectContainer.style.display !== 'none') {
 
 
 if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
-    resultCard.style.display = 'none';  // 直接隱藏（不卡動畫）
+    resultCard.style.display = 'none';
     playVideoEffect(resultCard, effect);
 } else {
-   // ✅ 拉霸前固定 Effect Selector 避免被推下
-effectContainer.style.position = 'fixed';
-effectContainer.style.top = window.effectSelectorStableTop + 'px';
+    // ✅ 拉霸前記錄穩定位置（首次執行時記錄）
+    if (!window.effectSelectorStableTop) {
+        const rect = effectContainer.getBoundingClientRect();
+        const scrollTop = window.scrollY || window.pageYOffset;
+        window.effectSelectorStableTop = rect.top + scrollTop;
+    }
+    // ✅ 使用穩定位置鎖定 Effect Selector，避免被推下
+    effectContainer.style.position = 'fixed';
+    effectContainer.style.top = window.effectSelectorStableTop + 'px';
+
     resultCard.textContent = '🎰 正在抽籤...';
     resultCard.classList.add('show', 'glow');
     runSlotAnimation();
@@ -758,12 +765,6 @@ if (effectSelect) {
  function runSlotAnimation() {
   // ✅ 執行拉霸前固定 Effect Selector 位置避免跳動
 const effectContainer = document.getElementById('effectSelectorContainer');
-const rect = effectContainer.getBoundingClientRect();
-const scrollTop = window.scrollY || window.pageYOffset;
-effectContainer.style.position = 'fixed';
-effectContainer.style.top = (rect.top + scrollTop) + 'px';
-// 清除暫存穩定位置
-delete window.effectSelectorStableTop;
   const slotMachine = document.getElementById('slotMachine');
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
@@ -835,9 +836,10 @@ resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
 slotMachine.classList.remove('show');
 slotMachine.style.display = 'none';
 // 恢復特效選單顯示
-// ✅ 拉霸結束後恢復原本定位
+// 拉霸結束後恢復原本定位
 effectContainer.style.position = 'absolute';
 effectContainer.style.top = '';
+delete window.effectSelectorStableTop; // ✅ 恢復後清除暫存
 setTimeout(() => {
     effectContainer.style.visibility = 'visible';
     effectContainer.classList.remove('fade-out-smooth');
