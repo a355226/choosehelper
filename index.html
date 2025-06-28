@@ -405,18 +405,24 @@
   will-change: transform; /* 提前通知瀏覽器加速渲染，減少撕裂 */
 }
 
+#effectSelectorContainer {
+    max-height: 100px;  /* 預留容器最大高度，可依實際高度調整 */
+    overflow: hidden;
+    opacity: 1;
+    transition: max-height 0.6s ease, opacity 0.6s ease;
+}
+
 #effectSelectorContainer.fade-out-smooth {
     opacity: 0;
-    transition: opacity 0.6s ease;
+    max-height: 0;
     pointer-events: none;
-    height: auto; /* 確保不變動高度 */
 }
 
 #effectSelectorContainer.fade-in-smooth {
     opacity: 1;
-    transition: opacity 0.6s ease;
-    height: auto; /* 確保不變動高度 */
+    max-height: 100px;
 }
+
 
   </style>
 </head>
@@ -722,8 +728,6 @@ if (effect === 'random') {
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
 
-// ✅ 加上高度鎖定
-effectContainer.style.height = effectContainer.offsetHeight + "px";
   // ✅ 淡出特效選單
   effectContainer.classList.remove('fade-in-smooth');
 effectContainer.classList.add('fade-out-smooth');
