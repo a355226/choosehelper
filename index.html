@@ -877,7 +877,12 @@ video.src = videoMap[effect] || videoMap['video001'];
     video.className = "custom-video";
 
     wrapper.appendChild(video);
-
+// ✅ 播放影片前固定 Effect Selector 位置避免跳動
+const effectContainer = document.getElementById('effectSelectorContainer');
+const rect = effectContainer.getBoundingClientRect();
+const scrollTop = window.scrollY || window.pageYOffset;
+effectContainer.style.position = 'fixed';
+effectContainer.style.top = (rect.top + scrollTop) + 'px';
     // 出現動畫
     setTimeout(() => {
         wrapper.classList.add('show');
