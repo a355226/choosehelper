@@ -718,7 +718,7 @@ if (effectContainer.style.display !== 'none') {
     setTimeout(() => {
     effectContainer.style.visibility = 'hidden'; // ✅ 改這行
     effectContainer.classList.remove('fade-out-smooth');
-}, 600);
+}, 0);
 }
 
 
@@ -889,7 +889,7 @@ video.src = videoMap[effect] || videoMap['video001'];
         setTimeout(() => {
             wrapper.remove();
             revealResult(); // 顯示最終結果
-        }, 1000);
+        }, 0);
     };
 }
 
