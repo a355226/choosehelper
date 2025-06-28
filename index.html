@@ -753,6 +753,12 @@ if (effectSelect) {
 }
 
  function runSlotAnimation() {
+  // ✅ 執行拉霸前固定 Effect Selector 位置避免跳動
+const effectContainer = document.getElementById('effectSelectorContainer');
+const rect = effectContainer.getBoundingClientRect();
+const scrollTop = window.scrollY || window.pageYOffset;
+effectContainer.style.position = 'fixed';
+effectContainer.style.top = (rect.top + scrollTop) + 'px';
   const slotMachine = document.getElementById('slotMachine');
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
@@ -818,6 +824,9 @@ resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
 slotMachine.classList.remove('show');
 slotMachine.style.display = 'none';
 // 恢復特效選單顯示
+// ✅ 拉霸結束後恢復原本定位
+effectContainer.style.position = 'absolute';
+effectContainer.style.top = '';
 setTimeout(() => {
     effectContainer.style.visibility = 'visible';
     effectContainer.classList.remove('fade-out-smooth');
