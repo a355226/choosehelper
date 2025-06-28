@@ -930,6 +930,12 @@ if (effectSelect) {
 }
 
  function runSlotAnimation() {
+    const currentEffect = document.getElementById('effectSelect').value;
+    const videoEffects = ['video001', 'video002', 'video003', 'video004', 'video005'];
+    if (videoEffects.includes(currentEffect)) {
+        console.log('[DEBUG] skip runSlotAnimation revealResult due to video mode.');
+        return; // 🚩 完全跳過排程 revealResult
+    }
   // ✅ 執行拉霸前固定 Effect Selector 位置避免跳動
 const effectContainer = document.getElementById('effectSelectorContainer');
   const slotMachine = document.getElementById('slotMachine');
