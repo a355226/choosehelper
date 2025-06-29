@@ -507,21 +507,26 @@ body.dark-mode .footer-note {
   color: #666;
 }
 
-    /* === 深色模式下排序 Modal 改善 === */
-body.dark-mode #sortModal li {
-  background: #555 !important;
-  color: #fff !important;
-  border: 1px solid #777;
+body.dark-mode #sortModal > div {
+  background: #2b2b2b !important; /* 深灰背景 */
+  color: #ddd !important;         /* 柔和淺字 */
+  border: 1px solid #444;         /* 可選：增加分界感 */
 }
-body.dark-mode #sortModal li:hover {
-  background: #666 !important;
-}
+
 body.dark-mode #sortModal h3 {
-  color: #fff;
+  color: #eee !important;         /* 標題更亮 */
 }
-body.dark-mode #sortModal {
-  background: rgba(0, 0, 0, 0.8);
+
+body.dark-mode #sortModal button {
+  background-color: #444 !important;
+  color: #eee !important;
+  border: 1px solid #555 !important;
 }
+
+body.dark-mode #sortModal button:hover {
+  background-color: #555 !important;
+}
+
 
   </style>
 </head>
