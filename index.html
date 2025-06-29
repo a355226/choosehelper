@@ -978,7 +978,9 @@ setTimeout(() => window._revealRunning = false, 1500);
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
-  resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
+  setTimeout(() => {
+    resultCard.style.display = '';
+}, 50);
 
   const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
 resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
@@ -986,9 +988,8 @@ resultCard.classList.remove('drop-in');
 
 requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-setTimeout(() => {
         resultCard.classList.add('show', 'glow', 'drop-in');
-    }, 50);
+    });
 });
 
     // ✅ 修正核心：顯式使用傳入的 currentEffect
