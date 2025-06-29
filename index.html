@@ -111,15 +111,16 @@
       list-style-type: none;
       padding: 0;
     }
-    li {
-      background: #e9fce6;
-      padding: 10px;
-      margin-bottom: 8px;
-      border-radius: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+li {
+  background: #f0fdf4;              /* ✅ 淡化底色，保留辨識但不壓迫 */
+  padding: 6px 8px;                 /* ✅ 減少內邊距，縮小高度 */
+  margin-bottom: 4px;               /* ✅ 減少間距，節省空間 */
+  border-radius: 4px;               /* ✅ 稍微圓角即可 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;                  /* ✅ 保持易讀大小 */
+}
     li span {
       flex-grow: 1;
       min-width: 0;
@@ -1133,14 +1134,15 @@ function revealIntroText() {
     display: none;                   /* 預設隱藏，打開時設為 flex */
 ">
   <div style="
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 200px;
-      width: 60%;
-      max-height: 90vh;
-      overflow-y: auto;
-  ">
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    max-width: 320px;
+    width: 85%;
+    max-height: 65vh;
+    overflow-y: auto;
+">
+
     <h3>拖曳排序清單</h3>
     <ul id="sortList" style="list-style: none; padding: 0; max-height: 300px; overflow: auto;"></ul>
     <button class="btn-primary" onclick="saveSortOrder()">儲存順序</button>
