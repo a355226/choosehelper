@@ -837,6 +837,8 @@ if (effectContainer.style.display !== 'none') {
 }
 if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
     resultCard.style.display = 'none';
+        let finalIndex = secureRandomIndex(currentList.length); // ✅ 新增
+    lastIndex = finalIndex; // ✅ 新增
     playVideoEffect(resultCard, effect);
 } else {
     // ✅ 拉霸前記錄穩定位置（首次執行時記錄）
@@ -915,7 +917,10 @@ setTimeout(() => window._revealRunning = false, 1500);
   setTimeout(() => {
     resultCard.style.display = '';
 }, 50);
-  const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
+ if (lastIndex < 0) {
+    lastIndex = secureRandomIndex(currentList.length);
+}
+const finalIndex = lastIndex;
 resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
 window._resultShown = true; // ✅ 標記結果已顯示
 requestAnimationFrame(() => {
