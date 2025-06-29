@@ -633,6 +633,7 @@ body.dark-mode .footer-note {
 </div>
 
 <script>
+let currentSortable = null; // 全域保存 Sortable 實例
 window._introPlayed = false; // ✅ 用於控制切頁時動畫只跑一次
 window._introPlayed = false;
 
@@ -1182,10 +1183,10 @@ darkModeToggle.addEventListener('click', () => {
   }
 });
 // 排序 Modal 開啟
-let currentSortable = null; // ⬅️ 放在最上面作為全域變數
 function openSortModal() {
     const sortList = document.getElementById('sortList');
     sortList.innerHTML = '';
+
     Object.keys(memoryData).forEach(name => {
         const li = document.createElement('li');
         li.textContent = name;
@@ -1196,14 +1197,28 @@ function openSortModal() {
         li.style.cursor = 'grab';
         sortList.appendChild(li);
     });
-    Sortable.create(sortList, {
-        animation: 150
+
+    // 修正：每次開啟前先 destroy 上一次的 sortable 實例，避免觸控無效
+    if (currentSortable) {
+        currentSortable.destroy();
+        currentSortable = null;
+    }
+
+    currentSortable = Sortable.create(sortList, {
+        animation: 150,
+        touchStartThreshold: 5 // (可選) 提高容錯讓手機更易觸發拖曳
     });
+
     document.getElementById('sortModal').style.display = 'flex';
 }
 
+
 // 排序 Modal 關閉
 function closeSortModal() {
+    if (currentSortable) {
+        currentSortable.destroy();
+        currentSortable = null;
+    }
     document.getElementById('sortModal').style.display = 'none';
 }
 
