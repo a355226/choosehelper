@@ -1122,7 +1122,8 @@ function revealIntroText() {
   position:fixed; 
   top:0; 
   left:0; 
-  width:100%; 
+  width:100%;
+overflow-y: auto; 
   height:100%; 
   background:rgba(0,0,0,0.5); 
   align-items:center; 
@@ -1134,6 +1135,7 @@ function revealIntroText() {
     border-radius:8px; 
     max-width:300px; 
     width:90%;
+max-height: 90vh;
 overflow-y: auto;">
     <h3>拖曳排序清單</h3>
     <ul id="sortList" style="list-style:none; padding:0; max-height:300px; overflow:auto;"></ul>
