@@ -549,6 +549,8 @@ body.dark-mode .footer-note {
   </style>
 </head>
 <body>
+<pre id="debugLog" style="position:fixed;bottom:0;left:0;width:100%;max-height:50%;overflow:auto;background:#000;color:#0f0;font-size:12px;z-index:9999;opacity:0.8;"></pre>
+
 <button id="darkModeToggle" title="切換深色模式" style="
   position: fixed;
   top: 10px;
@@ -628,6 +630,13 @@ body.dark-mode .footer-note {
 </div>
 
 <script>
+function logDebug(message) {
+    console.log(message); // 保留原本輸出
+    const debugEl = document.getElementById('debugLog');
+    debugEl.textContent += message + "\n";
+    debugEl.scrollTop = debugEl.scrollHeight;
+}
+
 let currentList = [];
 let memoryData = JSON.parse(localStorage.getItem('memoryData')) || {};
 let currentListName = "";
@@ -962,11 +971,12 @@ const effectContainer = document.getElementById('effectSelectorContainer');
 }
 function revealResult(currentEffect) {
         window._revealCounter = (window._revealCounter || 0) + 1;
-    console.log('[DEBUG] revealResult triggered count:', window._revealCounter, 'at', Date.now(), 'with effect:', currentEffect);
+    logDebug('[DEBUG] revealResult triggered count: ' + window._revealCounter + ' at ' + Date.now() + ' with effect: ' + currentEffect);
+
 
     // 防止重複觸發
     if (window._revealRunning) {
-        console.log('[DEBUG] revealResult aborted, already running.');
+        logDebug('[DEBUG] revealResult aborted, already running.');
         return;
     }
     window._revealRunning = true;
@@ -1075,7 +1085,7 @@ function fadeOutAndHide(element) {
 
 function playVideoEffect(resultCard, effect) {
 window._playVideoEffectCounter = (window._playVideoEffectCounter || 0) + 1;
-    console.log('[DEBUG] playVideoEffect triggered count:', window._playVideoEffectCounter, 'at', Date.now(), 'effect:', effect);
+    logDebug('[DEBUG] playVideoEffect triggered count:', window._playVideoEffectCounter, 'at', Date.now(), 'effect:', effect);
 
     const wrapper = document.createElement('div');
     wrapper.className = 'video-wrapper';
