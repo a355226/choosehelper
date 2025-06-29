@@ -644,46 +644,40 @@ let memoryData = JSON.parse(localStorage.getItem('memoryData')) || {};
 let currentListName = "";
 
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-  const btn = id === 'randomPage' ? document.querySelectorAll('.nav button')[0] : document.querySelectorAll('.nav button')[1];
-  btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+    const btn = id === 'randomPage' ? document.querySelectorAll('.nav button')[0] : document.querySelectorAll('.nav button')[1];
+    btn.classList.add('active');
 
-  // 🔻 如果是切換到 randomPage，就重設 slotMachine 狀態
-if (id === 'randomPage') {
-    const slotMachine = document.getElementById('slotMachine');
-    const resultCard = document.getElementById('resultCard');
-    const appealArea = document.getElementById('appealArea');
+    if (id === 'randomPage') {
+        const slotMachine = document.getElementById('slotMachine');
+        const resultCard = document.getElementById('resultCard');
+        const appealArea = document.getElementById('appealArea');
+        slotMachine.innerHTML = '';
+        slotMachine.classList.remove('show');
 
-    slotMachine.innerHTML = '';
-    slotMachine.classList.remove('show');
-    appealArea.innerHTML = '';
-    enableRandomButton();
+        if (!currentListName || currentList.length === 0) {
+            resultCard.textContent = '先選擇清單';
+        } else {
+            resultCard.textContent = `來決定「${currentListName}」!`;
+        }
 
-    if (!currentListName || currentList.length === 0) {
-        resultCard.textContent = '先選擇清單';
-    } else {
-        resultCard.textContent = `來決定「${currentListName}」!`;
+        resultCard.classList.remove('glow', 'show');
+        appealArea.innerHTML = '';
+        enableRandomButton();
+
+        // ✅ 僅第一次切換時播放動畫，避免多次排程錯亂
+        if (!window._introPlayed) {
+            window._introPlayed = true; // ⚡️ 標記已觸發
+            setTimeout(() => {
+                revealIntroText();
+            }, 300);
+        }
     }
 
-    // **重點：先移除動畫 class，確保手機不會觸發兩次**
-    resultCard.classList.remove('glow', 'show', 'drop-in', 'refresh-fade-scale');
-
-    // 使用 requestAnimationFrame 排隊，確保渲染穩定後再補上動畫
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            resultCard.classList.add('show', 'drop-in', 'glow');
-        });
-    });
-}
-
-
-
-  // 🔻 加這段：切換頁面時切換特效選單顯示
-  const effectContainer = document.getElementById('effectSelectorContainer');
-  effectContainer.style.display = (id === 'randomPage') ? 'block' : 'none';
-
+    const effectContainer = document.getElementById('effectSelectorContainer');
+    effectContainer.style.display = (id === 'randomPage') ? 'block' : 'none';
 }
 
 
@@ -1280,3 +1274,13 @@ function revealIntroText() {
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
