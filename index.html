@@ -954,9 +954,17 @@ const effectContainer = document.getElementById('effectSelectorContainer');
   slotMachine.innerHTML = '';
   slotMachine.appendChild(slotContent);
 
-  slotMachine.classList.add('show');
-  void slotContent.offsetWidth;
-  slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
+if (slotMachine.classList.contains('show')) {
+    console.log('slotMachine already shown, skip re-adding animation.');
+    return;
+}
+  
+setTimeout(() => {
+    slotMachine.classList.add('show');
+    void slotContent.offsetWidth;
+    slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
+}, 50);
+
 
   setTimeout(() => {
     revealResult();
