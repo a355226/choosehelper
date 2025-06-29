@@ -549,8 +549,6 @@ body.dark-mode .footer-note {
   </style>
 </head>
 <body>
-<pre id="debugLog" style="position:fixed;bottom:0;left:0;width:100%;max-height:50%;overflow:auto;background:#000;color:#0f0;font-size:12px;z-index:9999;opacity:0.8;"></pre>
-
 <button id="darkModeToggle" title="切換深色模式" style="
   position: fixed;
   top: 10px;
@@ -630,13 +628,6 @@ body.dark-mode .footer-note {
 </div>
 
 <script>
-function logDebug(message) {
-    console.log(message); // 保留原本輸出
-    const debugEl = document.getElementById('debugLog');
-    debugEl.textContent += message + "\n";
-    debugEl.scrollTop = debugEl.scrollHeight;
-}
-
 let currentList = [];
 let memoryData = JSON.parse(localStorage.getItem('memoryData')) || {};
 let currentListName = "";
@@ -841,84 +832,85 @@ function secureRandomIndex(max) {
 }
 
 function chooseRandom(isAppeal = false) {
-   window._chooseRandomCounter = (window._chooseRandomCounter || 0) + 1;
-    console.log('[DEBUG] chooseRandom triggered count:', window._chooseRandomCounter, 'at', Date.now(), 'isAppeal:', isAppeal);
- if (!currentListName || currentList.length === 0) {
-        const randomBtn = document.querySelector('.btn-primary');
-        randomBtn.classList.add('shake');
-        setTimeout(() => {
-            alert("🚫 請先選擇清單");
-            randomBtn.classList.remove('shake');
-        }, 50);
-        return;
-    }
+  if (!currentListName || currentList.length === 0) {
+    const randomBtn = document.querySelector('.btn-primary');
+    randomBtn.classList.add('shake');
 
-    randomBtn.classList.add('disabled');
-    randomBtn.disabled = true;
+    // 同時彈出提示
+    setTimeout(() => {
+      alert("🚫 請先選擇清單");
+      randomBtn.classList.remove('shake');
+    }, 50);
 
-    const resultCard = document.getElementById('resultCard');
-    const appealArea = document.getElementById('appealArea');
-    const slotMachine = document.getElementById('slotMachine');
-    const effectContainer = document.getElementById('effectSelectorContainer');
+    return;
+  } 
+  randomBtn.classList.add('disabled');
+  randomBtn.disabled = true;
 
-    slotMachine.style.display = '';
+  const resultCard = document.getElementById('resultCard');
+  const appealArea = document.getElementById('appealArea');
+  const slotMachine = document.getElementById('slotMachine');
+  const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
+ slotMachine.style.display = ''; 
 
-    let effect = document.getElementById('effectSelect')?.value || 'default';
+  let effect = document.getElementById('effectSelect')?.value || 'default';
 
-    // 隨機特效抽選
-    if (effect === 'random') {
-        const options = ['default', 'video001', 'video002', 'video003', 'video004', 'video005'];
-        effect = options[Math.floor(Math.random() * options.length)];
-    }
+// 如果是隨機，從 default 與 5 個影片隨機選一個
+if (effect === 'random') {
+    const options = ['default', 'video001', 'video002', 'video003', 'video004', 'video005'];
+    effect = options[Math.floor(Math.random() * options.length)];
+}
 
-    if (!isAppeal) appealCount = 3;
-    appealArea.innerHTML = '';
 
-    // 移除舊影片
-    const oldWrapper = document.querySelector('.video-wrapper');
-    if (oldWrapper) oldWrapper.remove();
+  if (!isAppeal) appealCount = 3;
+  appealArea.innerHTML = '';
 
-    // 重置拉霸
-    slotMachine.innerHTML = '';
-    slotMachine.classList.remove('show');
+  // ➤ 清除影片區
+  const oldWrapper = document.querySelector('.video-wrapper');
+  if (oldWrapper) oldWrapper.remove();
 
-    // 隱藏特效選擇器
-    if (effectContainer.style.display !== 'none') {
-        effectContainer.classList.remove('fade-in-smooth', 'fade-in-anim');
-        effectContainer.classList.add('fade-out-smooth');
-        setTimeout(() => {
-            effectContainer.style.visibility = 'hidden';
-            effectContainer.classList.remove('fade-out-smooth');
-        }, 600);
-    }
+  // ➤ 重置拉霸動畫
+  slotMachine.innerHTML = '';
+  slotMachine.classList.remove('show');
 
-    // ✅ 若為影片特效，播放影片並完全 return，避免誤觸發拉霸
-    if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
-        console.log('[Info] 影片模式，播放影片特效並跳過 runSlotAnimation');
-        resultCard.style.display = 'none';
-        playVideoEffect(resultCard, effect);
-        return; // ⬅️ 直接中止
-    }
+// ✅ 僅第一次隨機選 / 上訴時淡出，之後過程中不會再次淡出
+if (effectContainer.style.display !== 'none') {
+    effectContainer.classList.remove('fade-in-smooth', 'fade-in-anim');
+    effectContainer.classList.add('fade-out-smooth');
+    setTimeout(() => {
+        effectContainer.style.visibility = 'hidden';
+        effectContainer.classList.remove('fade-out-smooth');
+    }, 600);
+}
 
-    // ⬇️ 若非影片特效，執行拉霸流程
 
+
+
+
+if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
+    resultCard.style.display = 'none';
+    playVideoEffect(resultCard, effect);
+} else {
+    // ✅ 拉霸前記錄穩定位置（首次執行時記錄）
     if (!window.effectSelectorStableTop) {
         const rect = effectContainer.getBoundingClientRect();
         const scrollTop = window.scrollY || window.pageYOffset;
         window.effectSelectorStableTop = rect.top + scrollTop;
     }
+    // ✅ 使用穩定位置鎖定 Effect Selector，避免被推下
     effectContainer.style.position = 'fixed';
     effectContainer.style.top = window.effectSelectorStableTop + 'px';
 
     resultCard.textContent = '🎰 正在抽籤...';
     resultCard.classList.add('show', 'glow');
-    resultCard.classList.remove('drop-in');
-    void resultCard.offsetWidth;
-    resultCard.classList.add('drop-in');
-
+// 放在此處
+resultCard.classList.remove('drop-in');
+void resultCard.offsetWidth;
+resultCard.classList.add('drop-in');
     runSlotAnimation();
 }
 
+}
 
 function updateCurrentList() {
   if (!currentListName) {
@@ -938,7 +930,6 @@ if (effectSelect) {
 }
 
  function runSlotAnimation() {
-
   // ✅ 執行拉霸前固定 Effect Selector 位置避免跳動
 const effectContainer = document.getElementById('effectSelectorContainer');
   const slotMachine = document.getElementById('slotMachine');
@@ -969,39 +960,45 @@ const effectContainer = document.getElementById('effectSelectorContainer');
     revealResult();
   }, 3300);
 }
-function revealResult(currentEffect) {
-        window._revealCounter = (window._revealCounter || 0) + 1;
-    logDebug('[DEBUG] revealResult triggered count: ' + window._revealCounter + ' at ' + Date.now() + ' with effect: ' + currentEffect);
+function revealResult(currentEffect)  {
+console.log('[DEBUG] revealResult currentEffect =', currentEffect);
+if (window._revealRunning) return;
+window._revealRunning = true;
+setTimeout(() => window._revealRunning = false, 1500);
 
+  const effectContainer = document.getElementById('effectSelectorContainer');
 
-    // 防止重複觸發
-    if (window._revealRunning) {
-        logDebug('[DEBUG] revealResult aborted, already running.');
-        return;
-    }
-    window._revealRunning = true;
-    setTimeout(() => window._revealRunning = false, 1200);
+  // 測量穩定位置一次記錄
+  if (!window.effectSelectorStableTop) {
+    const rect = effectContainer.getBoundingClientRect();
+    const scrollTop = window.scrollY || window.pageYOffset;
+    window.effectSelectorStableTop = rect.top + scrollTop;
+  }
 
-    const videoEffects = ['video001', 'video002', 'video003', 'video004', 'video005'];
-    const effectContainer = document.getElementById('effectSelectorContainer');
-    const resultCard = document.getElementById('resultCard');
-    const appealArea = document.getElementById('appealArea');
-    const slotMachine = document.getElementById('slotMachine');
+  const resultCard = document.getElementById('resultCard');
+  const appealArea = document.getElementById('appealArea');
+  const slotMachine = document.getElementById('slotMachine');
+  resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
 
-    resultCard.style.display = ''; // 顯示結果卡
+  const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
+resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
+resultCard.classList.remove('drop-in');
 
-    const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
-    resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
-    resultCard.classList.remove('drop-in');
-    void resultCard.offsetWidth;
-    resultCard.classList.add('show', 'glow', 'drop-in');
+requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+        resultCard.classList.add('show', 'glow', 'drop-in');
+    });
+});
 
-    // 修正核心：防止影片特效模式時加 refresh-fade-scale
+    // ✅ 修正核心：顯式使用傳入的 currentEffect
     currentEffect = currentEffect || document.getElementById('effectSelect').value;
-    if (!videoEffects.includes(currentEffect) && (currentEffect === 'default' || currentEffect === 'random')) {
-        resultCard.classList.remove('refresh-fade-scale');
-        void resultCard.offsetWidth;
-        resultCard.classList.add('refresh-fade-scale');
+    if (currentEffect === 'default' || currentEffect === 'random') {
+resultCard.classList.remove('refresh-fade-scale');
+void resultCard.offsetWidth;
+setTimeout(() => {
+    resultCard.classList.add('refresh-fade-scale');
+}, 100); // 延遲 100ms，避免與 drop-in 同時疊加
+
     }
 
 
@@ -1084,9 +1081,6 @@ function fadeOutAndHide(element) {
 
 
 function playVideoEffect(resultCard, effect) {
-window._playVideoEffectCounter = (window._playVideoEffectCounter || 0) + 1;
-    logDebug('[DEBUG] playVideoEffect triggered count:', window._playVideoEffectCounter, 'at', Date.now(), 'effect:', effect);
-
     const wrapper = document.createElement('div');
     wrapper.className = 'video-wrapper';
     document.querySelector('.random-container').insertBefore(wrapper, resultCard);
@@ -1161,3 +1155,5 @@ darkModeToggle.addEventListener('click', () => {
 
 </body>
 </html>
+
+
