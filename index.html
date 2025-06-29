@@ -1038,7 +1038,18 @@ function openSortModal() {
   document.body.style.overflow = 'hidden';
     const sortList = document.getElementById('sortList');
     sortList.innerHTML = '';
-    Object.keys(memoryData).forEach(name => {
+let memoryOrder = [];
+try {
+    memoryOrder = JSON.parse(localStorage.getItem('memoryOrder')) || [];
+} catch (e) {
+    memoryOrder = [];
+}
+if (!Array.isArray(memoryOrder) || memoryOrder.length === 0) {
+    memoryOrder = Object.keys(memoryData);
+}
+
+memoryOrder.forEach(name => {
+    if (memoryData[name]) {
         const li = document.createElement('li');
         li.textContent = name;
         li.style.padding = '8px';
@@ -1047,7 +1058,8 @@ function openSortModal() {
         li.style.borderRadius = '5px';
         li.style.cursor = 'grab';
         sortList.appendChild(li);
-    });
+    }
+});
     // 修正：每次開啟前先 destroy 上一次的 sortable 實例，避免觸控無效
     if (currentSortable) {
         currentSortable.destroy();
