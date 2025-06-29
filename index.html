@@ -1035,6 +1035,7 @@ darkModeToggle.addEventListener('click', () => {
 });
 // 排序 Modal 開啟
 function openSortModal() {
+  document.body.style.overflow = 'hidden';
     const sortList = document.getElementById('sortList');
     sortList.innerHTML = '';
     Object.keys(memoryData).forEach(name => {
@@ -1060,6 +1061,7 @@ function openSortModal() {
 }
 // 排序 Modal 關閉
 function closeSortModal() {
+  document.body.style.overflow = '';
     if (currentSortable) {
         currentSortable.destroy();
         currentSortable = null;
@@ -1123,10 +1125,10 @@ function revealIntroText() {
 </script>
   <div class="footer-note">Designed by KJ&nbsp;&nbsp;</div>
 <div id="sortModal" style="
-    display: flex;                   /* ✅ flex 用於置中 */
+    display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;          /* ✅ 避免水平展開跑版 */
+    flex-direction: column;
     position: fixed;
     top: 0;
     left: 0;
@@ -1134,7 +1136,7 @@ function revealIntroText() {
     height: 100%;
     background: rgba(0,0,0,0.5);
     z-index: 9999;
-    display: none;                   /* 預設隱藏，打開時設為 flex */
+    display: none; /* 預設隱藏，打開時設為 flex */
 ">
   <div style="
     background: #fff;
@@ -1142,16 +1144,18 @@ function revealIntroText() {
     border-radius: 8px;
     max-width: 320px;
     width: 85%;
-    max-height: 65h;
-    overflow-y: auto;
+    max-height: 65vh;                 /* ✅ 修正 h → vh */
+    overflow-y: auto;                 /* ✅ 可滑動 */
+    touch-action: pan-y;              /* ✅ 空白處可滑動 */
+    -webkit-overflow-scrolling: touch; /* ✅ iOS 慣性滑動 */
 ">
-
     <h3>拖曳排序清單</h3>
     <ul id="sortList" style="list-style: none; padding: 0; max-height: 300px; overflow: auto;"></ul>
     <button class="btn-primary" onclick="saveSortOrder()">儲存順序</button>
     <button class="btn-pink" onclick="closeSortModal()">關閉</button>
   </div>
 </div>
+
 
 </body>
 </html>
