@@ -112,6 +112,7 @@ ul#sortList {
   width: 90%;
   margin: 0 auto;          /* 置中 */
   padding: 0 8px;          /* 適度內距 */
+  padding-right: 16px; /* 增加右側滑動緩衝區 */
 }
 li {
   background: #f0fdf4;     /* 淡綠底 */
@@ -1084,7 +1085,7 @@ memoryOrder.forEach(name => {
     }
     currentSortable = Sortable.create(sortList, {
         animation: 150,
-        touchStartThreshold: 5 // (可選) 提高容錯讓手機更易觸發拖曳
+        touchStartThreshold: 10 // (可選) 提高容錯讓手機更易觸發拖曳
     });
     document.getElementById('sortModal').style.display = 'flex';
 }
