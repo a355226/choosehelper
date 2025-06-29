@@ -963,7 +963,13 @@ if (window._revealRunning) return;
 window._revealRunning = true;
 setTimeout(() => window._revealRunning = false, 1500);
 
-  const effectContainer = document.getElementById('effectSelectorContainer');
+    const effectContainer = document.getElementById('effectSelectorContainer');
+    const resultCard = document.getElementById('resultCard');
+    const appealArea = document.getElementById('appealArea');
+    const slotMachine = document.getElementById('slotMachine');
+
+    // ✅ 修正：先清除 refresh-fade-scale，避免污染影片特效
+    resultCard.classList.remove('refresh-fade-scale');
 
   // 測量穩定位置一次記錄
   if (!window.effectSelectorStableTop) {
@@ -972,9 +978,6 @@ setTimeout(() => window._revealRunning = false, 1500);
     window.effectSelectorStableTop = rect.top + scrollTop;
   }
 
-  const resultCard = document.getElementById('resultCard');
-  const appealArea = document.getElementById('appealArea');
-  const slotMachine = document.getElementById('slotMachine');
   setTimeout(() => {
     resultCard.style.display = '';
 }, 50);
@@ -1004,26 +1007,30 @@ requestAnimationFrame(() => {
     resultCard.classList.remove('refresh-pulse');
   }, { once: true });
 
-  if (appealCount > 0) {
-    const btn = document.createElement('button');
-    btn.textContent = `上訴！（剩餘${appealCount}次）`;
-    btn.className = 'btn-pink';
-    btn.style.marginTop = '20px';
-    btn.style.backgroundColor = ['#ffe6e6', '#ffb3b3', '#ff6666'][3 - appealCount] || '#ff6666';
-    btn.style.color = '#800000';
-    btn.onclick = () => {
-      appealCount--;
-      chooseRandom(true);
-    };
-    appealArea.appendChild(btn);
-  } else {
-    const finalText = document.createElement('div');
-    finalText.textContent = '認命吧，這就是最好的選擇！';
-    finalText.style.marginTop = '20px';
-    finalText.style.fontWeight = 'bold';
-    finalText.style.color = '#b34400';
-    appealArea.appendChild(finalText);
-  }
+ // 將插入上訴按鈕的程式碼延後到動畫完全完成後再插入
+setTimeout(() => {
+    if (appealCount > 0) {
+        const btn = document.createElement('button');
+        btn.textContent = `上訴！（剩餘${appealCount}次）`;
+        btn.className = 'btn-pink';
+        btn.style.marginTop = '20px';
+        btn.style.backgroundColor = ['#ffe6e6', '#ffb3b3', '#ff6666'][3 - appealCount] || '#ff6666';
+        btn.style.color = '#800000';
+        btn.onclick = () => {
+            appealCount--;
+            chooseRandom(true);
+        };
+        appealArea.appendChild(btn);
+    } else {
+        const finalText = document.createElement('div');
+        finalText.textContent = '認命吧，這就是最好的選擇！';
+        finalText.style.marginTop = '20px';
+        finalText.style.fontWeight = 'bold';
+        finalText.style.color = '#b34400';
+        appealArea.appendChild(finalText);
+    }
+}, 50); // 建議延遲 600~800 ms，與動畫時間對齊
+
   enableRandomButton();
 
   // ✅ 淡出 slot-machine
@@ -1151,5 +1158,9 @@ darkModeToggle.addEventListener('click', () => {
 
 </body>
 </html>
+
+
+
+
 
 
