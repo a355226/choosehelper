@@ -636,6 +636,8 @@ body.dark-mode .footer-note {
 </div>
 
 <script>
+window._introPlayed = false; // ✅ 用於控制切頁時動畫只跑一次
+
 let currentList = [];
 let memoryData = JSON.parse(localStorage.getItem('memoryData')) || {};
 let currentListName = "";
@@ -648,22 +650,32 @@ function showPage(id) {
   btn.classList.add('active');
 
   // 🔻 如果是切換到 randomPage，就重設 slotMachine 狀態
-  if (id === 'randomPage') {
+if (id === 'randomPage') {
     const slotMachine = document.getElementById('slotMachine');
     const resultCard = document.getElementById('resultCard');
     const appealArea = document.getElementById('appealArea');
     slotMachine.innerHTML = '';
     slotMachine.classList.remove('show');
+
     if (!currentListName || currentList.length === 0) {
-    resultCard.textContent = '先選擇清單';
-} else {
-    resultCard.textContent = `來決定「${currentListName}」!`;
-}
+        resultCard.textContent = '先選擇清單';
+    } else {
+        resultCard.textContent = `來決定「${currentListName}」!`;
+    }
 
     resultCard.classList.remove('glow', 'show');
     appealArea.innerHTML = '';
-    enableRandomButton(); // ✅ 每次切到 randomPage 就重啟按鈕
-  }
+    enableRandomButton();
+
+    // ✅ 僅第一次切換時播放動畫
+    if (!window._introPlayed) {
+        setTimeout(() => {
+            revealIntroText();
+            window._introPlayed = true; // 設為已播放避免重複
+        }, 300);
+    }
+}
+
 
   // 🔻 加這段：切換頁面時切換特效選單顯示
   const effectContainer = document.getElementById('effectSelectorContainer');
@@ -830,7 +842,8 @@ function secureRandomIndex(max) {
   return Math.floor(arr[0] / (2**32) * max);
 }
 
-function chooseRandom(isAppeal = false) {
+function chooseRandom(isAppeal = false) {window._introPlayed = false; // ✅ 點擊抽籤後，下次切頁會重新播放動畫
+
   if (!currentListName || currentList.length === 0) {
     const randomBtn = document.querySelector('.btn-primary');
     randomBtn.classList.add('shake');
@@ -1211,6 +1224,28 @@ function updateMemorySelect() {
         });
     });
 }
+function revealIntroText() {
+    if (window._introTextAnimating) return; // 防止重複觸發
+    window._introTextAnimating = true;
+
+    const resultCard = document.getElementById('resultCard');
+
+    // 移除動畫類別以重置狀態
+    resultCard.classList.remove('drop-in', 'refresh-fade-scale', 'glow', 'show');
+
+    // 使用 requestAnimationFrame 保證渲染序列正確
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            resultCard.classList.add('show', 'glow', 'drop-in');
+
+            // 動畫時間結束後重置旗標（700ms 是 drop-in 動畫時間）
+            setTimeout(() => {
+                window._introTextAnimating = false;
+            }, 800);
+        });
+    });
+}
+
 
 </script>
 
