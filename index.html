@@ -2,13 +2,10 @@
 <html lang="zh-Hant">
 <head>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
 <!-- 分頁用 -->
 <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
-
 <!-- iOS 主畫面用 -->
 <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
-
 <!-- Android PWA -->
 <link rel="manifest" href="manifest.json">
   <meta charset="UTF-8">
@@ -85,7 +82,6 @@
   background-color: #35a4af;
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
-
 .btn-primary:active {
   background-color: #2d8e98;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
@@ -179,7 +175,6 @@
     transform: scale(0.6);
   }
 }
-
 .result-card.fade-out {
   animation: fadeOutShrink 0.4s ease forwards;
 }
@@ -202,7 +197,6 @@
       background-color: #fff;
       border: 1px solid #aaa;
     }
-
     .btn-pink {
       background-color: #fcebeb;
       color: #333;
@@ -212,7 +206,6 @@
       font-size: 14px;
       cursor: pointer;
     }
-
     .btn-lightblue {
       background-color: #e0f4ff;
       color: #333;
@@ -241,18 +234,15 @@
   opacity: 0;
   transition: all 0.4s ease;
 }
-
 .slot-machine.show {
   display: block;
   opacity: 1;
 }
-
 .slot-content {
   display: flex;
   flex-direction: column;
   animation: spinScroll 3.2s ease-out forwards;
 }
-
 @keyframes spinScroll {
   0%   { transform: translateY(0); }
   100% { transform: translateY(-100%); }
@@ -261,20 +251,17 @@
   width: 100%;
   margin: 10px 0;
 }
-
 .label-left {
   text-align: left;
   font-size: 1.2em;
   margin-bottom: 4px;
   padding-left: 12px;
 }
-
 .select-center {
   display: flex;
   justify-content: center;
   width: 100%;
 }
-
 .select-center select {
   min-width: 160px;
   max-width: 80vw;
@@ -289,7 +276,6 @@
   width: 100%;         /* ✅ 可選，確保置中對齊 */
   left: 0;             /* ✅ 固定左側 */
 }
-
 #effectSelect {
   appearance: none;
   font-size: 16px;
@@ -306,20 +292,15 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 #effectSelect:hover {
   background-color: #e0f4ff;
   box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
-
 #effectSelect:focus {
   outline: none;
   background-color: #d0ecff;
   box-shadow: 0 0 0 3px rgba(61, 184, 196, 0.2);
 }
-
-
-
 .video-wrapper {
   width: 100%;
   max-width: 420px;
@@ -337,7 +318,6 @@
 .video-wrapper.show {
   opacity: 1;              /* ✅ 出現時淡入 */
 }
-
 .custom-video {
   width: 100%;
   height: 100%;
@@ -346,11 +326,9 @@
   mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
   mask-composite: exclude;
 }
-
 .video-wrapper.glow-out {
   animation: glowOut 1s ease forwards;
 }
-
 @keyframes glowOut {
   0% {
     box-shadow: 0 0 20px rgba(255, 200, 0, 0.6);
@@ -365,7 +343,6 @@
     visibility: hidden;
   }
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
   to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -374,7 +351,6 @@
   opacity: 0;
   transform: scale(0.9);
 }
-
 .result-card.reveal {
   transition: all 0.6s ease;
   opacity: 1;
@@ -391,13 +367,11 @@
   opacity: 0;
   transition: opacity 0.6s ease;
 }
-
 .fade-in-smooth {
     opacity: 1;
     transition: opacity 0.6s ease;
     visibility: visible; /* ✅ 加上這行 */
 }
-
 @keyframes shake {
   0% { transform: translateX(0); }
   20% { transform: translateX(-6px); }
@@ -406,12 +380,10 @@
   80% { transform: translateX(4px); }
   100% { transform: translateX(0); }
 }
-
 .shake {
   animation: shake 0.4s;
   will-change: transform; /* 提前通知瀏覽器加速渲染，減少撕裂 */
 }
-
 @keyframes dropAndShrink {
   0% {
     opacity: 0;
@@ -426,7 +398,6 @@
     transform: translateY(0) scale(1);
   }
 }
-
 .result-card.drop-in {
   animation: dropAndShrink 0.7s ease forwards;
 }
@@ -464,56 +435,44 @@
     filter: brightness(1);
   }
 }
-
 .result-card.refresh-fade-scale {
   animation: refreshFadeScale 0.5s ease;
 }
-
 body.dark-mode {
   background-color: #1e1e1e;
   color: #ddd;
 }
-
 body.dark-mode .nav {
   background-color: #333;
 }
-
 body.dark-mode .nav button {
   background-color: #555;
   color: #eee;
 }
-
 body.dark-mode .nav button.active {
   background-color: #888;
 }
-
 body.dark-mode .page {
   background-color: #1e1e1e;
 }
-
 body.dark-mode h1 {
   color: #eee;
 }
-
 body.dark-mode .btn-primary {
   background-color: #555;
   color: #ddd;
 }
-
 body.dark-mode .btn-primary:hover {
   background-color: #666;
 }
-
 body.dark-mode .btn-pink {
   background-color: #664;
   color: #ddd;
 }
-
 body.dark-mode .btn-lightblue {
   background-color: #334;
   color: #ddd;
 }
-
 body.dark-mode input,
 body.dark-mode select,
 body.dark-mode button {
@@ -521,33 +480,26 @@ body.dark-mode button {
   color: #ddd;
   border: 1px solid #555;
 }
-
 body.dark-mode li {
   background: #333;
   color: #ddd;
 }
-
 body.dark-mode .result-card {
   background: linear-gradient(145deg, #333, #444);
   color: #ffe066;
 }
-
 body.dark-mode #effectSelect {
   background-color: #333;
   color: #ddd;
 }
-
 body.dark-mode .slot-machine {
   background-color: #333;
   color: #ffe066;
   border-color: #555;
 }
-
 body.dark-mode .footer-note {
   color: #666;
 }
-
-
   </style>
 </head>
 <body>
@@ -568,15 +520,12 @@ body.dark-mode .footer-note {
   align-items: center;
   justify-content: center;
 ">🌙</button>
-
 <h1><img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/icon.png" alt="icon" width="32">
 選擇小幫手</h1>
-
 <div class="nav">
   <button class="active" onclick="showPage('randomPage')">🎯 快速決定</button>
   <button onclick="showPage('editPage')">📝 編輯清單</button>
 </div>
-
 <div class="page active" id="randomPage">
   <div class="current-list-label">
   <div class="label-left">目前清單：</div>
@@ -587,14 +536,12 @@ body.dark-mode .footer-note {
   </div>
   </div>
   <div class="random-container">
-
     <button class="btn-primary" style="width:100%; font-size:20px;" onclick="chooseRandom()">🎲 隨機選 🎲</button>
     <div id="resultCard" class="result-card">請先建立清單</div>
 <div id="slotMachine" class="slot-machine"></div>
     <div id="appealArea"></div>
   </div>
 </div>
-
   <div id="effectSelectorContainer" style="margin-top: 80px; text-align: center;">
   <label for="effectSelect" style="font-weight: bold;"></label>
 <select id="effectSelect" onchange="handleEffectChange()">
@@ -607,17 +554,13 @@ body.dark-mode .footer-note {
   <option value="random">隨機</option>
 </select>
 </div>
-
-
 <div class="page" id="editPage">
   <div class="section-title">📂 切換清單：</div>
   <select id="memorySelect" onchange="loadMemoryList()">
     <option value="">-- 請選擇 --</option>
   </select>
 <button class="btn-lightblue" onclick="openSortModal()">🔃排序</button>
-
   <button class="btn-pink" onclick="deleteMemoryList()">🗑 刪除清單</button>
-
   <div class="section-title">🖊 輸入項目：</div>
   <input type="text" id="foodInput" placeholder="請輸入" />
   <button class="btn-primary" onclick="addFood()">加入</button>
@@ -631,40 +574,33 @@ body.dark-mode .footer-note {
     <button class="btn-lightblue" onclick="importList()">匯入</button>
   </div>
 </div>
-
 <script>
 let currentSortable = null; // 全域保存 Sortable 實例
 window._introPlayed = false; // ✅ 用於控制切頁時動畫只跑一次
 window._introPlayed = false;
-
 let currentList = [];
 let memoryData = JSON.parse(localStorage.getItem('memoryData')) || {};
 let currentListName = "";
-
 function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
     const btn = id === 'randomPage' ? document.querySelectorAll('.nav button')[0] : document.querySelectorAll('.nav button')[1];
     btn.classList.add('active');
-
     if (id === 'randomPage') {
         const slotMachine = document.getElementById('slotMachine');
         const resultCard = document.getElementById('resultCard');
         const appealArea = document.getElementById('appealArea');
         slotMachine.innerHTML = '';
         slotMachine.classList.remove('show');
-
         if (!currentListName || currentList.length === 0) {
             resultCard.textContent = '先選擇清單';
         } else {
             resultCard.textContent = `來決定「${currentListName}」!`;
         }
-
         resultCard.classList.remove('glow', 'show');
         appealArea.innerHTML = '';
         enableRandomButton();
-
         // ✅ 僅第一次切換時播放動畫，避免多次排程錯亂
         if (!window._introPlayed) {
             window._introPlayed = true; // ⚡️ 標記已觸發
@@ -673,17 +609,12 @@ function showPage(id) {
             }, 300);
         }
     }
-
     const effectContainer = document.getElementById('effectSelectorContainer');
     effectContainer.style.display = (id === 'randomPage') ? 'block' : 'none';
 }
-
-
-
 function saveMemoryData() {
   localStorage.setItem('memoryData', JSON.stringify(memoryData));
 }
-
 function addFood() {
   const input = document.getElementById('foodInput');
   const food = input.value.trim();
@@ -693,7 +624,6 @@ function addFood() {
     renderCurrentList();
   }
 }
-
 function renderCurrentList() {
   const ul = document.getElementById('foodList');
   ul.innerHTML = '';
@@ -714,21 +644,18 @@ function removeItem(index) {
   currentList.splice(index, 1);
   renderCurrentList();
 }
-
 function clearAllItems() {
   if (confirm("確定要清除目前所有項目？")) {
     currentList = [];
     renderCurrentList();
   }
 }
-
 function saveCurrentList() {
   const name = prompt("請輸入此清單的名稱：");
   if (name && name.trim()) {
     memoryData[name] = [...currentList];
     currentListName = name;
     saveMemoryData();
-
     // 🔸修正：插入新名稱到 memoryOrder 並存回
     let memoryOrder = [];
     try { memoryOrder = JSON.parse(localStorage.getItem('memoryOrder')) || []; } catch {}
@@ -736,13 +663,10 @@ function saveCurrentList() {
       memoryOrder.push(name);
       localStorage.setItem('memoryOrder', JSON.stringify(memoryOrder));
     }
-
     updateMemorySelect();
     alert(`已記憶清單：「${name}」`);
   }
 }
-
-
 function loadMemoryList() {
   const selected = document.getElementById('memorySelect').value;
   if (!selected) {
@@ -751,16 +675,13 @@ function loadMemoryList() {
     renderCurrentList();
     return;
   }
-
   if (memoryData[selected]) {
     currentList = [...memoryData[selected]];
     currentListName = selected;
     updateMemorySelect();
-
     renderCurrentList();
   }
 }
-
 function switchMemoryFromTop() {
   const selected = document.getElementById('topMemorySelect').value;
   if (!selected) {
@@ -773,11 +694,9 @@ function switchMemoryFromTop() {
     currentList = [...memoryData[selected]];
     currentListName = selected;
     updateMemorySelect();
-
     renderCurrentList();
   }
 }
-
 function deleteMemoryList() {
   const selected = document.getElementById('memorySelect').value;
   if (selected && memoryData[selected]) {
@@ -790,14 +709,12 @@ function deleteMemoryList() {
       }
       saveMemoryData();
       updateMemorySelect();
-
       alert(`「${selected}」已刪除`);
     }
   } else {
     alert("請先選擇要刪除的清單");
   }
 }
-
 function shareList() {
   const text = JSON.stringify({ name: currentListName, items: currentList });
   if (navigator.share) {
@@ -809,7 +726,6 @@ function shareList() {
     prompt("請複製以下內容以分享：", text);
   }
 }
-
 function importList() {
   const text = prompt("請貼上分享內容：");
   if (!text) return;
@@ -821,76 +737,58 @@ function importList() {
     currentList = [...parsed.items];
     saveMemoryData();
     updateMemorySelect();
-
     renderCurrentList();
     alert(`成功匯入清單：「${parsed.name}」`);
   } catch (e) {
     alert("❌ 匯入失敗：格式錯誤");
   }
 }
-
 // 初始化
 updateMemorySelect();
-
 renderCurrentList();
-
 // ✅ 修正：恢復上次使用的特效（讓 effectSelect 記住使用者選擇）
 const lastEffect = localStorage.getItem('lastEffect') || 'default';
 document.getElementById('effectSelect').value = lastEffect;
-
 let appealCount = 3;
 let lastIndex = -1; // 記錄上次的結果位置
-
 function secureRandomIndex(max) {
   const arr = new Uint32Array(1);
   window.crypto.getRandomValues(arr);
   return Math.floor(arr[0] / (2**32) * max);
 }
-
 function chooseRandom(isAppeal = false) {window._introPlayed = false; // ✅ 點擊抽籤後，下次切頁會重新播放動畫
 window._resultShown = false; // ✅ 每次抽選前重置
-
   if (!currentListName || currentList.length === 0) {
     const randomBtn = document.querySelector('.btn-primary');
     randomBtn.classList.add('shake');
-
     // 同時彈出提示
     setTimeout(() => {
       alert("🚫 請先選擇清單");
       randomBtn.classList.remove('shake');
     }, 50);
-
     return;
   } 
   randomBtn.classList.add('disabled');
   randomBtn.disabled = true;
-
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
   const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
  slotMachine.style.display = ''; 
-
   let effect = document.getElementById('effectSelect')?.value || 'default';
-
 // 如果是隨機，從 default 與 5 個影片隨機選一個
 if (effect === 'random') {
     const options = ['default', 'video001', 'video002', 'video003', 'video004', 'video005'];
     effect = options[Math.floor(Math.random() * options.length)];
 }
-
-
   if (!isAppeal) appealCount = 3;
   appealArea.innerHTML = '';
-
   // ➤ 清除影片區
   const oldWrapper = document.querySelector('.video-wrapper');
   if (oldWrapper) oldWrapper.remove();
-
   // ➤ 重置拉霸動畫
   slotMachine.innerHTML = '';
   slotMachine.classList.remove('show');
-
 // ✅ 僅第一次隨機選 / 上訴時淡出，之後過程中不會再次淡出
 if (effectContainer.style.display !== 'none') {
     effectContainer.classList.remove('fade-in-smooth', 'fade-in-anim');
@@ -900,11 +798,6 @@ if (effectContainer.style.display !== 'none') {
         effectContainer.classList.remove('fade-out-smooth');
     }, 600);
 }
-
-
-
-
-
 if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
     resultCard.style.display = 'none';
     playVideoEffect(resultCard, effect);
@@ -918,15 +811,11 @@ if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect
     // ✅ 使用穩定位置鎖定 Effect Selector，避免被推下
     effectContainer.style.position = 'fixed';
     effectContainer.style.top = window.effectSelectorStableTop + 'px';
-
     resultCard.textContent = '🎰 正在抽籤...';
     resultCard.classList.add('show', 'glow');
-
     runSlotAnimation();
 }
-
 }
-
 function updateCurrentList() {
   if (!currentListName) {
     alert("⚠️ 尚未選擇任何記憶清單，請先選擇一個要更新的清單");
@@ -943,72 +832,58 @@ if (effectSelect) {
     effectSelect.value = lastEffect;
 }
 }
-
  function runSlotAnimation() {
   // ✅ 執行拉霸前固定 Effect Selector 位置避免跳動
 const effectContainer = document.getElementById('effectSelectorContainer');
   const slotMachine = document.getElementById('slotMachine');
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
-
   let finalIndex = secureRandomIndex(currentList.length);
   lastIndex = finalIndex;
-
   const spinList = [];
   for (let i = 0; i < 90; i++) {
     spinList.push(currentList[secureRandomIndex(currentList.length)]);
   }
   spinList.push(currentList[finalIndex]);
-
   const slotContent = document.createElement('div');
   slotContent.className = 'slot-content';
   slotContent.style.animation = 'none';
   slotContent.innerHTML = spinList.map(item => `<div>${item}</div>`).join('');
   slotMachine.innerHTML = '';
   slotMachine.appendChild(slotContent);
-
   slotMachine.classList.add('show');
   void slotContent.offsetWidth;
   slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
-
   setTimeout(() => {
     revealResult();
   }, 3300);
 }
 function revealResult(currentEffect)  {
-
 console.log('[DEBUG] revealResult currentEffect =', currentEffect);
 if (window._revealRunning) return;
 window._revealRunning = true;
 setTimeout(() => window._revealRunning = false, 1500);
-
     const effectContainer = document.getElementById('effectSelectorContainer');
     const resultCard = document.getElementById('resultCard');
     const appealArea = document.getElementById('appealArea');
     const slotMachine = document.getElementById('slotMachine');
-
     // ✅ 修正：先清除 refresh-fade-scale，避免污染影片特效
     resultCard.classList.remove('refresh-fade-scale');
-
   // 測量穩定位置一次記錄
   if (!window.effectSelectorStableTop) {
     const rect = effectContainer.getBoundingClientRect();
     const scrollTop = window.scrollY || window.pageYOffset;
     window.effectSelectorStableTop = rect.top + scrollTop;
   }
-
   setTimeout(() => {
     resultCard.style.display = '';
 }, 50);
-
   const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
 resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
 window._resultShown = true; // ✅ 標記結果已顯示
-
 requestAnimationFrame(() => {
     requestAnimationFrame(() => {
         resultCard.classList.add('show', 'glow', 'drop-in');
-
         // 只有在需要時加上 refresh-fade-scale
         if (currentEffect === 'default' || currentEffect === 'random') {
             resultCard.classList.add('refresh-fade-scale');
@@ -1016,13 +891,11 @@ requestAnimationFrame(() => {
     });
 });
 resultCard.classList.remove('drop-in');
-
 requestAnimationFrame(() => {
     requestAnimationFrame(() => {
         resultCard.classList.add('show', 'glow', 'drop-in');
     });
 });
-
     // ✅ 修正核心：顯式使用傳入的 currentEffect
     currentEffect = currentEffect || document.getElementById('effectSelect').value;
     if (currentEffect === 'default' || currentEffect === 'random') {
@@ -1030,14 +903,11 @@ requestAnimationFrame(() => {
         void resultCard.offsetWidth;
         resultCard.classList.add('refresh-fade-scale');
     }
-
-
   // ✅ 刷新特效：在結果顯示時套用一次刷新動畫
   resultCard.classList.add('refresh-pulse');
   resultCard.addEventListener('animationend', () => {
     resultCard.classList.remove('refresh-pulse');
   }, { once: true });
-
  // 將插入上訴按鈕的程式碼延後到動畫完全完成後再插入
 setTimeout(() => {
     if (appealCount > 0) {
@@ -1061,18 +931,14 @@ setTimeout(() => {
         appealArea.appendChild(finalText);
     }
 }, 50); // 建議延遲 600~800 ms，與動畫時間對齊
-
   enableRandomButton();
-
   // ✅ 淡出 slot-machine
   slotMachine.classList.remove('show');
   slotMachine.style.display = 'none';
-
   // 拉霸結束後恢復原本定位
   effectContainer.style.position = 'absolute';
   effectContainer.style.top = '';
   delete window.effectSelectorStableTop; // ✅ 恢復後清除暫存
-
   // ✅ 修正淡入效果確實觸發
 setTimeout(() => {
     effectContainer.classList.remove('fade-in-anim', 'fade-in-smooth', 'fade-out-smooth');
@@ -1080,11 +946,7 @@ setTimeout(() => {
     void effectContainer.offsetWidth;                // 強制重排以確保動畫觸發
     effectContainer.classList.add('fade-in-anim');   // 執行動畫
 }, 100);
-
-
 }
-
-
   const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
 document.querySelectorAll('link[rel="icon"], link[rel="manifest"]').forEach(el => {
   if (el.href) {
@@ -1099,26 +961,18 @@ if ('serviceWorker' in navigator) {
 const randomBtn = document.querySelector('.btn-primary');
 randomBtn.classList.remove('disabled');
 randomBtn.disabled = false;
-
-
-
-
 function enableRandomButton() {
   const randomBtn = document.querySelector('.btn-primary');
   randomBtn.classList.remove('disabled');
   randomBtn.disabled = false;
 }
-
 function fadeOutAndHide(element) {
     element.classList.add('fade-out-smooth');
 }
-
-
 function playVideoEffect(resultCard, effect) {
     const wrapper = document.createElement('div');
     wrapper.className = 'video-wrapper';
     document.querySelector('.random-container').insertBefore(wrapper, resultCard);
-
     const video = document.createElement('video');
     const videoMap = {
     'video001': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4',
@@ -1128,12 +982,10 @@ function playVideoEffect(resultCard, effect) {
     'video005': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video005.mp4',
 };
 video.src = videoMap[effect] || videoMap['video001'];
-
     video.autoplay = true;
     video.playsInline = true;
     video.muted = true;
     video.className = "custom-video";
-
     wrapper.appendChild(video);
 // ✅ 播放影片前固定 Effect Selector 位置避免跳動
 const effectContainer = document.getElementById('effectSelectorContainer');
@@ -1145,33 +997,27 @@ effectContainer.style.top = (rect.top + scrollTop) + 'px';
     setTimeout(() => {
         wrapper.classList.add('show');
     }, 50);
-
 video.onended = () => {
     wrapper.classList.add('glow-out');
     setTimeout(() => {
         wrapper.remove();
-
         // ✅ 播放影片後恢復原本定位
         effectContainer.style.position = 'absolute';
         effectContainer.style.top = '';
-
         revealResult(effect);// 顯示最終結果
     }, 1000);
 };
 }
-
   function handleEffectChange() {
     const effect = document.getElementById('effectSelect').value;
     localStorage.setItem('lastEffect', effect);
 }
-
 // 深色模式切換與記憶
 const darkModeToggle = document.getElementById('darkModeToggle');
 if (localStorage.getItem('darkMode') === 'enabled') {
   document.body.classList.add('dark-mode');
   darkModeToggle.textContent = '☀️';
 }
-
 darkModeToggle.addEventListener('click', () => {
   document.body.classList.toggle('dark-mode');
   if (document.body.classList.contains('dark-mode')) {
@@ -1186,7 +1032,6 @@ darkModeToggle.addEventListener('click', () => {
 function openSortModal() {
     const sortList = document.getElementById('sortList');
     sortList.innerHTML = '';
-
     Object.keys(memoryData).forEach(name => {
         const li = document.createElement('li');
         li.textContent = name;
@@ -1197,22 +1042,17 @@ function openSortModal() {
         li.style.cursor = 'grab';
         sortList.appendChild(li);
     });
-
     // 修正：每次開啟前先 destroy 上一次的 sortable 實例，避免觸控無效
     if (currentSortable) {
         currentSortable.destroy();
         currentSortable = null;
     }
-
     currentSortable = Sortable.create(sortList, {
         animation: 150,
         touchStartThreshold: 5 // (可選) 提高容錯讓手機更易觸發拖曳
     });
-
     document.getElementById('sortModal').style.display = 'flex';
 }
-
-
 // 排序 Modal 關閉
 function closeSortModal() {
     if (currentSortable) {
@@ -1221,7 +1061,6 @@ function closeSortModal() {
     }
     document.getElementById('sortModal').style.display = 'none';
 }
-
 // 排序結果儲存
 function saveSortOrder() {
     const sortList = document.getElementById('sortList');
@@ -1230,11 +1069,9 @@ function saveSortOrder() {
     closeSortModal();
     updateMemorySelect();
 }
-
 // 更新下拉選單使用排序
 function updateMemorySelect() {
     const selects = [document.getElementById('memorySelect'), document.getElementById('topMemorySelect')];
-
     let memoryOrder = [];
     try {
         memoryOrder = JSON.parse(localStorage.getItem('memoryOrder'));
@@ -1244,7 +1081,6 @@ function updateMemorySelect() {
     if (!Array.isArray(memoryOrder) || memoryOrder.length === 0) {
         memoryOrder = Object.keys(memoryData);
     }
-
     selects.forEach(select => {
         select.innerHTML = '<option value="">-- 請選擇 --</option>';
         memoryOrder.forEach(name => {
@@ -1261,9 +1097,7 @@ function updateMemorySelect() {
 function revealIntroText() {
     if (window._resultShown) return; // 若已顯示結果，不重播動畫
     if (window._introTextAnimating) return; // 防止重複觸發
-
     const resultCard = document.getElementById('resultCard');
-
     const text = resultCard.textContent.trim();
     if (text === '先選擇清單' || text.startsWith('來決定「')) {
         // ⚠️ 如果是提示文字，直接顯示並保持，不執行動畫重置
@@ -1272,11 +1106,8 @@ function revealIntroText() {
         resultCard.classList.add('show'); // 保證可見
         return;
     }
-
     window._introTextAnimating = true;
-
     resultCard.classList.remove('drop-in', 'refresh-fade-scale', 'glow', 'show');
-
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             resultCard.classList.add('show', 'glow', 'drop-in');
@@ -1284,14 +1115,7 @@ function revealIntroText() {
         });
     });
 }
-
-
-
-
 </script>
-
-  <div class="footer-note">Designed by KJ&nbsp;&nbsp;</div>
-
 <div id="sortModal" style="
   display:none; 
   position:fixed; 
@@ -1302,13 +1126,18 @@ function revealIntroText() {
   background:rgba(0,0,0,0.5); 
   align-items:center; 
   justify-content:center; 
-  z-index:9999;">
+  z-index:9999;
+  overflow-y: auto;  /* ✅ 加上這行 */
+">
   <div style="
     background:#fff; 
     padding:20px; 
     border-radius:8px; 
     max-width:300px; 
-    width:90%;">
+    width:90%;
+    max-height: 90vh;   /* ✅ 加上這行 */
+    overflow-y: auto;   /* ✅ 加上這行 */
+">
     <h3>拖曳排序清單</h3>
     <ul id="sortList" style="list-style:none; padding:0; max-height:300px; overflow:auto;"></ul>
     <button class="btn-primary" onclick="saveSortOrder()">儲存順序</button>
@@ -1316,15 +1145,10 @@ function revealIntroText() {
   </div>
 </div>
 
+
+  </div>
+</div>
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
