@@ -851,7 +851,9 @@ function chooseRandom(isAppeal = false) {
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
   const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
- slotMachine.style.display = ''; 
+setTimeout(() => {
+    slotMachine.style.display = '';
+}, 50);
 
   let effect = document.getElementById('effectSelect')?.value || 'default';
 
