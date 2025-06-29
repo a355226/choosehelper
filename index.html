@@ -107,20 +107,24 @@
     input, select {
       width: 100%;
     }
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
+ul#sortList {
+  max-width: 320px;
+  width: 90%;
+  margin: 0 auto;          /* 置中 */
+  padding: 0 8px;          /* 適度內距 */
+}
 li {
-  background: #f0fdf4;              /* ✅ 淡化底色，保留辨識但不壓迫 */
-  padding: 6px 8px;                 /* ✅ 減少內邊距，縮小高度 */
-  margin-bottom: 4px;               /* ✅ 減少間距，節省空間 */
-  border-radius: 4px;               /* ✅ 稍微圓角即可 */
+  background: #f0fdf4;     /* 淡綠底 */
+  padding: 6px 8px;
+  max-width: 220px;
+width: 85%;
+  margin-bottom: 4px;
+  border-radius: 4px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 16px;                  /* ✅ 保持易讀大小 */
 }
+
     li span {
       flex-grow: 1;
       min-width: 0;
@@ -1139,7 +1143,7 @@ function revealIntroText() {
     border-radius: 8px;
     max-width: 320px;
     width: 85%;
-    max-height: 65vh;
+    max-height: 65h;
     overflow-y: auto;
 ">
 
