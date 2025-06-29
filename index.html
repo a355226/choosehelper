@@ -840,6 +840,7 @@ function secureRandomIndex(max) {
 }
 
 function chooseRandom(isAppeal = false) {window._introPlayed = false; // ✅ 點擊抽籤後，下次切頁會重新播放動畫
+window._resultShown = false; // ✅ 每次抽選前重置
 
   if (!currentListName || currentList.length === 0) {
     const randomBtn = document.querySelector('.btn-primary');
@@ -967,6 +968,7 @@ const effectContainer = document.getElementById('effectSelectorContainer');
   }, 3300);
 }
 function revealResult(currentEffect)  {
+
 console.log('[DEBUG] revealResult currentEffect =', currentEffect);
 if (window._revealRunning) return;
 window._revealRunning = true;
@@ -993,6 +995,18 @@ setTimeout(() => window._revealRunning = false, 1500);
 
   const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
 resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
+window._resultShown = true; // ✅ 標記結果已顯示
+
+requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+        resultCard.classList.add('show', 'glow', 'drop-in');
+
+        // 只有在需要時加上 refresh-fade-scale
+        if (currentEffect === 'default' || currentEffect === 'random') {
+            resultCard.classList.add('refresh-fade-scale');
+        }
+    });
+});
 resultCard.classList.remove('drop-in');
 
 requestAnimationFrame(() => {
@@ -1222,26 +1236,33 @@ function updateMemorySelect() {
     });
 }
 function revealIntroText() {
+    if (window._resultShown) return; // 若已顯示結果，不重播動畫
     if (window._introTextAnimating) return; // 防止重複觸發
-    window._introTextAnimating = true;
 
     const resultCard = document.getElementById('resultCard');
 
-    // 移除動畫類別以重置狀態
+    const text = resultCard.textContent.trim();
+    if (text === '先選擇清單' || text.startsWith('來決定「')) {
+        // ⚠️ 如果是提示文字，直接顯示並保持，不執行動畫重置
+        resultCard.style.opacity = 1;
+        resultCard.style.transform = 'scale(1)';
+        resultCard.classList.add('show'); // 保證可見
+        return;
+    }
+
+    window._introTextAnimating = true;
+
     resultCard.classList.remove('drop-in', 'refresh-fade-scale', 'glow', 'show');
 
-    // 使用 requestAnimationFrame 保證渲染序列正確
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             resultCard.classList.add('show', 'glow', 'drop-in');
-
-            // 動畫時間結束後重置旗標（700ms 是 drop-in 動畫時間）
-            setTimeout(() => {
-                window._introTextAnimating = false;
-            }, 800);
+            setTimeout(() => { window._introTextAnimating = false; }, 800);
         });
     });
 }
+
+
 
 
 </script>
@@ -1274,13 +1295,3 @@ function revealIntroText() {
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
