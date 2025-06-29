@@ -851,9 +851,7 @@ function chooseRandom(isAppeal = false) {
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
   const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
-setTimeout(() => {
-    slotMachine.style.display = '';
-}, 50);
+ slotMachine.style.display = ''; 
 
   let effect = document.getElementById('effectSelect')?.value || 'default';
 
@@ -951,17 +949,9 @@ const effectContainer = document.getElementById('effectSelectorContainer');
   slotMachine.innerHTML = '';
   slotMachine.appendChild(slotContent);
 
-if (slotMachine.classList.contains('show')) {
-    console.log('slotMachine already shown, skip re-adding animation.');
-    return;
-}
-  
-setTimeout(() => {
-    slotMachine.classList.add('show');
-    void slotContent.offsetWidth;
-    slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
-}, 50);
-
+  slotMachine.classList.add('show');
+  void slotContent.offsetWidth;
+  slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
 
   setTimeout(() => {
     revealResult();
@@ -985,9 +975,7 @@ setTimeout(() => window._revealRunning = false, 1500);
   const resultCard = document.getElementById('resultCard');
   const appealArea = document.getElementById('appealArea');
   const slotMachine = document.getElementById('slotMachine');
-  setTimeout(() => {
-    resultCard.style.display = '';
-}, 50);
+  resultCard.style.display = ''; // ← ★★★ 關鍵：恢復顯示結果卡
 
   const finalIndex = lastIndex >= 0 ? lastIndex : secureRandomIndex(currentList.length);
 resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
