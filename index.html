@@ -832,7 +832,9 @@ function secureRandomIndex(max) {
 }
 
 function chooseRandom(isAppeal = false) {
-    if (!currentListName || currentList.length === 0) {
+   window._chooseRandomCounter = (window._chooseRandomCounter || 0) + 1;
+    console.log('[DEBUG] chooseRandom triggered count:', window._chooseRandomCounter, 'at', Date.now(), 'isAppeal:', isAppeal);
+ if (!currentListName || currentList.length === 0) {
         const randomBtn = document.querySelector('.btn-primary');
         randomBtn.classList.add('shake');
         setTimeout(() => {
@@ -959,7 +961,8 @@ const effectContainer = document.getElementById('effectSelectorContainer');
   }, 3300);
 }
 function revealResult(currentEffect) {
-    console.log('[DEBUG] revealResult called with:', currentEffect, 'time:', Date.now());
+        window._revealCounter = (window._revealCounter || 0) + 1;
+    console.log('[DEBUG] revealResult triggered count:', window._revealCounter, 'at', Date.now(), 'with effect:', currentEffect);
 
     // 防止重複觸發
     if (window._revealRunning) {
@@ -1071,6 +1074,9 @@ function fadeOutAndHide(element) {
 
 
 function playVideoEffect(resultCard, effect) {
+window._playVideoEffectCounter = (window._playVideoEffectCounter || 0) + 1;
+    console.log('[DEBUG] playVideoEffect triggered count:', window._playVideoEffectCounter, 'at', Date.now(), 'effect:', effect);
+
     const wrapper = document.createElement('div');
     wrapper.className = 'video-wrapper';
     document.querySelector('.random-container').insertBefore(wrapper, resultCard);
