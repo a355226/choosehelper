@@ -638,6 +638,13 @@ function showPage(id) {
         resultCard.classList.remove('glow', 'show');
         appealArea.innerHTML = '';
         enableRandomButton();
+        // 同步下拉選單顯示狀態
+const topMemorySelect = document.getElementById('topMemorySelect');
+if (!currentListName) {
+    topMemorySelect.value = "";
+} else {
+    topMemorySelect.value = currentListName;
+}
         // ✅ 僅第一次切換時播放動畫，避免多次排程錯亂
         if (!window._introPlayed) {
             window._introPlayed = true; // ⚡️ 標記已觸發
