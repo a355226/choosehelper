@@ -780,6 +780,15 @@ function importList() {
     currentListName = parsed.name;
     currentList = [...parsed.items];
     saveMemoryData();
+
+    // ✅ 修正：插入匯入名稱到記憶順序
+    let memoryOrder = [];
+    try { memoryOrder = JSON.parse(localStorage.getItem('memoryOrder')) || []; } catch {}
+    if (!memoryOrder.includes(parsed.name)) {
+        memoryOrder.push(parsed.name);
+        localStorage.setItem('memoryOrder', JSON.stringify(memoryOrder));
+    }
+
     updateMemorySelect();
     renderCurrentList();
     alert(`成功匯入清單：「${parsed.name}」`);
@@ -787,6 +796,7 @@ function importList() {
     alert("❌ 匯入失敗：格式錯誤");
   }
 }
+
 // 初始化
 updateMemorySelect();
 renderCurrentList();
