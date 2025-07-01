@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+<!-- Firebase App (必須) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js"></script>
+
+<!-- Firebase Realtime Database (多人選擇需要) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-database.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <!-- 分頁用 -->
 <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
@@ -564,7 +569,24 @@ body.dark-mode #sortModal li:hover {
 <div class="nav">
   <button class="active" onclick="showPage('randomPage')">🎯 快速決定</button>
   <button onclick="showPage('editPage')">📝 編輯清單</button>
+<button onclick="showPage('multiPage')">👥 多人選擇</button>
 </div>
+<div class="page" id="multiPage">
+  <h2 id="multiRoomName">多人選擇房間</h2>
+  <div>
+    <strong>參與者：</strong>
+    <ul id="participantList"></ul>
+  </div>
+  <div class="section-title">📃 清單項目：</div>
+  <ul id="multiList"></ul>
+  <input type="text" id="multiInput" placeholder="輸入項目後按 Enter 或按下按鈕" />
+  <button class="btn-primary" onclick="addMultiItem()">新增項目</button>
+  <div class="random-container">
+    <button class="btn-primary" onclick="multiChooseRandom()">🎲 抽籤 🎲</button>
+    <div id="multiResult" class="result-card">請先輸入清單項目</div>
+  </div>
+</div>
+
 <div class="page active" id="randomPage">
   <div class="current-list-label">
   <div class="label-left">目前清單：</div>
@@ -624,8 +646,15 @@ function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-    const btn = id === 'randomPage' ? document.querySelectorAll('.nav button')[0] : document.querySelectorAll('.nav button')[1];
-    btn.classList.add('active');
+const navButtons = document.querySelectorAll('.nav button');
+if (id === 'randomPage') {
+    navButtons[0].classList.add('active');
+} else if (id === 'editPage') {
+    navButtons[1].classList.add('active');
+} else if (id === 'multiPage') {
+    navButtons[2].classList.add('active');
+}
+
     if (id === 'randomPage') {
         const slotMachine = document.getElementById('slotMachine');
         const resultCard = document.getElementById('resultCard');
@@ -1274,6 +1303,165 @@ function multiImport() {
   };
   input.click();
 }
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBUbKgC4P7wGFQqZZmgJU890qOe_4yC9kA",
+    authDomain: "choosehel.firebaseapp.com",
+    databaseURL: "https://choosehel-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "choosehel",
+    storageBucket: "choosehel.firebasestorage.app",
+    messagingSenderId: "116763876894",
+    appId: "1:116763876894:web:1662b36ef2fa815863d80f"
+  };
+
+  // 初始化 Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // 取得 Realtime Database 實例
+  const database = firebase.database();
+
+document.getElementById('multiModeToggle').addEventListener('click', () => {
+    document.getElementById('multiModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+});
+
+
+function closeMultiModal() {
+  document.getElementById('multiModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function createOrJoinRoom() {
+  const roomName = document.getElementById('roomNameInput').value.trim();
+  const creatorName = document.getElementById('creatorNameInput').value.trim();
+  if (!roomName || !creatorName) {
+    alert('請輸入房間名稱與你的名稱');
+    return;
+  }
+  const roomId = btoa(roomName).replace(/=/g, '').toLowerCase(); // 簡易 hash 做為 roomId
+  const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+  const roomRef = database.ref('rooms/' + roomId);
+
+  // 加入房間資料
+  roomRef.once('value').then(snapshot => {
+    if (!snapshot.exists()) {
+      // 若房間不存在則建立
+      roomRef.set({
+        name: roomName,
+        creator: creatorName,
+        list: [],
+        participants: {}
+      });
+    }
+    // 加入參與者名單
+    roomRef.child('participants/' + userId).set({
+      name: creatorName
+    });
+    // 將 roomId 與 userId 存入 localStorage 以便後續同步使用
+    localStorage.setItem('currentRoomId', roomId);
+    localStorage.setItem('currentUserId', userId);
+
+    alert(`已加入房間「${roomName}」，將切換至多人選擇頁面。`);
+    closeMultiModal();
+    showMultiSelectPage();
+  });
+}
+
+function showMultiSelectPage() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('multiPage').classList.add('active');
+
+  const roomId = localStorage.getItem('currentRoomId');
+  const userId = localStorage.getItem('currentUserId');
+  if (!roomId || !userId) {
+    alert('⚠️ 尚未加入任何房間，請先使用多人模式建立或加入房間');
+    return;
+  }
+
+  const roomRef = database.ref('rooms/' + roomId);
+  const participantList = document.getElementById('participantList');
+  const multiRoomName = document.getElementById('multiRoomName');
+  const multiList = document.getElementById('multiList');
+  const multiResult = document.getElementById('multiResult');
+
+  // 顯示房間名稱
+  roomRef.child('name').on('value', snapshot => {
+    multiRoomName.textContent = '多人選擇房間：' + (snapshot.val() || '');
+  });
+
+  // 顯示參與者名單
+  roomRef.child('participants').on('value', snapshot => {
+    const participants = snapshot.val() || {};
+    participantList.innerHTML = '';
+    Object.values(participants).forEach(p => {
+      const li = document.createElement('li');
+      li.textContent = p.name;
+      participantList.appendChild(li);
+    });
+  });
+
+  // 清單即時同步顯示
+  roomRef.child('list').on('value', snapshot => {
+    const items = snapshot.val() || [];
+    multiList.innerHTML = '';
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      multiList.appendChild(li);
+    });
+    if (items.length === 0) {
+      multiResult.textContent = '請先輸入清單項目';
+    }
+  });
+
+  // 抽籤結果同步顯示
+  roomRef.child('currentResult').on('value', snapshot => {
+    const result = snapshot.val();
+    if (result) {
+      multiResult.textContent = `🎉 抽中：${result}`;
+      multiResult.classList.add('show', 'glow');
+    }
+  });
+}
+function multiChooseRandom() {
+  const roomId = localStorage.getItem('currentRoomId');
+  if (!roomId) {
+    alert('⚠️ 尚未加入任何房間');
+    return;
+  }
+  const roomRef = database.ref('rooms/' + roomId);
+  roomRef.child('list').once('value').then(snapshot => {
+    const list = snapshot.val() || [];
+    if (list.length === 0) {
+      alert('⚠️ 請先新增清單項目');
+      return;
+    }
+    const randomItem = list[Math.floor(Math.random() * list.length)];
+    roomRef.child('currentResult').set(randomItem);
+  });
+}
+function addMultiItem() {
+    const roomId = localStorage.getItem('currentRoomId');
+    const input = document.getElementById('multiInput');
+    const value = input.value.trim();
+    if (!roomId) {
+        alert('⚠️ 尚未加入房間');
+        return;
+    }
+    if (!value) {
+        alert('⚠️ 請輸入項目');
+        return;
+    }
+    const roomRef = database.ref('rooms/' + roomId + '/list');
+    roomRef.once('value').then(snapshot => {
+        const list = snapshot.val() || [];
+        list.push(value);
+        roomRef.set(list);
+        input.value = '';
+    });
+}
+
+
 </script>
   <div class="footer-note">Designed by KJ&nbsp;&nbsp;</div>
 <div id="sortModal" style="
@@ -1341,6 +1529,51 @@ function multiImport() {
     <button class="btn-pink" style="margin-top: 10px;" onclick="closeExportImportModal()">關閉</button>
   </div>
 </div>
+<button id="multiModeToggle" title="多人選擇模式" style="
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 999;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+">👥</button>
+
+<div id="multiModal" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+">
+  <div style="
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 320px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  ">
+    <h3>建立 / 加入多人選擇房間</h3>
+    <input type="text" id="roomNameInput" placeholder="房間名稱" />
+    <input type="text" id="creatorNameInput" placeholder="你的名稱" />
+    <button class="btn-primary" onclick="createOrJoinRoom()">確定</button>
+    <button class="btn-pink" onclick="closeMultiModal()">取消</button>
+  </div>
+</div>
+
 </body>
 </html>
-
