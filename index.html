@@ -1320,11 +1320,6 @@ function multiImport() {
   // 取得 Realtime Database 實例
   const database = firebase.database();
 
-document.getElementById('multiModeToggle').addEventListener('click', () => {
-    document.getElementById('multiModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-});
-
 
 function closeMultiModal() {
   document.getElementById('multiModal').style.display = 'none';
@@ -1461,7 +1456,13 @@ function addMultiItem() {
     });
 }
 
-
+document.addEventListener('DOMContentLoaded', () => {
+    const multiModeToggle = document.getElementById('multiModeToggle');
+    multiModeToggle.addEventListener('click', () => {
+        document.getElementById('multiModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+});
 </script>
   <div class="footer-note">Designed by KJ&nbsp;&nbsp;</div>
 <div id="sortModal" style="
