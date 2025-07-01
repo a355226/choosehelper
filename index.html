@@ -2,10 +2,9 @@
 <html lang="zh-Hant">
 <head>
 <!-- Firebase App (必須) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-<!-- Firebase Realtime Database (多人選擇需要) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-database.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <!-- 分頁用 -->
 <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
@@ -543,6 +542,30 @@ body.dark-mode #sortModal li {
 body.dark-mode #sortModal li:hover {
   background: #4a4a4a !important; /* 滑過時加亮 */
 }
+#participantList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 4.5em; /* 約三排 */
+    overflow: hidden;
+    position: relative;
+}
+.participant-item {
+    background: #e0f4ff;
+    border-radius: 16px;
+    padding: 6px 10px;
+    font-size: 14px;
+    white-space: nowrap;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#showMoreParticipants {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+    font-size: 14px;
+}
 
   </style>
 </head>
@@ -743,11 +766,16 @@ body.dark-mode #sortModal li:hover {
     <h3>建立 / 加入多人選擇房間</h3>
     <input type="text" id="roomNameInput" placeholder="房間名稱" />
     <input type="text" id="creatorNameInput" placeholder="你的名稱" />
+<input type="password" id="roomPasswordInput" placeholder="房間密碼（可空白）" />
+
     <button class="btn-primary" onclick="createOrJoinRoom()">確定</button>
     <button class="btn-pink" onclick="closeMultiModal()">取消</button>
   </div>
 </div>
 <script>
+
+
+
 let currentSortable = null; // 全域保存 Sortable 實例
 window._introPlayed = false; // ✅ 用於控制切頁時動畫只跑一次
 window._introPlayed = false;
@@ -1416,7 +1444,13 @@ function multiImport() {
   input.click();
 }
 
-  const firebaseConfig = {
+
+function closeMultiModal() {
+  document.getElementById('multiModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+const firebaseConfig = {
     apiKey: "AIzaSyBUbKgC4P7wGFQqZZmgJU890qOe_4yC9kA",
     authDomain: "choosehel.firebaseapp.com",
     databaseURL: "https://choosehel-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -1424,55 +1458,76 @@ function multiImport() {
     storageBucket: "choosehel.firebasestorage.app",
     messagingSenderId: "116763876894",
     appId: "1:116763876894:web:1662b36ef2fa815863d80f"
-  };
-
-  // 初始化 Firebase
-  firebase.initializeApp(firebaseConfig);
-
-  // 取得 Realtime Database 實例
-  const database = firebase.database();
-
-
-function closeMultiModal() {
-  document.getElementById('multiModal').style.display = 'none';
-  document.body.style.overflow = '';
-}
+};
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
 function createOrJoinRoom() {
+const confirmBtn = document.querySelector('#multiModal .btn-primary');
+confirmBtn.disabled = true;
+confirmBtn.textContent = '建立中...';
+
   const roomName = document.getElementById('roomNameInput').value.trim();
   const creatorName = document.getElementById('creatorNameInput').value.trim();
+  const roomPassword = document.getElementById('roomPasswordInput').value.trim(); // 取得密碼
+
   if (!roomName || !creatorName) {
     alert('請輸入房間名稱與你的名稱');
+confirmBtn.disabled = false;
+confirmBtn.textContent = '確定';
+
     return;
   }
-  const roomId = btoa(roomName).replace(/=/g, '').toLowerCase(); // 簡易 hash 做為 roomId
+
+  const roomId = encodeURIComponent(roomName); // ✅ 安全支援中文與 emoji
   const userId = 'user_' + Math.random().toString(36).substr(2, 9);
   const roomRef = database.ref('rooms/' + roomId);
 
-  // 加入房間資料
   roomRef.once('value').then(snapshot => {
     if (!snapshot.exists()) {
-      // 若房間不存在則建立
+      // 房間不存在 → 建立房間並寫入密碼（可空）
       roomRef.set({
         name: roomName,
         creator: creatorName,
+        password: roomPassword,
         list: [],
         participants: {}
+      }).then(() => {
+        proceedJoin();
+      }).catch(err => {
+        alert("❌ 建立房間失敗：" + err);
       });
+    } else {
+      // 房間已存在，檢查密碼
+      const data = snapshot.val();
+      if (data.password && data.password !== roomPassword) {
+        alert('❌ 密碼錯誤，請重新輸入');
+        return;
+      }
+      proceedJoin();
     }
-    // 加入參與者名單
-    roomRef.child('participants/' + userId).set({
-      name: creatorName
-    });
-    // 將 roomId 與 userId 存入 localStorage 以便後續同步使用
-    localStorage.setItem('currentRoomId', roomId);
-    localStorage.setItem('currentUserId', userId);
 
-    alert(`已加入房間「${roomName}」，將切換至多人選擇頁面。`);
-    closeMultiModal();
-    showMultiSelectPage();
+    function proceedJoin() {
+      // 加入參與者名單
+      roomRef.child('participants/' + userId).set({
+        name: creatorName
+      });
+roomRef.child('participants/' + userId).onDisconnect().remove();
+      // 記錄在本機
+      localStorage.setItem('currentRoomId', roomId);
+      localStorage.setItem('currentUserId', userId);
+      alert(`已加入房間「${roomName}」，將切換至多人選擇頁面。`);
+      closeMultiModal();
+createShareButton(roomId, roomPassword);
+
+      showMultiSelectPage();
+    }
+  }).catch(err => {
+    alert('❌ 發生錯誤：' + err);
   });
 }
+
+
 
 function showMultiSelectPage() {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1497,15 +1552,43 @@ function showMultiSelectPage() {
   });
 
   // 顯示參與者名單
-  roomRef.child('participants').on('value', snapshot => {
+ roomRef.child('participants').on('value', snapshot => {
     const participants = snapshot.val() || {};
     participantList.innerHTML = '';
-    Object.values(participants).forEach(p => {
-      const li = document.createElement('li');
-      li.textContent = p.name;
-      participantList.appendChild(li);
+
+    const keys = Object.keys(participants);
+    const maxDisplay = 15; // 顯示最多 15 個
+
+    keys.slice(0, maxDisplay).forEach(uid => {
+        const p = participants[uid];
+        const div = document.createElement('div');
+        div.className = 'participant-item';
+        div.textContent = p.name;
+        participantList.appendChild(div);
     });
-  });
+
+    if (keys.length > maxDisplay) {
+        const more = document.createElement('div');
+        more.id = 'showMoreParticipants';
+        more.textContent = `... 查看全部 (${keys.length})`;
+        more.onclick = () => {
+            alert('參與者清單：\n\n' + keys.map(uid => participants[uid].name).join('\n'));
+        };
+        participantList.appendChild(more);
+    }
+
+    // 在參與者下方顯示在線人數
+    let onlineCount = document.getElementById('onlineCount');
+    if (!onlineCount) {
+        onlineCount = document.createElement('div');
+        onlineCount.id = 'onlineCount';
+        onlineCount.style.marginTop = '6px';
+        onlineCount.style.fontWeight = 'bold';
+        participantList.parentNode.appendChild(onlineCount);
+    }
+    onlineCount.textContent = `在線人數：${keys.length} 人`;
+});
+
 
   // 清單即時同步顯示
   roomRef.child('list').on('value', snapshot => {
@@ -1560,12 +1643,12 @@ function addMultiItem() {
         return;
     }
     const roomRef = database.ref('rooms/' + roomId + '/list');
-    roomRef.once('value').then(snapshot => {
-        const list = snapshot.val() || [];
-        list.push(value);
-        roomRef.set(list);
-        input.value = '';
-    });
+roomRef.transaction(currentList => {
+    if (!currentList) currentList = [];
+    currentList.push(value);
+    return currentList;
+});
+
 }
 const multiModeToggle = document.getElementById('multiModeToggle');
 multiModeToggle.addEventListener('click', () => {
@@ -1576,6 +1659,51 @@ multiModeToggle.addEventListener('click', () => {
 function openMultiModal() {
     document.getElementById('multiModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+}
+window.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const room = urlParams.get('room');
+  const pwd = urlParams.get('pwd');
+
+  if (room) {
+    document.getElementById('roomNameInput').value = decodeURIComponent(room);
+    if (pwd) {
+      document.getElementById('roomPasswordInput').value = decodeURIComponent(pwd);
+    }
+    document.getElementById('multiModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+      document.getElementById('creatorNameInput').focus();
+    }, 100);
+  }
+});
+function createShareButton(roomId, roomPassword) {
+    const multiPage = document.getElementById('multiPage');
+    if (document.getElementById('shareRoomBtn')) return; // 避免重複插入
+
+    const btn = document.createElement('button');
+    btn.id = 'shareRoomBtn';
+    btn.className = 'btn-lightblue';
+    btn.textContent = '🔗 分享房間';
+    btn.style.marginTop = '10px';
+    btn.onclick = () => {
+        const shareUrl = `${location.origin}${location.pathname}?room=${encodeURIComponent(decodeURIComponent(roomId))}${roomPassword ? '&pwd=' + encodeURIComponent(roomPassword) : ''}`;
+        if (confirm('點擊確定分享房間連結，取消則複製連結')) {
+            if (navigator.share) {
+                navigator.share({
+                    title: '快來加入我的選擇房間',
+                    url: shareUrl
+                }).catch(err => alert('分享失敗: ' + err));
+            } else {
+                navigator.clipboard.writeText(shareUrl);
+                alert('已複製房間連結，可貼給朋友！');
+            }
+        } else {
+            navigator.clipboard.writeText(shareUrl);
+            alert('已複製房間連結，可貼給朋友！');
+        }
+    };
+    multiPage.insertBefore(btn, multiPage.children[1]); // 插在清單前面
 }
 
 
