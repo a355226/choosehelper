@@ -1,0 +1,560 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>多人選擇小幫手 - 建立房間</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<link rel="icon" type="image/png" sizes="32x32" href="icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  body {font-family: "Segoe UI", sans-serif; background-color: #f0f9ff; margin: 0; padding: 0;}
+  h1 {text-align: center; padding: 20px; color: #2c3e50; margin: 0;}
+  .page {display: none; padding: 20px; max-width: 600px; margin: auto;}
+  .page.active {display: block;}
+  .btn-primary {background-color: #3db8c4; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s ease;}
+  .btn-primary:hover {background-color: #35a4af;}
+  .btn-confirm {background-color: #2c3e50; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s ease;}
+  .btn-confirm:hover {background-color: #1e2a38;}
+  input {padding: 10px; font-size: 16px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; width: 100%; box-sizing: border-box;}
+  .item-container {display: flex; flex-wrap: wrap; gap: 6px; max-height: calc(1.8em * 3 + 20px); overflow-y: auto; padding: 4px; background: #ffffffaa; border-radius: 8px;}
+  .item-box {background: #e0f4ff; border-radius: 16px; padding: 6px 10px; font-size: 14px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center;}
+  .remove-btn {background: none; border: none; color: #c0392b; font-size: 16px; cursor: pointer; margin-left: 6px; flex-shrink: 0;}
+  .header-row {display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;}
+  .modal {position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999;}
+  .modal-content {background: white; max-width: 90%; max-height: 80%; overflow-y: auto; padding: 20px; border-radius: 8px; text-align: center;}
+  .hidden {display: none;}
+</style>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyBUbKgC4P7wGFQqZZmgJU890qOe_4yC9kA",
+    authDomain: "choosehel.firebaseapp.com",
+    databaseURL: "https://choosehel-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "choosehel",
+    storageBucket: "choosehel.appspot.com",
+    messagingSenderId: "116763876894",
+    appId: "1:116763876894:web:1662b36ef2fa815863d80f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let userId;
+
+function createRoom() {
+  const roomName = document.getElementById('roomNameInput').value.trim();
+  const userName = document.getElementById('userNameInput').value.trim();
+  if (!roomName || !userName) {
+    alert('請輸入房間名稱和你的名稱');
+    return;
+  }
+  const roomId = encodeURIComponent(roomName);
+  userId = 'user_' + Math.random().toString(36).substr(2, 9);
+  const roomRef = db.ref('rooms/' + roomId);
+
+  roomRef.once('value').then(snapshot => {
+    if (!snapshot.exists()) {
+      roomRef.set({
+        name: roomName,
+        creator: userName,
+        list: [],
+        participants: {}
+      });
+    }
+    roomRef.child('participants/' + userId).set({ name: userName });
+    localStorage.setItem('currentRoomId', roomId);
+    localStorage.setItem('currentUserId', userId);
+    document.getElementById('setupPage').classList.remove('active');
+    document.getElementById('multiPage').classList.add('active');
+    document.getElementById('roomNameDisplay').textContent = `房間：${decodeURIComponent(roomId)}`;
+    loadRoomData(roomId);
+    listenConfirmation(roomId);
+  });
+}
+
+function showModal(content, buttons) {
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  const modalContent = document.createElement('div');
+  modalContent.className = 'modal-content';
+  modalContent.innerHTML = `<p style="font-size:18px;">${content}</p>`;
+  buttons.forEach(btn => {
+    const button = document.createElement('button');
+    button.className = btn.class || 'btn-primary';
+    button.textContent = btn.text;
+    button.onclick = () => {
+      modal.remove();
+      btn.onClick();
+    };
+    modalContent.appendChild(button);
+  });
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+}
+
+function loadRoomData(roomId) {
+  const roomRef = db.ref('rooms/' + roomId);
+  const participantContainer = document.getElementById('participantContainer');
+  const listContainer = document.getElementById('listContainer');
+
+  roomRef.child('participants').on('value', snapshot => {
+    const data = snapshot.val() || {};
+    participantContainer.innerHTML = '';
+    Object.values(data).forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'item-box';
+      div.textContent = p.name;
+      participantContainer.appendChild(div);
+    });
+  });
+
+  roomRef.child('list').on('value', snapshot => {
+    const items = snapshot.val() || [];
+    listContainer.innerHTML = '';
+    items.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = 'item-box';
+      const span = document.createElement('span');
+      span.textContent = item;
+      const btn = document.createElement('button');
+      btn.textContent = '✕';
+      btn.className = 'remove-btn';
+      btn.onclick = () => removeItem(index);
+      div.appendChild(span);
+      div.appendChild(btn);
+      listContainer.appendChild(div);
+    });
+  });
+roomRef.child('decisionMode').on('value', snapshot => {
+  const mode = snapshot.val() || '';
+  document.getElementById('selectedMode').textContent = mode ? `已選擇：${mode}` : '';
+  const decideModeDisplay = document.getElementById('decideModeDisplay');
+  if (decideModeDisplay) decideModeDisplay.textContent = mode ? `決定方式：${mode}` : '';
+});
+
+}
+
+function addItem() {
+  const roomId = localStorage.getItem('currentRoomId');
+  const input = document.getElementById('itemInput');
+  const value = input.value.trim();
+  if (!value) return;
+  const listRef = db.ref('rooms/' + roomId + '/list');
+  listRef.once('value').then(snapshot => {
+    let list = snapshot.val() || [];
+    list.push(value);
+    listRef.set(list);
+  });
+  input.value = '';
+}
+
+function removeItem(index) {
+  const roomId = localStorage.getItem('currentRoomId');
+  const listRef = db.ref('rooms/' + roomId + '/list');
+  listRef.once('value').then(snapshot => {
+    let list = snapshot.val() || [];
+    list.splice(index, 1);
+    listRef.set(list);
+  });
+}
+
+function importItems() {
+  const roomId = localStorage.getItem('currentRoomId');
+  const text = prompt('請貼上要匯入的項目（JSON 或每行一項）：');
+  if (!text) return;
+  let items = [];
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed.items) items = parsed.items;
+    else throw new Error();
+  } catch {
+    items = text.split('\n').map(s => s.trim()).filter(Boolean);
+  }
+  if (items.length === 0) return;
+  const listRef = db.ref('rooms/' + roomId + '/list');
+  listRef.once('value').then(snapshot => {
+    let list = snapshot.val() || [];
+    list = list.concat(items);
+    listRef.set(list);
+  });
+}
+
+function shareRoom() {
+  const roomId = localStorage.getItem('currentRoomId');
+  const url = `${location.origin}${location.pathname}?room=${roomId}`;
+
+  // 建立 modal
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  const modalContent = document.createElement('div');
+  modalContent.className = 'modal-content';
+
+  const title = document.createElement('p');
+  title.textContent = '請選擇分享方式';
+  title.style.fontSize = '18px';
+  modalContent.appendChild(title);
+
+  // 分享按鈕
+  const shareBtn = document.createElement('button');
+  shareBtn.textContent = '📤 分享';
+  shareBtn.className = 'btn-primary';
+  shareBtn.style.margin = '8px';
+  shareBtn.onclick = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: '加入我的選擇房間',
+        text: '點擊快速加入房間！',
+        url
+      }).catch(err => alert('分享失敗: ' + err));
+    } else {
+      alert('此裝置不支援直接分享功能');
+    }
+    modal.remove();
+  };
+  modalContent.appendChild(shareBtn);
+
+  // 複製按鈕
+  const copyBtn = document.createElement('button');
+  copyBtn.textContent = '📋 複製連結';
+  copyBtn.className = 'btn-primary';
+  copyBtn.style.margin = '8px';
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(url)
+      .then(() => alert('已複製連結，可直接貼給朋友！'))
+      .catch(err => alert('複製失敗，請手動複製'));
+    modal.remove();
+  };
+  modalContent.appendChild(copyBtn);
+
+  // 取消按鈕
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = '❌ 取消';
+  cancelBtn.className = 'btn-confirm';
+  cancelBtn.style.margin = '8px';
+  cancelBtn.onclick = () => {
+    modal.remove();
+  };
+  modalContent.appendChild(cancelBtn);
+
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+}
+
+
+// 同意機制
+function listenConfirmation(roomId) {
+  const confirmRef = db.ref(`rooms/${roomId}/confirm`);
+  confirmRef.on('value', snapshot => {
+    const data = snapshot.val();
+    if (data && data.active) {
+      showModal('你是否同意此清單？', [
+        { text: '同意', class: 'btn-confirm', onClick: () => confirmRef.child('responses').child(userId).set(true) },
+        { text: '不同意', class: 'btn-primary', onClick: () => confirmRef.set(null) }
+      ]);
+    }
+  });
+}
+
+function requestConfirmation() {
+  const roomId = localStorage.getItem('currentRoomId');
+  const roomRef = db.ref(`rooms/${roomId}`);
+  roomRef.child('participants').once('value').then(snapshot => {
+    const participants = snapshot.val() || {};
+    const total = Object.keys(participants).length;
+    const confirmRef = roomRef.child('confirm');
+    confirmRef.set({ active: true, responses: {} });
+    confirmRef.child('responses').on('value', snap => {
+      const responses = snap.val() || {};
+      if (Object.keys(responses).length === total) {
+        confirmRef.off();
+        confirmRef.set(null);
+document.getElementById('multiPage').classList.remove('active');
+document.getElementById('decidePage').classList.add('active');
+document.getElementById('decideRoomNameDisplay').textContent = document.getElementById('roomNameDisplay').textContent;
+
+
+        // ⚠️ TODO: 實際導向下一步頁面或觸發抽籤，可接你的動畫程式
+      }
+    });
+  });
+}
+</script>
+</head>
+<body>
+<h1>多人選擇小幫手</h1>
+<div class="page active" id="setupPage">
+<div class="header-row" style="justify-content: flex-end;">
+    <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
+</div>
+
+  <h2>建立 / 加入房間</h2>
+  <input type="text" id="roomNameInput" placeholder="房間名稱" />
+  <input type="text" id="userNameInput" placeholder="你的名稱" />
+  <button class="btn-primary" onclick="createRoom()">建立 / 加入</button>
+</div>
+<div class="page" id="multiPage">
+
+
+<div class="header-row">
+    <span id="roomNameDisplay" style="font-weight:bold;"></span>
+    <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="shareRoom()">分享</button>
+    <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
+</div>
+
+  <div><strong>參與者：</strong>
+    <div id="participantContainer" class="item-container"></div>
+  </div>
+<div style="text-align:center; margin-bottom:10px;">
+  <button class="btn-primary" onclick="chooseDecisionMode()">決定方式</button>
+  <span id="selectedMode" style="margin-left:8px; font-weight:bold; color:#2c3e50;"></span>
+</div>
+  <div style="margin-top: 20px;"><strong>📃 清單項目：</strong>
+    <div id="listContainer" class="item-container"></div>
+    <input type="text" id="itemInput" placeholder="輸入項目並按 Enter" onkeypress="if(event.key==='Enter') addItem();" />
+    <div style="display:flex; gap:6px; margin-top:4px;">
+      <button class="btn-primary" onclick="addItem()">新增項目</button>
+      <button class="btn-primary" onclick="importItems()">匯入</button>
+    </div>
+    <div style="margin-top:10px;">
+      <button class="btn-confirm" onclick="requestConfirmation()">我同意此清單</button>
+    </div>
+  </div>
+</div>
+<div class="page" id="decidePage">
+<div class="header-row">
+  <span id="decideRoomNameDisplay" style="font-weight:bold;"></span>
+  <span id="decideModeDisplay" style="margin-left:10px; font-weight:bold; color:#2c3e50;"></span>
+</div>
+
+  <div style="text-align:center; margin-top: 30px;">
+    <button class="btn-primary" onclick="startDraw()">🎲 開始抽籤</button>
+    <div id="resultArea" style="font-size: 2em; margin-top: 20px;"></div>
+  </div>
+</div>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('setupPage').classList.add('active');
+});
+function startDraw() {
+  const roomId = localStorage.getItem('currentRoomId');
+  const finalResultRef = db.ref(`rooms/${roomId}/finalResult`);
+  const listRef = db.ref('rooms/' + roomId + '/list');
+  const modeRef = db.ref('rooms/' + roomId + '/decisionMode');
+
+  // 先檢查是否已經有最終結果
+  finalResultRef.once('value').then(finalSnap => {
+    const existingResult = finalSnap.val();
+    if (existingResult) {
+      showModal(`⚠️ 本次抽籤已完成，結果為：${existingResult}`, [
+        { text: '好的', class: 'btn-confirm', onClick: () => {} }
+      ]);
+      return; // 阻止繼續抽籤
+    }
+
+    // 若無結果，進行抽籤流程
+    Promise.all([
+      listRef.once('value'),
+      modeRef.once('value')
+    ]).then(([listSnap, modeSnap]) => {
+      const items = listSnap.val() || [];
+      const mode = modeSnap.val() || '一抽入魂'; // 預設一抽入魂
+
+      if (items.length === 0) {
+        alert('⚠️ 目前沒有可抽籤的項目');
+        return;
+      }
+
+      const spinList = [];
+      for (let i = 0; i < 60; i++) {
+        spinList.push(items[Math.floor(Math.random() * items.length)]);
+      }
+      const finalItem = items[Math.floor(Math.random() * items.length)];
+      spinList.push(finalItem);
+
+      const resultArea = document.getElementById('resultArea');
+      resultArea.textContent = '🎰 抽籤中...';
+
+      let index = 0;
+      const interval = setInterval(() => {
+        resultArea.textContent = spinList[index];
+        index++;
+        if (index >= spinList.length) {
+          clearInterval(interval);
+
+          if (mode === '一抽入魂') {
+            db.ref(`rooms/${roomId}/finalResult`).set(finalItem); // 記錄最終結果
+            showFinalResult(finalItem);
+          } else if (mode === '多數決' || mode === '共識決') {
+            initiateVoting(finalItem, mode);
+          } else {
+            alert(`⚠️ 未知決定模式，預設採用一抽入魂`);
+            db.ref(`rooms/${roomId}/finalResult`).set(finalItem); // 記錄最終結果
+            showFinalResult(finalItem);
+          }
+        }
+      }, 50);
+    });
+  });
+}
+
+
+function chooseDecisionMode() {
+  showModal('選擇決定方式', [
+    { text: '一抽入魂', onClick: () => setDecisionMode('一抽入魂') },
+    { text: '多數決', onClick: () => setDecisionMode('多數決') },
+    { text: '共識決', onClick: () => setDecisionMode('共識決') },
+  ]);
+}
+
+function setDecisionMode(mode) {
+  const roomId = localStorage.getItem('currentRoomId');
+  db.ref(`rooms/${roomId}/decisionMode`).set(mode);
+  document.getElementById('selectedMode').textContent = `已選擇：${mode}`;
+}
+function showFinalResult(result) {
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  const modalContent = document.createElement('div');
+  modalContent.className = 'modal-content';
+  modalContent.innerHTML = `
+    <h2 style="font-size:2em;">🎉 最終結果 🎉</h2>
+    <p style="font-size:1.8em; color:#3db8c4; font-weight:bold; margin: 20px 0;">${result}</p>
+    <p style="font-size:1em;">恭喜！本次抽籤已完成</p>
+  `;
+
+  // 彩帶特效（簡易動畫）
+  confettiEffect();
+
+  const btn = document.createElement('button');
+  btn.className = 'btn-confirm';
+  btn.textContent = '關閉';
+  btn.onclick = () => modal.remove();
+  modalContent.appendChild(btn);
+
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+}
+
+// 可選擇是否使用，如不要可刪除
+
+function confettiEffect() {
+  for (let i = 0; i < 30; i++) {
+    const confetti = document.createElement('div');
+    confetti.textContent = '🎊';
+    confetti.style.position = 'fixed';
+    confetti.style.top = '-50px';
+    confetti.style.left = Math.random() * 100 + 'vw';
+    confetti.style.fontSize = '2em';
+    confetti.style.animation = `fall ${2 + Math.random() * 3}s linear forwards`;
+    document.body.appendChild(confetti);
+
+    confetti.addEventListener('animationend', () => {
+      confetti.remove();
+    });
+  }
+}
+
+// 加入簡易 falling 動畫
+const style = document.createElement('style');
+style.textContent = `
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+`;
+document.head.appendChild(style);
+
+function initiateVoting(finalItem, mode) {
+  const roomId = localStorage.getItem('currentRoomId');
+  const voteRef = db.ref(`rooms/${roomId}/vote`);
+
+  // 清除先前投票紀錄
+  voteRef.set({
+    item: finalItem,
+    mode: mode,
+    votes: {}
+  });
+
+  // 發送投票彈窗給使用者
+  showModal(`是否同意將 "${finalItem}" 作為最終結果？`, [
+    {
+      text: '同意',
+      class: 'btn-confirm',
+      onClick: () => {
+        const userId = localStorage.getItem('currentUserId');
+        voteRef.child('votes').child(userId).set(true);
+      }
+    },
+    {
+      text: '不同意',
+      class: 'btn-primary',
+      onClick: () => {
+        const userId = localStorage.getItem('currentUserId');
+        voteRef.child('votes').child(userId).set(false);
+      }
+    }
+  ]);
+
+  // 監聽投票進度
+  db.ref(`rooms/${roomId}/participants`).once('value').then(snap => {
+    const participants = snap.val() || {};
+    const total = Object.keys(participants).length;
+
+    voteRef.child('votes').on('value', snapshot => {
+      const votes = snapshot.val() || {};
+      const agreeCount = Object.values(votes).filter(v => v === true).length;
+      const disagreeCount = Object.values(votes).filter(v => v === false).length;
+
+      // 判斷投票結束條件
+      if (Object.keys(votes).length === total) {
+        voteRef.child('votes').off(); // 停止監聽
+
+        if (mode === '多數決' && agreeCount > total / 2) {
+db.ref(`rooms/${roomId}/finalResult`).set(finalItem);
+
+          showFinalResult(finalItem);
+        } else if (mode === '共識決' && agreeCount === total) {
+db.ref(`rooms/${roomId}/finalResult`).set(finalItem);
+
+          showFinalResult(finalItem);
+        } else {
+          showModal('❌ 未達成條件，請重新抽籤', [
+            { text: '好的', class: 'btn-primary', onClick: () => voteRef.remove() }
+          ]);
+        }
+      }
+    });
+  });
+}
+function leaveRoom() {
+    showModal('確定要離開此房間嗎？', [
+        {
+            text: '確定',
+            class: 'btn-confirm',
+            onClick: () => {
+                // 清除 localStorage 資料
+                localStorage.removeItem('currentRoomId');
+                localStorage.removeItem('currentUserId');
+
+                // 導回 index.html
+                window.location.href = 'index.html';
+            }
+        },
+        {
+            text: '取消',
+            class: 'btn-primary',
+            onClick: () => {}
+        }
+    ]);
+}
+
+</script>
+</body>
+</html>
+
+
+
