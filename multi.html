@@ -99,16 +99,24 @@ function loadRoomData(roomId) {
   const participantContainer = document.getElementById('participantContainer');
   const listContainer = document.getElementById('listContainer');
 
-  roomRef.child('participants').on('value', snapshot => {
+roomRef.child('participants').on('value', snapshot => {
     const data = snapshot.val() || {};
     participantContainer.innerHTML = '';
+    const decideParticipantContainer = document.getElementById('decideParticipantContainer');
+    if (decideParticipantContainer) decideParticipantContainer.innerHTML = '';
     Object.values(data).forEach(p => {
       const div = document.createElement('div');
       div.className = 'item-box';
       div.textContent = p.name;
       participantContainer.appendChild(div);
+
+      if (decideParticipantContainer) {
+        const divClone = div.cloneNode(true);
+        decideParticipantContainer.appendChild(divClone);
+      }
     });
-  });
+});
+
 
   roomRef.child('list').on('value', snapshot => {
     const items = snapshot.val() || [];
@@ -323,10 +331,17 @@ document.getElementById('decideRoomNameDisplay').textContent = document.getEleme
   </div>
 </div>
 <div class="page" id="decidePage">
-<div class="header-row">
-  <span id="decideRoomNameDisplay" style="font-weight:bold;"></span>
-  <span id="decideModeDisplay" style="margin-left:10px; font-weight:bold; color:#2c3e50;"></span>
+  <div class="header-row" style="justify-content: space-between;">
+    <div>
+      <span id="decideRoomNameDisplay" style="font-weight:bold;"></span>
+      <span id="decideModeDisplay" style="margin-left:10px; font-weight:bold; color:#2c3e50;"></span>
+    </div>
+    <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
+  </div>
+<div><strong>參與者：</strong>
+  <div id="decideParticipantContainer" class="item-container"></div>
 </div>
+
 
   <div style="text-align:center; margin-top: 30px;">
     <button class="btn-primary" onclick="startDraw()">🎲 開始抽籤</button>
@@ -555,6 +570,3 @@ function leaveRoom() {
 </script>
 </body>
 </html>
-
-
-
