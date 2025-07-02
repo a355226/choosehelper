@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>多人選擇小幫手 - 建立房間</title>
+<title>選擇小幫手 - 建立房間</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
@@ -44,35 +43,49 @@ const db = firebase.database();
 let userId;
 
 function createRoom() {
-  const roomName = document.getElementById('roomNameInput').value.trim();
-  const userName = document.getElementById('userNameInput').value.trim();
-  if (!roomName || !userName) {
-    alert('請輸入房間名稱和你的名稱');
-    return;
-  }
-  const roomId = encodeURIComponent(roomName);
-  userId = 'user_' + Math.random().toString(36).substr(2, 9);
-  const roomRef = db.ref('rooms/' + roomId);
+    const roomName = document.getElementById('roomNameInput').value.trim();
+    const verificationCodeInput = document.getElementById('verificationCodeInput').value.trim();
+    const userName = document.getElementById('userNameInput').value.trim();
 
-  roomRef.once('value').then(snapshot => {
-    if (!snapshot.exists()) {
-      roomRef.set({
-        name: roomName,
-        creator: userName,
-        list: [],
-        participants: {}
-      });
+    if (!roomName || !userName) {
+        alert('請輸入房間名稱和你的名稱');
+        return;
     }
-    roomRef.child('participants/' + userId).set({ name: userName });
-    localStorage.setItem('currentRoomId', roomId);
-    localStorage.setItem('currentUserId', userId);
-    document.getElementById('setupPage').classList.remove('active');
-    document.getElementById('multiPage').classList.add('active');
-    document.getElementById('roomNameDisplay').textContent = `房間：${decodeURIComponent(roomId)}`;
-    loadRoomData(roomId);
-    listenConfirmation(roomId);
-  });
+
+    let verificationCode = verificationCodeInput;
+    if (!verificationCode) {
+        verificationCode = generateVerificationCode();
+    }
+
+    const roomIdRaw = `${roomName}-${verificationCode}`;
+    const roomId = encodeURIComponent(roomIdRaw);
+
+    userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    const roomRef = db.ref('rooms/' + roomId);
+
+    roomRef.once('value').then(snapshot => {
+        if (!snapshot.exists()) {
+            roomRef.set({
+                name: roomName,
+                code: verificationCode,
+                creator: userName,
+                list: [],
+                participants: {}
+            });
+        }
+        roomRef.child('participants/' + userId).set({ name: userName });
+        localStorage.setItem('currentRoomId', roomId);
+        localStorage.setItem('currentUserId', userId);
+
+        document.getElementById('setupPage').classList.remove('active');
+        document.getElementById('multiPage').classList.add('active');
+        document.getElementById('roomNameDisplay').textContent = `房間：${roomName} (驗證碼：${verificationCode})`;
+
+        loadRoomData(roomId);
+        listenConfirmation(roomId);
+    });
 }
+
 
 function showModal(content, buttons) {
   const modal = document.createElement('div');
@@ -141,6 +154,17 @@ roomRef.child('decisionMode').on('value', snapshot => {
   const decideModeDisplay = document.getElementById('decideModeDisplay');
   if (decideModeDisplay) decideModeDisplay.textContent = mode ? `決定方式：${mode}` : '';
 });
+roomRef.child('name').once('value').then(nameSnap => {
+    const roomName = nameSnap.val() || '';
+    roomRef.child('code').once('value').then(codeSnap => {
+        const verificationCode = codeSnap.val() || '';
+        const decideRoomNameDisplay = document.getElementById('decideRoomNameDisplay');
+        if (decideRoomNameDisplay) {
+            decideRoomNameDisplay.textContent = `房間：${roomName} (驗證碼：${verificationCode})`;
+        }
+    });
+});
+
 
 }
 
@@ -168,86 +192,72 @@ function removeItem(index) {
   });
 }
 
-function importItems() {
-  const roomId = localStorage.getItem('currentRoomId');
-  const text = prompt('請貼上要匯入的項目（JSON 或每行一項）：');
-  if (!text) return;
-  let items = [];
-  try {
-    const parsed = JSON.parse(text);
-    if (parsed.items) items = parsed.items;
-    else throw new Error();
-  } catch {
-    items = text.split('\n').map(s => s.trim()).filter(Boolean);
-  }
-  if (items.length === 0) return;
-  const listRef = db.ref('rooms/' + roomId + '/list');
-  listRef.once('value').then(snapshot => {
-    let list = snapshot.val() || [];
-    list = list.concat(items);
-    listRef.set(list);
-  });
-}
-
 function shareRoom() {
-  const roomId = localStorage.getItem('currentRoomId');
-  const url = `${location.origin}${location.pathname}?room=${roomId}`;
+    const roomId = localStorage.getItem('currentRoomId');
+    const roomRef = db.ref(`rooms/${roomId}`);
 
-  // 建立 modal
-  const modal = document.createElement('div');
-  modal.className = 'modal';
-  const modalContent = document.createElement('div');
-  modalContent.className = 'modal-content';
+    roomRef.once('value').then(snapshot => {
+        const data = snapshot.val() || {};
+        const roomName = data.name || '';
+        const verificationCode = data.code || '';
+        const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(roomName)}&code=${encodeURIComponent(verificationCode)}`;
 
-  const title = document.createElement('p');
-  title.textContent = '請選擇分享方式';
-  title.style.fontSize = '18px';
-  modalContent.appendChild(title);
+        // 建立 modal
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content';
 
-  // 分享按鈕
-  const shareBtn = document.createElement('button');
-  shareBtn.textContent = '📤 分享';
-  shareBtn.className = 'btn-primary';
-  shareBtn.style.margin = '8px';
-  shareBtn.onclick = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: '加入我的選擇房間',
-        text: '點擊快速加入房間！',
-        url
-      }).catch(err => alert('分享失敗: ' + err));
-    } else {
-      alert('此裝置不支援直接分享功能');
-    }
-    modal.remove();
-  };
-  modalContent.appendChild(shareBtn);
+        const title = document.createElement('p');
+        title.textContent = '請選擇分享方式';
+        title.style.fontSize = '18px';
+        modalContent.appendChild(title);
 
-  // 複製按鈕
-  const copyBtn = document.createElement('button');
-  copyBtn.textContent = '📋 複製連結';
-  copyBtn.className = 'btn-primary';
-  copyBtn.style.margin = '8px';
-  copyBtn.onclick = () => {
-    navigator.clipboard.writeText(url)
-      .then(() => alert('已複製連結，可直接貼給朋友！'))
-      .catch(err => alert('複製失敗，請手動複製'));
-    modal.remove();
-  };
-  modalContent.appendChild(copyBtn);
+        // 分享按鈕
+        const shareBtn = document.createElement('button');
+        shareBtn.textContent = '📤 分享';
+        shareBtn.className = 'btn-primary';
+        shareBtn.style.margin = '8px';
+        shareBtn.onclick = () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: `加入我的選擇房間 - ${roomName}`,
+                    text: '點擊快速加入房間！',
+                    url
+                }).catch(err => alert('分享失敗: ' + err));
+            } else {
+                alert('此裝置不支援直接分享功能');
+            }
+            modal.remove();
+        };
+        modalContent.appendChild(shareBtn);
 
-  // 取消按鈕
-  const cancelBtn = document.createElement('button');
-  cancelBtn.textContent = '❌ 取消';
-  cancelBtn.className = 'btn-confirm';
-  cancelBtn.style.margin = '8px';
-  cancelBtn.onclick = () => {
-    modal.remove();
-  };
-  modalContent.appendChild(cancelBtn);
+        // 複製按鈕
+        const copyBtn = document.createElement('button');
+        copyBtn.textContent = '📋 複製連結';
+        copyBtn.className = 'btn-primary';
+        copyBtn.style.margin = '8px';
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(url)
+                .then(() => alert('已複製連結，可直接貼給朋友！'))
+                .catch(err => alert('複製失敗，請手動複製'));
+            modal.remove();
+        };
+        modalContent.appendChild(copyBtn);
 
-  modal.appendChild(modalContent);
-  document.body.appendChild(modal);
+        // 取消按鈕
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = '❌ 取消';
+        cancelBtn.className = 'btn-confirm';
+        cancelBtn.style.margin = '8px';
+        cancelBtn.onclick = () => {
+            modal.remove();
+        };
+        modalContent.appendChild(cancelBtn);
+
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+    });
 }
 
 
@@ -291,7 +301,7 @@ document.getElementById('decideRoomNameDisplay').textContent = document.getEleme
 </script>
 </head>
 <body>
-<h1>多人選擇小幫手</h1>
+<h1>選擇小幫手</h1>
 <div class="page active" id="setupPage">
 <div class="header-row" style="justify-content: flex-end;">
     <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
@@ -299,6 +309,8 @@ document.getElementById('decideRoomNameDisplay').textContent = document.getEleme
 
   <h2>建立 / 加入房間</h2>
   <input type="text" id="roomNameInput" placeholder="房間名稱" />
+<input type="text" id="verificationCodeInput" placeholder="驗證碼（新房間免填）" />
+
   <input type="text" id="userNameInput" placeholder="你的名稱" />
   <button class="btn-primary" onclick="createRoom()">建立 / 加入</button>
 </div>
@@ -352,6 +364,16 @@ document.getElementById('decideRoomNameDisplay').textContent = document.getEleme
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('setupPage').classList.add('active');
 });
+const params = new URLSearchParams(window.location.search);
+const roomParam = params.get('room');
+const codeParam = params.get('code');
+if (roomParam) {
+    document.getElementById('roomNameInput').value = decodeURIComponent(roomParam);
+}
+if (codeParam) {
+    document.getElementById('verificationCodeInput').value = decodeURIComponent(codeParam);
+}
+
 function startDraw() {
   const roomId = localStorage.getItem('currentRoomId');
   const finalResultRef = db.ref(`rooms/${roomId}/finalResult`);
@@ -566,7 +588,19 @@ function leaveRoom() {
         }
     ]);
 }
+function generateVerificationCode() {
+    const digits = Math.floor(Math.random() * 90 + 10).toString(); // 10~99
+    const letters = String.fromCharCode(
+        Math.floor(Math.random() * 26) + 97,
+        Math.floor(Math.random() * 26) + 97
+    );
+    return digits + letters;
+}
+
 
 </script>
 </body>
 </html>
+
+
+
