@@ -8,22 +8,177 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 <link rel="manifest" href="manifest.json">
 <style>
-  body {font-family: "Segoe UI", sans-serif; background-color: #f0f9ff; margin: 0; padding: 0;}
-  h1 {text-align: center; padding: 20px; color: #2c3e50; margin: 0;}
-  .page {display: none; padding: 20px; max-width: 600px; margin: auto;}
-  .page.active {display: block;}
-  .btn-primary {background-color: #3db8c4; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s ease;}
-  .btn-primary:hover {background-color: #35a4af;}
-  .btn-confirm {background-color: #2c3e50; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s ease;}
-  .btn-confirm:hover {background-color: #1e2a38;}
-  input {padding: 10px; font-size: 16px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; width: 100%; box-sizing: border-box;}
-  .item-container {display: flex; flex-wrap: wrap; gap: 6px; max-height: calc(1.8em * 3 + 20px); overflow-y: auto; padding: 4px; background: #ffffffaa; border-radius: 8px;}
-  .item-box {background: #e0f4ff; border-radius: 16px; padding: 6px 10px; font-size: 14px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center;}
-  .remove-btn {background: none; border: none; color: #c0392b; font-size: 16px; cursor: pointer; margin-left: 6px; flex-shrink: 0;}
-  .header-row {display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;}
-  .modal {position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999;}
-  .modal-content {background: white; max-width: 90%; max-height: 80%; overflow-y: auto; padding: 20px; border-radius: 8px; text-align: center;}
-  .hidden {display: none;}
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: #f0f9ff;
+    margin: 0;
+    padding: 0;
+    color: #2c3e50;
+  }
+  h1 {
+    text-align: center;
+    padding: 20px 10px;
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.6em;
+  }
+  .page {
+    display: none;
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+  }
+  .page.active {
+    display: block;
+  }
+  .btn-primary, .btn-confirm {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  .btn-primary {
+    background-color: #3db8c4;
+    color: white;
+  }
+  .btn-primary:hover {
+    background-color: #35a4af;
+  }
+  .btn-confirm {
+    background-color: #2c3e50;
+    color: white;
+  }
+  .btn-confirm:hover {
+    background-color: #1e2a38;
+  }
+  .btn-confirm-red {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+  }
+  .btn-confirm-red:hover {
+    background-color: #c0392b;
+  }
+  input {
+    padding: 10px;
+    font-size: 16px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+  input:focus {
+    border-color: #3db8c4;
+    box-shadow: 0 0 5px rgba(61, 184, 196, 0.5);
+    outline: none;
+  }
+  .item-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: calc(1.8em * 3 + 20px);
+    overflow-y: auto;
+    padding: 6px;
+    background: #ffffffcc;
+    border-radius: 10px;
+  }
+  .item-box {
+    background: #e0f4ff;
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 14px;
+    white-space: nowrap;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+  }
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #c0392b;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: 6px;
+    flex-shrink: 0;
+  }
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  .modal-content {
+    background: white;
+    max-width: 90%;
+    max-height: 80%;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+  }
+  .modal-content button {
+    margin: 6px 10px;
+  }
+  .hidden { display: none; }
+  @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+  }
+  .spin-animation {
+      animation: spin 1s linear infinite;
+      display: inline-block;
+  }
+  .result-final {
+    font-size: 1.8em;
+    color: #3db8c4;
+    font-weight: bold;
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  .debug-box {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    height: 150px;
+    background: #f0f0f0;
+    border: 1px solid #000;
+    overflow-y: auto;
+    padding: 10px;
+    font-size: 12px;
+    z-index: 10000;
+    font-family: monospace;
+  }
 </style>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -41,158 +196,376 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let userId;
+let hasShownReeditSuccess = false;
+let hasShownConfirmModal = false;
+let hasShownReeditModal = false;
+let lastConfirmInitiator = null;
+let lastReeditInitiator = null;
 
-function createRoom() {
+// Debug function to log messages to the appropriate debug box
+function logDebug(message) {
+    const activePage = document.querySelector('.page.active');
+    let debugBox;
+    if (activePage.id === 'multiPage') {
+        debugBox = document.getElementById('multiDebugBox');
+    } else if (activePage.id === 'decidePage') {
+        debugBox = document.getElementById('decideDebugBox');
+    }
+    if (debugBox) {
+        debugBox.innerHTML += `<p>${new Date().toLocaleTimeString()} - ${message}</p>`;
+        debugBox.scrollTop = debugBox.scrollHeight;
+    }
+}
+
+// Debounce function to reduce repeated Firebase triggers
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+async function createRoom() {
+    logDebug("createRoom: Starting room creation");
     const roomName = document.getElementById('roomNameInput').value.trim();
     const verificationCodeInput = document.getElementById('verificationCodeInput').value.trim();
     const userName = document.getElementById('userNameInput').value.trim();
 
     if (!roomName || !userName) {
-        alert('請輸入房間名稱和你的名稱');
+        logDebug("createRoom: Missing roomName or userName");
+        showModal('請輸入房間名稱和你的名稱', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
         return;
     }
 
-    let verificationCode = verificationCodeInput;
-    if (!verificationCode) {
-        verificationCode = generateVerificationCode();
-    }
-
+    let verificationCode = verificationCodeInput || generateVerificationCode();
     const roomIdRaw = `${roomName}-${verificationCode}`;
     const roomId = encodeURIComponent(roomIdRaw);
+    const createBtn = document.querySelector('#setupPage .btn-primary');
+    createBtn.disabled = true;
+    createBtn.innerHTML = '<span class="spin-animation">⏳</span> 建立中...';
+    logDebug(`createRoom: Attempting to create/join room ${roomId}`);
 
     userId = 'user_' + Math.random().toString(36).substr(2, 9);
-    const roomRef = db.ref('rooms/' + roomId);
+    localStorage.setItem(`currentUserId_${roomId}`, userId);
+    localStorage.setItem('currentRoomId', roomId);
+    logDebug(`createRoom: Generated userId ${userId} for user ${userName} in room ${roomId}`);
 
-    roomRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) {
-            roomRef.set({
+    const roomRef = db.ref('rooms/' + roomId);
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await roomRef.child('participants').once('value');
+            const participants = snapshot.val() || {};
+            logDebug(`createRoom: Found ${Object.keys(participants).length} participants`);
+            if (Object.keys(participants).length === 0) {
+                await roomRef.update({
+                    finalResult: null,
+                    drawResult: null,
+                    isDrawing: null,
+                    vote: null,
+                    confirm: null,
+                    editConfirm: null
+                });
+                logDebug("createRoom: Initialized empty room");
+            }
+            await roomRef.update({
                 name: roomName,
                 code: verificationCode,
-                creator: userName,
-                list: [],
-                participants: {}
+                creator: userName                
             });
+            const participantRef = roomRef.child('participants/' + userId);
+            await participantRef.set({ name: userName });
+            participantRef.onDisconnect().remove();
+            logDebug(`createRoom: Added user ${userId} (${userName})`);
+
+            document.getElementById('setupPage').classList.remove('active');
+            document.getElementById('multiPage').classList.add('active');
+            document.getElementById('roomNameDisplay').textContent = `房間：${roomName} (驗證碼：${verificationCode})`;
+            logDebug("createRoom: Switched to multiPage");
+
+            loadRoomData(roomId);
+            listenConfirmation(roomId);
+            listenVote(roomId);
+            listenReedit(roomId); // 確保重新編輯監聽在房間創建時啟動
+            createBtn.disabled = false;
+            createBtn.innerHTML = '建立 / 加入';
+            logDebug("createRoom: Successfully created/joined room");
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`createRoom: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                console.error('createRoom: Firebase error after retries:', error);
+                showModal('房間建立失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                createBtn.disabled = false;
+                createBtn.innerHTML = '建立 / 加入';
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
-        roomRef.child('participants/' + userId).set({ name: userName });
-        localStorage.setItem('currentRoomId', roomId);
-        localStorage.setItem('currentUserId', userId);
-
-        document.getElementById('setupPage').classList.remove('active');
-        document.getElementById('multiPage').classList.add('active');
-        document.getElementById('roomNameDisplay').textContent = `房間：${roomName} (驗證碼：${verificationCode})`;
-
-        loadRoomData(roomId);
-        listenConfirmation(roomId);
-    });
+    }
 }
 
+function showModal(content, buttons, modalId = 'generic') {
+    if (document.querySelector(`.modal[data-modalId="${modalId}"]`)) {
+        logDebug(`showModal: Modal ${modalId} already exists, skipping`);
+        return;
+    }
+    closeModalById(modalId);
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.dataset.modalId = modalId;
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    modalContent.innerHTML = `<p style="font-size:18px;">${content}</p>`;
+    buttons.forEach(btn => {
+        const button = document.createElement('button');
+        button.className = btn.class || 'btn-primary';
+        button.textContent = btn.text;
+        button.onclick = () => {
+            logDebug(`showModal: Button clicked - ${btn.text} for modal ${modalId}`);
+            modal.remove();
+            btn.onClick();
+        };
+        modalContent.appendChild(button);
+    });
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    logDebug(`showModal: Displayed modal ${modalId} with content: ${content}`);
+}
 
-function showModal(content, buttons) {
-  const modal = document.createElement('div');
-  modal.className = 'modal';
-  const modalContent = document.createElement('div');
-  modalContent.className = 'modal-content';
-  modalContent.innerHTML = `<p style="font-size:18px;">${content}</p>`;
-  buttons.forEach(btn => {
-    const button = document.createElement('button');
-    button.className = btn.class || 'btn-primary';
-    button.textContent = btn.text;
-    button.onclick = () => {
-      modal.remove();
-      btn.onClick();
-    };
-    modalContent.appendChild(button);
-  });
-  modal.appendChild(modalContent);
-  document.body.appendChild(modal);
+function closeModalById(modalId) {
+    const modal = document.querySelector(`.modal[data-modalId="${modalId}"]`);
+    if (modal) {
+        modal.remove();
+        logDebug(`closeModalById: Closed modal ${modalId}`);
+    }
+}
+
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        logDebug(`closeAllModals: Closing modal ${modal.dataset.modalId}`);
+        modal.remove();
+    });
 }
 
 function loadRoomData(roomId) {
-  const roomRef = db.ref('rooms/' + roomId);
-  const participantContainer = document.getElementById('participantContainer');
-  const listContainer = document.getElementById('listContainer');
+    logDebug("loadRoomData: Loading room data");
+    const roomRef = db.ref('rooms/' + roomId);
+    const participantContainer = document.getElementById('participantContainer');
+    const listContainer = document.getElementById('listContainer');
 
-roomRef.child('participants').on('value', snapshot => {
-    const data = snapshot.val() || {};
-    participantContainer.innerHTML = '';
-    const decideParticipantContainer = document.getElementById('decideParticipantContainer');
-    if (decideParticipantContainer) decideParticipantContainer.innerHTML = '';
-    Object.values(data).forEach(p => {
-      const div = document.createElement('div');
-      div.className = 'item-box';
-      div.textContent = p.name;
-      participantContainer.appendChild(div);
-
-      if (decideParticipantContainer) {
-        const divClone = div.cloneNode(true);
-        decideParticipantContainer.appendChild(divClone);
-      }
-    });
-});
-
-
-  roomRef.child('list').on('value', snapshot => {
-    const items = snapshot.val() || [];
-    listContainer.innerHTML = '';
-    items.forEach((item, index) => {
-      const div = document.createElement('div');
-      div.className = 'item-box';
-      const span = document.createElement('span');
-      span.textContent = item;
-      const btn = document.createElement('button');
-      btn.textContent = '✕';
-      btn.className = 'remove-btn';
-      btn.onclick = () => removeItem(index);
-      div.appendChild(span);
-      div.appendChild(btn);
-      listContainer.appendChild(div);
-    });
-  });
-roomRef.child('decisionMode').on('value', snapshot => {
-  const mode = snapshot.val() || '';
-  document.getElementById('selectedMode').textContent = mode ? `已選擇：${mode}` : '';
-  const decideModeDisplay = document.getElementById('decideModeDisplay');
-  if (decideModeDisplay) decideModeDisplay.textContent = mode ? `決定方式：${mode}` : '';
-});
-roomRef.child('name').once('value').then(nameSnap => {
-    const roomName = nameSnap.val() || '';
-    roomRef.child('code').once('value').then(codeSnap => {
-        const verificationCode = codeSnap.val() || '';
-        const decideRoomNameDisplay = document.getElementById('decideRoomNameDisplay');
-        if (decideRoomNameDisplay) {
-            decideRoomNameDisplay.textContent = `房間：${roomName} (驗證碼：${verificationCode})`;
+    roomRef.child('isDrawing').on('value', snap => {
+        const isDrawing = snap.val();
+        logDebug(`loadRoomData: isDrawing changed to ${isDrawing}`);
+        if (isDrawing) {
+            playDrawAnimation(roomId);
         }
     });
+
+    roomRef.child('finalResult').on('value', snap => {
+        const result = snap.val();
+        logDebug(`loadRoomData: finalResult changed to ${result}`);
+        if (result) {
+            if (!document.getElementById('decidePage').classList.contains('active')) {
+                document.getElementById('multiPage').classList.remove('active');
+                document.getElementById('decidePage').classList.add('active');
+                logDebug("loadRoomData: Switched to decidePage due to finalResult");
+            }
+            setTimeout(() => {
+                showFinalResult(result);
+            }, 150);
+        }
+    });
+
+    roomRef.child('participants').on('value', snapshot => {
+        const data = snapshot.val() || {};
+        logDebug(`loadRoomData: Participants updated, count: ${Object.keys(data).length}`);
+        participantContainer.innerHTML = '';
+        const participantCountDisplay = document.getElementById('participantCount');
+        if (participantCountDisplay) {
+            participantCountDisplay.textContent = `參與者(${Object.keys(data).length}人)：`;
+        }
+
+        const decideParticipantContainer = document.getElementById('decideParticipantContainer');
+        const decideParticipantCountDisplay = document.getElementById('decideParticipantCount');
+        if (decideParticipantContainer) decideParticipantContainer.innerHTML = '';
+        if (decideParticipantCountDisplay) {
+            decideParticipantCountDisplay.textContent = `參與者(${Object.keys(data).length}人)：`;
+        }
+
+        Object.values(data).forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.textContent = p.name;
+            participantContainer.appendChild(div);
+
+            if (decideParticipantContainer) {
+                const divClone = div.cloneNode(true);
+                decideParticipantContainer.appendChild(divClone);
+            }
+        });
+    });
+
+    roomRef.child('list').on('value', snapshot => {
+        const items = snapshot.val() || [];
+        logDebug(`loadRoomData: List updated, items: ${items.length}`);
+        listContainer.innerHTML = '';
+        items.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            const span = document.createElement('span');
+            span.textContent = item;
+            const btn = document.createElement('button');
+            btn.textContent = '✕';
+            btn.className = 'remove-btn';
+            btn.onclick = () => removeItem(index);
+            div.appendChild(span);
+            div.appendChild(btn);
+            listContainer.appendChild(div);
+        });
+    });
+
+    roomRef.child('decisionMode').on('value', snapshot => {
+        const mode = snapshot.val() || '';
+        logDebug(`loadRoomData: Decision mode changed to ${mode}`);
+        document.getElementById('selectedMode').textContent = mode ? `已選擇：${mode}` : '';
+        const decideModeDisplay = document.getElementById('decideModeDisplay');
+        if (decideModeDisplay) decideModeDisplay.textContent = mode ? `決定方式：${mode}` : '';
+    });
+
+    roomRef.child('name').once('value').then(nameSnap => {
+        const roomName = nameSnap.val() || '';
+        roomRef.child('code').once('value').then(codeSnap => {
+            const verificationCode = codeSnap.val() || '';
+            const decideRoomNameDisplay = document.getElementById('decideRoomNameDisplay');
+            if (decideRoomNameDisplay) {
+                decideRoomNameDisplay.textContent = `房間：${roomName} (驗證碼：${verificationCode})`;
+                logDebug(`loadRoomData: Room name set to ${roomName}, code: ${verificationCode}`);
+            }
+        });
+    });
+
+roomRef.child('isDeciding').on('value', snap => {
+    const isDeciding = snap.val();
+    logDebug(`loadRoomData: isDeciding changed to ${isDeciding}`);
+    const decidePage = document.getElementById('decidePage');
+    const multiPage = document.getElementById('multiPage');
+    const confirmRef = db.ref(`rooms/${roomId}/confirm`);
+    const reeditRef = db.ref(`rooms/${roomId}/editConfirm`);
+
+    if (isDeciding && !decidePage.classList.contains('active')) {
+        logDebug("loadRoomData: Switching to decidePage");
+        multiPage.classList.remove('active');
+        decidePage.classList.add('active');
+        confirmRef.off('value');
+        confirmRef.remove();
+        listenReedit(roomId);
+        listenVote(roomId);
+    } else if (!isDeciding && !multiPage.classList.contains('active')) {
+        logDebug("loadRoomData: Switching to multiPage");
+        decidePage.classList.remove('active');
+        multiPage.classList.add('active');
+        reeditRef.off('value');
+        reeditRef.remove();
+        confirmRef.remove();
+        closeAllModals();
+        listenConfirmation(roomId);
+    } else if (isDeciding) {
+        listenReedit(roomId);
+        listenVote(roomId);
+    }
 });
 
-
 }
 
-function addItem() {
-  const roomId = localStorage.getItem('currentRoomId');
-  const input = document.getElementById('itemInput');
-  const value = input.value.trim();
-  if (!value) return;
-  const listRef = db.ref('rooms/' + roomId + '/list');
-  listRef.once('value').then(snapshot => {
-    let list = snapshot.val() || [];
-    list.push(value);
-    listRef.set(list);
-  });
-  input.value = '';
+async function addItem() {
+    logDebug("addItem: Starting item addition");
+    const roomId = localStorage.getItem('currentRoomId');
+    const input = document.getElementById('itemInput');
+    const value = input.value.trim();
+    if (!value) {
+        logDebug("addItem: Empty input, aborting");
+        return;
+    }
+
+    const addBtn = document.querySelector('#multiPage .btn-primary[onclick="addItem()"]');
+    addBtn.disabled = true;
+    addBtn.innerHTML = '<span class="spin-animation">⏳</span> 新增中...';
+    logDebug("addItem: Button disabled, adding item");
+
+    const listRef = db.ref('rooms/' + roomId + '/list');
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await listRef.once('value');
+            let list = snapshot.val() || [];
+            list.push(value);
+            await listRef.set(list);
+            logDebug(`addItem: Added item ${value} to list`);
+            input.value = '';
+            addBtn.disabled = false;
+            addBtn.innerHTML = '新增項目';
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`addItem: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                console.error('addItem: Firebase error after retries:', error);
+                showModal('新增項目失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                addBtn.disabled = false;
+                addBtn.innerHTML = '新增項目';
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
 }
 
-function removeItem(index) {
-  const roomId = localStorage.getItem('currentRoomId');
-  const listRef = db.ref('rooms/' + roomId + '/list');
-  listRef.once('value').then(snapshot => {
-    let list = snapshot.val() || [];
-    list.splice(index, 1);
-    listRef.set(list);
-  });
+async function removeItem(index) {
+    logDebug(`removeItem: Attempting to remove item at index ${index}`);
+    const roomId = localStorage.getItem('currentRoomId');
+    const listRef = db.ref('rooms/' + roomId + '/list');
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await listRef.once('value');
+            let list = snapshot.val() || [];
+            list.splice(index, 1);
+            await listRef.set(list);
+            logDebug(`removeItem: Removed item at index ${index}`);
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`removeItem: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                console.error('removeItem: Firebase error after retries:', error);
+                showModal('移除項目失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
 }
 
 function shareRoom() {
+    logDebug("shareRoom: Initiating room sharing");
     const roomId = localStorage.getItem('currentRoomId');
     const roomRef = db.ref(`rooms/${roomId}`);
 
@@ -201,146 +574,1164 @@ function shareRoom() {
         const roomName = data.name || '';
         const verificationCode = data.code || '';
         const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(roomName)}&code=${encodeURIComponent(verificationCode)}`;
+        logDebug(`shareRoom: Generated share URL: ${url}`);
 
-        // 建立 modal
+        showModal('請選擇分享方式', [
+            {
+                text: '📤 分享',
+                class: 'btn-primary',
+                onClick: () => {
+                    logDebug("shareRoom: Share button clicked");
+                    if (navigator.share) {
+                        navigator.share({
+                            title: `加入我的選擇房間 - ${roomName}`,
+                            text: '點擊快速加入房間！',
+                            url
+                        }).catch(err => {
+                            logDebug(`shareRoom: Share failed: ${err.message}`);
+                            showModal('分享失敗: ' + err, [
+                                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                            ], 'error');
+                        });
+                    } else {
+                        logDebug("shareRoom: Device does not support sharing");
+                        showModal('此裝置不支援直接分享功能', [
+                            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                        ], 'error');
+                    }
+                }
+            },
+            {
+                text: '📋 複製連結',
+                class: 'btn-primary',
+                onClick: () => {
+                    logDebug("shareRoom: Copy link button clicked");
+                    navigator.clipboard.writeText(url)
+                        .then(() => {
+                            logDebug("shareRoom: Link copied successfully");
+                            showModal('已複製連結，可直接貼給朋友！', [
+                                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                            ], 'success');
+                        })
+                        .catch(err => {
+                            logDebug(`shareRoom: Copy failed: ${err.message}`);
+                            showModal('複製失敗，請手動複製', [
+                                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                            ], 'error');
+                        });
+                }
+            },
+            {
+                text: '❌ 取消',
+                class: 'btn-confirm',
+                onClick: () => {
+                    logDebug("shareRoom: Cancel button clicked");
+                }
+            }
+        ], 'share');
+    });
+}
+
+function listenConfirmation(roomId) {
+    logDebug("listenConfirmation: Starting confirmation listener");
+    const confirmRef = db.ref(`rooms/${roomId}/confirm`);
+    const modalId = 'confirm';
+    let lastProcessedData = null;
+
+    confirmRef.on('value', debounce(async snapshot => {
+        const data = snapshot.val();
+        const dataString = JSON.stringify(data);
+        if (dataString === lastProcessedData) {
+            logDebug("listenConfirmation: Data unchanged, skipping");
+            return;
+        }
+        closeModalById(modalId); // 提前關閉模態框
+        lastProcessedData = dataString;
+        logDebug(`listenConfirmation: Received data: ${dataString}, User: ${userId}`);
+
+        try {
+            const roomSnap = await db.ref(`rooms/${roomId}`).once('value');
+            const roomData = roomSnap.val() || {};
+            const isDeciding = roomData.isDeciding;
+            const hasFinalResult = !!roomData.finalResult;
+            logDebug(`listenConfirmation: Room state - isDeciding: ${isDeciding}, hasFinalResult: ${hasFinalResult}`);
+
+            if (isDeciding || hasFinalResult) {
+                logDebug("listenConfirmation: Terminating due to isDeciding or finalResult");
+                closeAllModals();
+                await confirmRef.remove();
+                confirmRef.off('value');
+                return;
+            }
+
+if (!data) {
+    logDebug("listenConfirmation: No data, skip showing cancel modal");
+    closeAllModals();
+    // 這裡不要 showModal，因為 confirm 本來就沒有
+    return;
+}
+
+
+            if (!data.active || data.status === 'cancelled') {
+                logDebug("listenConfirmation: Confirmation cancelled or inactive");
+                closeAllModals();
+                const cancelledByName = data.cancelledBy ? (await db.ref(`rooms/${roomId}/participants/${data.cancelledBy}`).once('value')).val()?.name || '未知用戶' : '未知用戶';
+                showModal(`❌ 確認流程已被 ${cancelledByName} 取消。`, [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                await confirmRef.remove();
+                return;
+            }
+
+            if (data.status !== 'pending') {
+                logDebug("listenConfirmation: Not pending, cleaning up");
+                closeModalById(modalId);
+                return;
+            }
+
+            if (!data.initiator || !data.initiatorName) {
+                logDebug("listenConfirmation: Invalid initiator data, ignoring");
+                await confirmRef.remove();
+                closeModalById(modalId);
+                showModal('❌ 確認流程無效，已取消。', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                return;
+            }
+
+            const participantSnap = await db.ref(`rooms/${roomId}/participants`).once('value');
+            const participants = participantSnap.val() || {};
+            const total = Object.keys(participants).length;
+            const responses = data.responses || {};
+            const agreeCount = Object.values(responses).filter(v => v === true).length;
+            const disagreeCount = Object.values(responses).filter(v => v === false).length;
+
+            // 確保票數更新
+            await confirmRef.update({
+                agreeCount: agreeCount,
+                disagreeCount: disagreeCount
+            });
+            logDebug(`listenConfirmation: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
+
+            const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+
+            if (disagreeCount > 0) {
+                logDebug("listenConfirmation: Someone disagreed, cancelling");
+                await confirmRef.update({ status: 'cancelled', active: false });
+                closeAllModals();
+                showModal(`❌ 有人不同意清單（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`, [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                await confirmRef.remove();
+                return;
+            }
+
+            if (agreeCount === total && total > 0) {
+                logDebug("listenConfirmation: All agreed, switching to decidePage");
+                await confirmRef.update({ status: 'completed', active: false });
+                await db.ref(`rooms/${roomId}/isDeciding`).set(true);
+                const multiPage = document.getElementById('multiPage');
+                const decidePage = document.getElementById('decidePage');
+                if (!decidePage.classList.contains('active')) {
+                    logDebug("listenConfirmation: Forcing switch to decidePage");
+                    multiPage.classList.remove('active');
+                    decidePage.classList.add('active');
+                    showModal('✅ 所有人同意，進入抽籤頁面！', [
+                        { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                    ], 'success');
+                }
+                return;
+            }
+
+            if (responses[userId] === true) {
+                logDebug("listenConfirmation: User has agreed, showing waiting modal");
+                showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中... ${progressText}`, modalId);
+                return;
+            }
+
+            logDebug("listenConfirmation: Showing confirmation modal for user");
+closeAllModals();
+            showModal(`已發起清單確認，是否同意？${progressText}`, [
+                {
+                    text: '同意',
+                    class: 'btn-confirm',
+                    onClick: async () => {
+                        logDebug("listenConfirmation: User agrees");
+                        await confirmRef.child('responses').child(userId).set(true);
+                        showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中... ${progressText}`, modalId);
+                    }
+                },
+                {
+                    text: '不同意',
+                    class: 'btn-primary',
+                    onClick: async () => {
+                        logDebug("listenConfirmation: User disagrees");
+                        await confirmRef.child('responses').child(userId).set(false);
+                    }
+                }
+            ], modalId);
+        } catch (error) {
+            logDebug(`listenConfirmation: Error: ${error.message}`);
+            showModal('處理確認流程失敗，請稍後再試！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+        }
+    }, 500));
+}
+
+async function requestConfirmation() {
+    logDebug("requestConfirmation: Starting confirmation request");
+    const roomId = localStorage.getItem('currentRoomId');
+    const userId = localStorage.getItem(`currentUserId_${roomId}`);
+    if (!userId) {
+        logDebug("requestConfirmation: No userId found in localStorage");
+        showModal('用戶身份驗證失敗，請重新加入房間！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => { window.location.reload(); } }
+        ], 'error');
+        return;
+    }
+    logDebug(`requestConfirmation: Current userId: ${userId}`);
+    const confirmRef = db.ref(`rooms/${roomId}/confirm`);
+    const confirmBtn = document.querySelector('.btn-confirm-red');
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="spin-animation">⏳</span> 提交中...';
+    logDebug("requestConfirmation: Button disabled, initiating request");
+
+    try {
+        const modeSnap = await db.ref(`rooms/${roomId}/decisionMode`).once('value');
+        const mode = modeSnap.val();
+        if (!mode) {
+            logDebug("requestConfirmation: No decision mode selected");
+            showModal('請先選擇決定方式！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '我同意此清單';
+            return;
+        }
+
+        const isDecidingSnap = await db.ref(`rooms/${roomId}/isDeciding`).once('value');
+        if (isDecidingSnap.exists() && isDecidingSnap.val() === true) {
+            logDebug("requestConfirmation: Room is already deciding");
+            showModal('房間正在進行決定中，請稍後再試！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '我同意此清單';
+            return;
+        }
+
+        const participantSnap = await db.ref(`rooms/${roomId}/participants/${userId}`).once('value');
+        if (!participantSnap.exists()) {
+            logDebug("requestConfirmation: UserId not found in participants");
+            showModal('用戶身份無效，請重新加入房間！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => { window.location.reload(); } }
+            ], 'error');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '我同意此清單';
+            return;
+        }
+
+        await confirmRef.transaction(currentData => {
+            logDebug("requestConfirmation: Clearing confirm data via transaction");
+            return null;
+        });
+        const userName = participantSnap.val().name || '未知';
+        await confirmRef.set({
+            active: true,
+            initiator: userId,
+            initiatorName: userName,
+            status: 'pending',
+            responses: {},
+            agreeCount: 0,    // 新增：初始化同意票數
+            disagreeCount: 0, // 新增：初始化不同意票數
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        logDebug(`requestConfirmation: Set confirm data for initiator ${userName} (${userId})`);
+        showWaitingModal(confirmRef, userId, '已發起清單確認，等待所有人同意...', 'confirm');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '我同意此清單';
+    } catch (error) {
+        logDebug(`requestConfirmation: Firebase error: ${error.message}`);
+        console.error('requestConfirmation: Firebase 設定錯誤:', error);
+        showModal('確認流程啟動失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '我同意此清單';
+    }
+}
+
+function showWaitingModal(ref, userId, message, modalId) {
+    logDebug(`showWaitingModal: Displaying waiting modal ${modalId}`);
+    showModal(message, [
+        {
+            text: '取消',
+            class: 'btn-primary',
+            onClick: async () => {
+                logDebug(`showWaitingModal: Cancel button clicked for ${modalId} by user ${userId}`);
+                try {
+                    await ref.update({
+                        status: 'cancelled',
+                        active: false,
+                        cancelledBy: userId,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    logDebug(`showWaitingModal: Set ${modalId} to cancelled state`);
+                    closeModalById(modalId);
+                } catch (error) {
+                    logDebug(`showWaitingModal: Error setting cancelled state: ${error.message}`);
+                    showModal('取消流程失敗，請稍後再試！', [
+                        { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                    ], 'error');
+                }
+            }
+        }
+    ], modalId);
+}
+
+async function startDraw() {
+    logDebug("startDraw: Starting draw process");
+    const drawBtn = document.querySelector('#decidePage .btn-primary[onclick="startDraw()"]');
+    drawBtn.disabled = true;
+    drawBtn.innerHTML = '<span class="spin-animation">⏳</span> 抽籤中...';
+    const roomId = localStorage.getItem('currentRoomId');
+    const roomRef = db.ref(`rooms/${roomId}`);
+
+    try {
+        const [finalResultSnap, isDecidingSnap] = await Promise.all([
+            roomRef.child('finalResult').once('value'),
+            roomRef.child('isDeciding').once('value')
+        ]);
+        if (finalResultSnap.val() || !isDecidingSnap.val()) {
+            logDebug(`startDraw: Invalid state - finalResult: ${finalResultSnap.val()}, isDeciding: ${isDecidingSnap.val()}`);
+            showModal(
+                finalResultSnap.val()
+                    ? `本次結果已出爐[${finalResultSnap.val()}]，請重新編輯清單以開始新抽籤！`
+                    : '房間狀態無效，請重新確認清單！',
+                [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ],
+                'error'
+            );
+            drawBtn.disabled = false;
+            drawBtn.innerHTML = '🎲 開始抽籤';
+            return;
+        }
+
+        const [listSnap, modeSnap] = await Promise.all([
+            roomRef.child('list').once('value'),
+            roomRef.child('decisionMode').once('value')
+        ]);
+        const items = listSnap.val() || [];
+        const mode = modeSnap.val() || '一抽入魂';
+        logDebug(`startDraw: Items count: ${items.length}, Mode: ${mode}`);
+
+        if (items.length === 0) {
+            logDebug("startDraw: No items to draw");
+            showModal('⚠️ 目前沒有可抽籤的項目', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            roomRef.child('isDrawing').remove();
+            drawBtn.disabled = false;
+            drawBtn.innerHTML = '🎲 開始抽籤';
+            return;
+        }
+
+        const finalItem = items[Math.floor(Math.random() * items.length)];
+        const spinList = [];
+        for (let i = 0; i < 35; i++) {
+            spinList.push(items[Math.floor(Math.random() * items.length)]);
+        }
+        spinList.push(finalItem);
+        logDebug(`startDraw: Generated spinList, finalItem: ${finalItem}`);
+
+        await roomRef.update({
+            isDrawing: true,
+            drawResult: finalItem,
+            drawAnimation: spinList,
+            vote: null // Clear vote data before draw
+        });
+        logDebug("startDraw: Updated Firebase with draw data");
+        drawBtn.disabled = false;
+        drawBtn.innerHTML = '🎲 開始抽籤';
+    } catch (error) {
+        logDebug(`startDraw: Firebase error: ${error.message}`);
+        showModal('抽籤失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+        drawBtn.disabled = false;
+        drawBtn.innerHTML = '🎲 開始抽籤';
+    }
+}
+function chooseDecisionMode() {
+    logDebug("chooseDecisionMode: Opening decision mode modal");
+    showModal('選擇決定方式', [
+        { text: '一抽入魂', onClick: () => setDecisionMode('一抽入魂') },
+        { text: '多數決', onClick: () => setDecisionMode('多數決') },
+        { text: '共識決', onClick: () => setDecisionMode('共識決') }
+    ], 'decisionMode');
+}
+
+async function setDecisionMode(mode) {
+    logDebug(`setDecisionMode: Setting mode to ${mode}`);
+    const roomId = localStorage.getItem('currentRoomId');
+    try {
+        await db.ref(`rooms/${roomId}/decisionMode`).set(mode);
+        document.getElementById('selectedMode').textContent = `已選擇：${mode}`;
+        logDebug(`setDecisionMode: Successfully set mode ${mode}`);
+    } catch (error) {
+        logDebug(`setDecisionMode: Firebase error: ${error.message}`);
+        console.error('setDecisionMode: Firebase error:', error);
+        showModal('設置決定方式失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+    }
+}
+
+function showFinalResult(result) {
+    logDebug(`showFinalResult: Displaying final result: ${result}`);
+    const roomId = localStorage.getItem('currentRoomId');
+    const confirmRef = db.ref(`rooms/${roomId}/confirm`);
+    const reeditRef = db.ref(`rooms/${roomId}/editConfirm`);
+    const voteRef = db.ref(`rooms/${roomId}/vote`);
+
+    confirmRef.remove();
+    reeditRef.remove();
+    voteRef.remove();
+    voteRef.off('value');
+    closeAllModals();
+    logDebug("showFinalResult: Cleared confirm, reedit, and vote data");
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.dataset.modalId = 'finalResult';
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    modalContent.innerHTML = `
+        <h2 style="font-size:2em;">🎉 最終結果 🎉</h2>
+        <p style="font-size:1.8em; color:#3db8c4; font-weight:bold; margin: 20px 0;">${result}</p>
+        <p style="font-size:1em;">本次結果已出爐，請務必遵守哦！</p>
+    `;
+
+    confettiEffect();
+
+    const btn = document.createElement('button');
+btn.className = 'btn-confirm';
+btn.textContent = '關閉';
+btn.onclick = () => {
+    logDebug("showFinalResult: Close button clicked");
+    modal.remove();
+    const drawBtn = document.querySelector('#decidePage .btn-primary[onclick="startDraw()"]');
+    if (drawBtn) drawBtn.disabled = false; // 確保按鈕禁用
+};
+modalContent.appendChild(btn);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+}
+
+function confettiEffect() {
+    logDebug("confettiEffect: Starting confetti animation");
+    for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.textContent = '🎊';
+        confetti.style.position = 'fixed';
+        confetti.style.top = '-50px';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.fontSize = '2em';
+        confetti.style.animation = `fall ${2 + Math.random() * 3}s linear forwards`;
+        document.body.appendChild(confetti);
+        confetti.addEventListener('animationend', () => {
+            confetti.remove();
+        });
+    }
+}
+
+async function initiateVoting(mode, finalItem) {
+    logDebug(`initiateVoting: Starting voting for item ${finalItem}, mode: ${mode}`);
+    const roomId = localStorage.getItem('currentRoomId');
+    const voteRef = db.ref(`rooms/${roomId}/vote`);
+    try {
+        if (!finalItem) {
+            logDebug("initiateVoting: Invalid finalItem");
+            showModal('抽籤結果無效，請重新抽籤！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            return;
+        }
+        // 先檢查是否已經有投票資料，沒有再寫
+        const voteSnap = await voteRef.once('value');
+        if (voteSnap.exists()) {
+            logDebug("initiateVoting: Voting already initialized, skip.");
+            return;
+        }
+        await voteRef.set({
+            active: true,
+            item: finalItem,
+            mode: mode,
+            votes: {},
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        logDebug("initiateVoting: Voting initialized");
+    } catch (error) {
+        logDebug(`initiateVoting: Firebase error: ${error.message}`);
+        showModal('投票啟動失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+    }
+}
+
+
+async function requestReedit() {
+    logDebug("requestReedit: Starting reedit request");
+    const roomId = localStorage.getItem('currentRoomId');
+    const userId = localStorage.getItem(`currentUserId_${roomId}`);
+    if (!userId) {
+        logDebug("requestReedit: No userId found in localStorage");
+        showModal('用戶身份驗證失敗，請重新加入房間！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => { window.location.reload(); } }
+        ], 'error');
+        return;
+    }
+    logDebug(`requestReedit: Current userId: ${userId}`);
+    const reeditRef = db.ref(`rooms/${roomId}/editConfirm`);
+    const reeditBtn = document.querySelector('#decidePage .btn-primary[onclick="requestReedit()"]');
+    reeditBtn.disabled = true;
+    reeditBtn.innerHTML = '<span class="spin-animation">⏳</span> 提交中...';
+    logDebug("requestReedit: Button disabled, initiating request");
+
+    try {
+        const participantSnap = await db.ref(`rooms/${roomId}/participants/${userId}`).once('value');
+        if (!participantSnap.exists()) {
+            logDebug("requestReedit: UserId not found in participants");
+            showModal('用戶身份無效，請重新加入房間！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => { window.location.reload(); } }
+            ], 'error');
+            reeditBtn.disabled = false;
+            reeditBtn.innerHTML = '← 重新編輯';
+            return;
+        }
+
+        // 改動：移除自動同意，僅設置重新編輯請求
+        await reeditRef.transaction(currentData => {
+            logDebug("requestReedit: Clearing reedit data via transaction");
+            return null;
+        });
+        const userName = participantSnap.val().name || '未知';
+        await reeditRef.set({
+            active: true,
+            initiator: userId,
+            initiatorName: userName,
+            status: 'pending',
+            responses: {}, // 改動：不預設發起人同意
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        logDebug(`requestReedit: Set reedit data for initiator ${userName} (${userId})`);
+        showWaitingModal(reeditRef, userId, '已發起重新編輯，等待所有人同意...', 'reedit');
+        reeditBtn.disabled = false;
+        reeditBtn.innerHTML = '← 重新編輯';
+    } catch (error) {
+        logDebug(`requestReedit: Firebase error: ${error.message}`);
+        console.error('requestReedit: Firebase 設定錯誤:', error);
+        showModal('重新編輯請求失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+        reeditBtn.disabled = false;
+        reeditBtn.innerHTML = '← 重新編輯';
+    }
+}
+
+function listenReedit(roomId) {
+    logDebug("listenReedit: Starting reedit listener");
+    const reeditRef = db.ref(`rooms/${roomId}/editConfirm`);
+    const modalId = 'reedit';
+    let lastProcessedData = null;
+
+    reeditRef.on('value', debounce(async snap => {
+        const data = snap.val();
+        const dataString = JSON.stringify(data);
+        if (dataString === lastProcessedData) {
+            logDebug("listenReedit: Data unchanged, skipping");
+            return;
+        }
+        lastProcessedData = dataString;
+        logDebug(`listenReedit: Received data: ${dataString}, User: ${userId}`);
+
+        try {
+            const roomSnap = await db.ref(`rooms/${roomId}`).once('value');
+            const roomData = roomSnap.val() || {};
+            const isDeciding = roomData.isDeciding;
+            logDebug(`listenReedit: isDeciding: ${isDeciding}`);
+
+            if (!isDeciding) {
+                logDebug("listenReedit: Not in deciding phase, clearing reedit data");
+                await reeditRef.remove();
+                closeModalById(modalId);
+                return;
+            }
+
+            if (!data) {
+                logDebug("listenReedit: editConfirm is null, closing modal");
+                closeModalById(modalId);
+                return;
+            }
+
+            if (data.status === 'cancelled') {
+                logDebug("listenReedit: Reedit process cancelled!");
+                closeAllModals();
+                // 找出反對者名稱（或未知用戶）
+                let cancelledByName = '未知用戶';
+                if (data.responses) {
+                    const refusers = Object.entries(data.responses).filter(([uid, v]) => v === false);
+                    if (refusers.length > 0) {
+                        const [refuseId] = refusers[0];
+                        const snap = await db.ref(`rooms/${roomId}/participants/${refuseId}`).once('value');
+                        cancelledByName = snap.val() && snap.val().name ? snap.val().name : '未知用戶';
+                    }
+                }
+closeAllModals();
+                showModal(
+                    `❅ 重新編輯流程已被 ${cancelledByName} 取消！`,
+                    [{ text: '好的', class: 'btn-confirm', onClick: () => {} }],
+                    'error'
+                );
+                // 不切頁！只顯示訊息
+                return;
+            }
+
+            if (!data.active || data.status !== 'pending') {
+                logDebug("listenReedit: No active reedit or not pending, cleaning up");
+                await reeditRef.remove();
+                closeModalById(modalId);
+                return;
+            }
+
+            if (!data.initiator || !data.initiatorName) {
+                logDebug("listenReedit: Invalid initiator data, ignoring");
+                await reeditRef.remove();
+                closeModalById(modalId);
+                return;
+            }
+
+            const participantSnap = await db.ref(`rooms/${roomId}/participants`).once('value');
+            const participants = participantSnap.val() || {};
+            const total = Object.keys(participants).length;
+            const responses = data.responses || {};
+            const agreeCount = Object.values(responses).filter(v => v === true).length;
+            const disagreeCount = Object.values(responses).filter(v => v === false).length;
+            logDebug(`listenReedit: Total participants: ${total}, Agree: ${agreeCount}, Disagree: ${disagreeCount}, User: ${userId}`);
+
+            // 更新票數
+            await reeditRef.update({
+                agreeCount: agreeCount,
+                disagreeCount: disagreeCount
+            });
+            logDebug(`listenReedit: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
+
+            const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+
+            // 只要有人不同意，就彈窗，不動任何狀態，不切頁
+            if (disagreeCount > 0) {
+                logDebug("listenReedit: Someone disagreed, cancelling");
+                await reeditRef.update({ status: 'cancelled', active: false });
+                closeAllModals();
+                showModal(
+                    `❅ 有人不同意重新編輯（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`,
+                    [{ text: '好的', class: 'btn-confirm', onClick: () => {} }],
+                    'error'
+                );
+                // 不切頁、不動 isDeciding
+                return;
+            }
+
+            // 只有全同意，才切頁還原所有狀態
+            if (agreeCount === total && total > 0) {
+                logDebug("listenReedit: All agreed, returning to multiPage");
+                await reeditRef.update({ status: 'completed', active: false });
+                await db.ref(`rooms/${roomId}`).update({
+                    isDeciding: null,
+                    finalResult: null,
+                    drawResult: null,
+                    isDrawing: null,
+                    vote: null,
+                    confirm: null,
+                    editConfirm: null
+                });
+                closeAllModals();
+                showModal('✅ 所有人同意，返回編輯清單！', [
+                    {
+                        text: '好的',
+                        class: 'btn-confirm',
+                        onClick: () => {
+                            const decidePage = document.getElementById('decidePage');
+                            const multiPage = document.getElementById('multiPage');
+                            if (!multiPage.classList.contains('active')) {
+                                decidePage.classList.remove('active');
+                                multiPage.classList.add('active');
+                                listenVote(roomId);
+                            }
+                        }
+                    }
+                ], 'success');
+                return;
+            }
+
+            // 已同意的用戶，顯示等待
+            if (responses[userId] === true) {
+                logDebug("listenReedit: User has agreed, showing waiting modal");
+                closeAllModals();
+                showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... ${progressText}`, modalId);
+                return;
+            }
+
+            // 尚未表態，顯示同意/不同意選擇
+            logDebug("listenReedit: Showing confirmation modal for user");
+            closeAllModals();
+            showModal(`已發起重新編輯，是否同意？${progressText}`, [
+                {
+                    text: '同意',
+                    class: 'btn-confirm',
+                    onClick: async () => {
+                        logDebug("listenReedit: User agrees");
+                        await reeditRef.child('responses').child(userId).set(true);
+                        closeAllModals();
+                        showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... ${progressText}`, modalId);
+                    }
+                },
+                {
+                    text: '不同意',
+                    class: 'btn-primary',
+                    onClick: async () => {
+                        logDebug("listenReedit: User disagrees");
+                        await reeditRef.child('responses').child(userId).set(false);
+                        closeModalById(modalId);
+                        // 不做任何切頁，只彈窗！
+                    }
+                }
+            ], modalId);
+
+        } catch (error) {
+            logDebug(`listenReedit: Error: ${error.message}`);
+            showModal('重新編輯處理失敗，請稍後再試！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+        }
+    }, 500));
+}
+
+async function playDrawAnimation(roomId) {
+    logDebug("playDrawAnimation: Starting draw animation");
+    const roomRef = db.ref(`rooms/${roomId}`);
+    try {
+        const finalResultSnap = await roomRef.child('finalResult').once('value');
+        if (finalResultSnap.val()) {
+            logDebug(`playDrawAnimation: Final result already exists: ${finalResultSnap.val()}`);
+            showModal(`本次結果[${finalResultSnap.val()}]，請務必遵守哦！`, [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'info');
+            return;
+        }
+
+        const [spinListSnap, resultSnap, modeSnap] = await Promise.all([
+            roomRef.child('drawAnimation').once('value'),
+            roomRef.child('drawResult').once('value'),
+            roomRef.child('decisionMode').once('value')
+        ]);
+        const spinList = spinListSnap.val() || [];
+        const finalItem = resultSnap.val();
+        const mode = modeSnap.val() || '一抽入魂';
+
+        if (!spinList.length || !finalItem) {
+            logDebug("playDrawAnimation: Invalid spinList or finalItem");
+            showModal('抽籤動畫數據未載入，請重新抽籤！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            roomRef.update({ isDrawing: null, drawAnimation: null });
+            return;
+        }
+
+        closeModalById('drawAnimation');
         const modal = document.createElement('div');
         modal.className = 'modal';
+        modal.dataset.modalId = 'drawAnimation';
         const modalContent = document.createElement('div');
         modalContent.className = 'modal-content';
-
-        const title = document.createElement('p');
-        title.textContent = '請選擇分享方式';
-        title.style.fontSize = '18px';
-        modalContent.appendChild(title);
-
-        // 分享按鈕
-        const shareBtn = document.createElement('button');
-        shareBtn.textContent = '📤 分享';
-        shareBtn.className = 'btn-primary';
-        shareBtn.style.margin = '8px';
-        shareBtn.onclick = () => {
-            if (navigator.share) {
-                navigator.share({
-                    title: `加入我的選擇房間 - ${roomName}`,
-                    text: '點擊快速加入房間！',
-                    url
-                }).catch(err => alert('分享失敗: ' + err));
-            } else {
-                alert('此裝置不支援直接分享功能');
-            }
-            modal.remove();
-        };
-        modalContent.appendChild(shareBtn);
-
-        // 複製按鈕
-        const copyBtn = document.createElement('button');
-        copyBtn.textContent = '📋 複製連結';
-        copyBtn.className = 'btn-primary';
-        copyBtn.style.margin = '8px';
-        copyBtn.onclick = () => {
-            navigator.clipboard.writeText(url)
-                .then(() => alert('已複製連結，可直接貼給朋友！'))
-                .catch(err => alert('複製失敗，請手動複製'));
-            modal.remove();
-        };
-        modalContent.appendChild(copyBtn);
-
-        // 取消按鈕
-        const cancelBtn = document.createElement('button');
-        cancelBtn.textContent = '❌ 取消';
-        cancelBtn.className = 'btn-confirm';
-        cancelBtn.style.margin = '8px';
-        cancelBtn.onclick = () => {
-            modal.remove();
-        };
-        modalContent.appendChild(cancelBtn);
-
+        const resultArea = document.createElement('p');
+        resultArea.style.fontSize = '2em';
+        resultArea.className = 'spin-animation';
+        resultArea.textContent = '🎰 抽籤中...';
+        modalContent.appendChild(resultArea);
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
-    });
-}
+        logDebug("playDrawAnimation: Displayed draw animation modal");
 
+        let index = 0;
+        function animate() {
+            if (index >= spinList.length) {
+                resultArea.className = 'result-final';
+                resultArea.textContent = finalItem;
+                logDebug(`playDrawAnimation: Final item: ${finalItem}`);
+                setTimeout(() => {
+                    modal.remove();
+                    roomRef.update({
+                        isDrawing: null,
+                        drawAnimation: null
+                    }).then(() => {
+                        logDebug("playDrawAnimation: Cleared draw data");
+                        if (mode === '一抽入魂') {
+                            roomRef.update({ finalResult: finalItem }).then(() => {
+                                logDebug("playDrawAnimation: Set finalResult for 一抽入魂");
+                            });
+                        } else {
+                            initiateVoting(mode, finalItem).then(() => {
+                                logDebug("playDrawAnimation: Voting initiated");
+                                listenVote(roomId); // Reattach vote listener
+                            });
+                        }
+                    }).catch(error => {
+                        logDebug(`playDrawAnimation: Firebase update error: ${error.message}`);
+                        showModal('抽籤完成失敗，請重新抽籤！', [
+                            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                        ], 'error');
+                    });
+                }, 2000);
+                return;
+            }
 
-// 同意機制
-function listenConfirmation(roomId) {
-  const confirmRef = db.ref(`rooms/${roomId}/confirm`);
-  confirmRef.on('value', snapshot => {
-    const data = snapshot.val();
-    if (data && data.active) {
-      showModal('你是否同意此清單？', [
-        { text: '同意', class: 'btn-confirm', onClick: () => confirmRef.child('responses').child(userId).set(true) },
-        { text: '不同意', class: 'btn-primary', onClick: () => confirmRef.set(null) }
-      ]);
+            resultArea.textContent = spinList[index];
+            logDebug(`playDrawAnimation: Showing item ${spinList[index]} at index ${index}`);
+            index++;
+            setTimeout(() => requestAnimationFrame(animate), 100); // Add slight delay for smoother animation
+        }
+
+        requestAnimationFrame(animate);
+    } catch (error) {
+        logDebug(`playDrawAnimation: Firebase error: ${error.message}`);
+        console.error('playDrawAnimation: Firebase error:', error);
+        showModal('抽籤動畫失敗，請重新抽籤！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+        roomRef.update({ isDrawing: null, drawAnimation: null });
     }
-  });
+}
+async function importItems() {
+    logDebug("importItems: Starting item import");
+    const roomId = localStorage.getItem('currentRoomId');
+    const text = prompt('請貼上要匯入的項目（JSON 或每行一項）：');
+    if (!text) {
+        logDebug("importItems: No input provided");
+        return;
+    }
+    let items = [];
+    try {
+        const parsed = JSON.parse(text);
+        if (parsed.items) items = parsed.items;
+        else throw new Error();
+    } catch {
+        items = text.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+    if (items.length === 0) {
+        logDebug("importItems: No valid items to import");
+        return;
+    }
+    logDebug(`importItems: Parsed ${items.length} items`);
+
+    const importBtn = document.querySelector('#multiPage .btn-primary[onclick="importItems()"]');
+    importBtn.disabled = true;
+    importBtn.innerHTML = '<span class="spin-animation">⏳</span> 匯入中...';
+    logDebug("importItems: Button disabled, importing items");
+
+    const listRef = db.ref('rooms/' + roomId + '/list');
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await listRef.once('value');
+            let list = snapshot.val() || [];
+            list = list.concat(items);
+            await listRef.set(list);
+            logDebug(`importItems: Imported ${items.length} items`);
+            importBtn.disabled = false;
+            importBtn.innerHTML = '匯入';
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`importItems: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                console.error('importItems: Firebase error after retries:', error);
+                showModal('匯入項目失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                importBtn.disabled = false;
+                importBtn.innerHTML = '匯入';
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
 }
 
-function requestConfirmation() {
-  const roomId = localStorage.getItem('currentRoomId');
-  const roomRef = db.ref(`rooms/${roomId}`);
-  roomRef.child('participants').once('value').then(snapshot => {
-    const participants = snapshot.val() || {};
-    const total = Object.keys(participants).length;
-    const confirmRef = roomRef.child('confirm');
-    confirmRef.set({ active: true, responses: {} });
-    confirmRef.child('responses').on('value', snap => {
-      const responses = snap.val() || {};
-      if (Object.keys(responses).length === total) {
-        confirmRef.off();
-        confirmRef.set(null);
-document.getElementById('multiPage').classList.remove('active');
-document.getElementById('decidePage').classList.add('active');
-document.getElementById('decideRoomNameDisplay').textContent = document.getElementById('roomNameDisplay').textContent;
+function listenVote(roomId) {
+    logDebug("listenVote: Starting vote listener");
+    const voteRef = db.ref(`rooms/${roomId}/vote`);
+    const modalId = 'vote';
+    let lastProcessedData = null;
+
+    voteRef.on('value', debounce(async snap => {
+        const data = snap.val();
+        const dataString = JSON.stringify(data);
+        if (dataString === lastProcessedData) {
+            logDebug("listenVote: Data unchanged, skipping");
+            return;
+        }
+        lastProcessedData = dataString;
+        logDebug(`listenVote: Received data: ${dataString}`);
+
+        try {
+            const finalResultSnap = await db.ref(`rooms/${roomId}/finalResult`).once('value');
+            if (finalResultSnap.val()) {
+                logDebug("listenVote: Final result exists, terminating vote listener");
+                await voteRef.remove();
+                voteRef.off('value');
+                closeModalById(modalId);
+                return;
+            }
+
+if (!data || !data.active || !data.item || data.status === 'cancelled') {
+    logDebug("listenVote: No active vote or invalid item, removing listener and clearing vote");
+    closeModalById(modalId);
+    await voteRef.remove();
+    voteRef.off('value');
+    return;
+}
+
+            const item = data.item;
+            const mode = data.mode;
+            const votes = data.votes || {};
+
+            const participantSnap = await db.ref(`rooms/${roomId}/participants`).once('value');
+            const participants = participantSnap.val() || {};
+            const total = Object.keys(participants).length;
+            const agreeCount = Object.values(votes).filter(v => v === true).length;
+            const disagreeCount = Object.values(votes).filter(v => v === false).length;
+            const totalVotes = Object.keys(votes).length;
+            logDebug(`listenVote: Total participants: ${total}, Agree: ${agreeCount}, Disagree: ${disagreeCount}, Total votes: ${totalVotes}`);
+
+            // 確保票數更新
+            await voteRef.update({
+                agreeCount: agreeCount,
+                disagreeCount: disagreeCount
+            });
+            logDebug(`listenVote: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
+
+            const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+
+            if (!(userId in votes)) {
+                logDebug(`listenVote: User ${userId} has not voted, showing vote modal`);
+                closeAllModals();
+                showModal(`是否同意將「${item}」作為最終結果？${progressText}`, [
+    {
+        text: '同意',
+        class: 'btn-confirm',
+        onClick: async () => {
+            logDebug('你按了同意！userId=' + userId);
+            closeModalById(modalId);
+            await voteRef.child('votes/' + userId).set(true)
+                .then(() => logDebug('set(true) 寫入成功！'))
+                .catch(e => logDebug('set(true) 失敗：' + e.message));
+            showWaitingModal(voteRef, userId, `已同意，等待其他人投票中... ${progressText}`, modalId);
+            lastProcessedData = null; // Reset to ensure updates
+        }
+    },
+    {
+        text: '不同意',
+        class: 'btn-primary',
+        onClick: async () => {
+            logDebug('你按了不同意！userId=' + userId);
+            closeAllModals();
+            await voteRef.child('votes/' + userId).set(false)
+                .then(() => logDebug('set(false) 寫入成功！'))
+                .catch(e => logDebug('set(false) 失敗：' + e.message));
+            lastProcessedData = null; // Reset to ensure updates
+        }
+    }
+], modalId);
+
+            } else {
+                logDebug(`listenVote: User ${userId} has voted, showing waiting modal`);
+                showWaitingModal(voteRef, userId, `已投票，等待其他人投票中... ${progressText}`, modalId);
+            }
+
+            let passed = false;
+            if (mode === '共識決' && agreeCount === total && totalVotes === total) passed = true;
+            if (mode === '多數決' && agreeCount > total / 2) passed = true;
+
+            // 多數決與共識決分開判斷
+if (mode === '共識決') {
+    // 共識決：全員同意才通過
+    if (totalVotes === total) {
+        if (agreeCount === total) {
+            await db.ref(`rooms/${roomId}`).update({
+                finalResult: item,
+                isDrawing: null
+            });
+            closeAllModals();
+            voteRef.off('value');
+        } else {
+            closeAllModals();
+            showModal(
+                `❌ 未達成條件（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+                [{ text: '好的', class: 'btn-confirm', onClick: async () => {
+                    await db.ref(`rooms/${roomId}`).update({
+                        vote: null,
+                        isDrawing: null,
+                        drawAnimation: null,
+                        drawResult: null
+                    });
+                    const drawBtn = document.querySelector('#decidePage .btn-primary[onclick="startDraw()"]');
+                    if (drawBtn) drawBtn.disabled = false;
+                }}],
+                'error'
+            );
+        }
+    }
+} else if (mode === '多數決') {
+    // 多數決：只要過半就通過（**要等全員投完才判斷**）
+    if (totalVotes === total) {
+        if (agreeCount > total / 2) {
+            await db.ref(`rooms/${roomId}`).update({
+                finalResult: item,
+                isDrawing: null
+            });
+            closeAllModals();
+            voteRef.off('value');
+        } else {
+            closeAllModals();
+            showModal(
+                `❌ 未達成條件（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+                [{ text: '好的', class: 'btn-confirm', onClick: async () => {
+                    await db.ref(`rooms/${roomId}`).update({
+                        vote: null,
+                        isDrawing: null,
+                        drawAnimation: null,
+                        drawResult: null
+                    });
+                    const drawBtn = document.querySelector('#decidePage .btn-primary[onclick="startDraw()"]');
+                    if (drawBtn) drawBtn.disabled = false;
+                }}],
+                'error'
+            );
+        }
+    }
+}
 
 
-        // ⚠️ TODO: 實際導向下一步頁面或觸發抽籤，可接你的動畫程式
-      }
-    });
-  });
+
+        } catch (error) {
+            logDebug(`listenVote: Error: ${error.message}`);
+            showModal('投票處理失敗，請稍後再試！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+        }
+    }, 500));
+}
+function leaveRoom() {
+    logDebug("leaveRoom: Initiating room exit");
+    showModal('確定要離開此房間嗎？', [
+        {
+            text: '確定',
+            class: 'btn-confirm',
+            onClick: () => {
+                logDebug("leaveRoom: Confirm leave clicked");
+                const roomId = localStorage.getItem('currentRoomId');
+                const userId = localStorage.getItem(`currentUserId_${roomId}`);
+                const roomRef = db.ref(`rooms/${roomId}`);
+
+                roomRef.child('participants').transaction(participants => {
+                    if (!participants) return;
+                    delete participants[userId];
+                    const participantCount = Object.keys(participants).length;
+                    roomRef.child('participants/' + userId).remove();
+                    logDebug(`leaveRoom: Removed user ${userId}, remaining: ${participantCount}`);
+
+                    if (participantCount === 0) {
+                        roomRef.update({
+                            drawResult: null,
+                            finalResult: null,
+                            isDrawing: null,
+                            vote: null,
+                            confirm: null,
+                            editConfirm: null
+                        });
+                        logDebug("leaveRoom: Cleared room data as last participant");
+                    }
+                    localStorage.removeItem('currentRoomId');
+                    localStorage.removeItem(`currentUserId_${roomId}`);
+                    window.location.href = 'index.html';
+                });
+            }
+        },
+        {
+            text: '取消',
+            class: 'btn-primary',
+            onClick: () => {
+                logDebug("leaveRoom: Cancel leave clicked");
+            }
+        }
+    ], 'leave');
+}
+
+function generateVerificationCode() {
+    const digits = Math.floor(Math.random() * 90 + 10).toString();
+    const letters = String.fromCharCode(
+        Math.floor(Math.random() * 26) + 97,
+        Math.floor(Math.random() * 26) + 97
+    );
+    const code = digits + letters;
+    logDebug(`generateVerificationCode: Generated code ${code}`);
+    return code;
 }
 </script>
 </head>
 <body>
 <h1>選擇小幫手</h1>
 <div class="page active" id="setupPage">
-<div class="header-row" style="justify-content: flex-end;">
+  <div class="header-row" style="justify-content: flex-end;">
     <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
-</div>
-
+  </div>
   <h2>建立 / 加入房間</h2>
   <input type="text" id="roomNameInput" placeholder="房間名稱" />
-<input type="text" id="verificationCodeInput" placeholder="驗證碼（新房間免填）" />
-
+  <input type="text" id="verificationCodeInput" placeholder="驗證碼（新房間免填）" />
   <input type="text" id="userNameInput" placeholder="你的名稱" />
   <button class="btn-primary" onclick="createRoom()">建立 / 加入</button>
 </div>
 <div class="page" id="multiPage">
-
-
-<div class="header-row">
-    <span id="roomNameDisplay" style="font-weight:bold;"></span>
-    <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="shareRoom()">分享</button>
+  <div class="header-row" style="justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span id="roomNameDisplay" style="font-weight:bold;"></span>
+      <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="shareRoom()">分享</button>
+    </div>
     <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
-</div>
-
-  <div><strong>參與者：</strong>
+  </div>
+  <div><strong id="participantCount">參與者(0人)： </strong>
     <div id="participantContainer" class="item-container"></div>
   </div>
-<div style="text-align:center; margin-bottom:10px;">
-  <button class="btn-primary" onclick="chooseDecisionMode()">決定方式</button>
-  <span id="selectedMode" style="margin-left:8px; font-weight:bold; color:#2c3e50;"></span>
-</div>
+  <div style="margin-top: 10px; text-align:left;">
+    <button class="btn-primary" onclick="chooseDecisionMode()">決定方式</button>
+    <span id="selectedMode" style="margin-left:8px; font-weight:bold; color:#2c3e50;"></span>
+  </div>
   <div style="margin-top: 20px;"><strong>📃 清單項目：</strong>
     <div id="listContainer" class="item-container"></div>
-    <input type="text" id="itemInput" placeholder="輸入項目並按 Enter" onkeypress="if(event.key==='Enter') addItem();" />
+    <input type="text" id="itemInput" placeholder="輸入項目" onkeypress="if(event.key==='Enter') addItem();" />
     <div style="display:flex; gap:6px; margin-top:4px;">
       <button class="btn-primary" onclick="addItem()">新增項目</button>
       <button class="btn-primary" onclick="importItems()">匯入</button>
     </div>
-    <div style="margin-top:10px;">
-      <button class="btn-confirm" onclick="requestConfirmation()">我同意此清單</button>
+    <div style="margin-top:30px;">
+      <button class="btn-confirm-red" onclick="requestConfirmation()">我同意此清單</button>
     </div>
   </div>
+  <div id="multiDebugBox" class="debug-box"></div>
 </div>
 <div class="page" id="decidePage">
   <div class="header-row" style="justify-content: space-between;">
@@ -348,259 +1739,21 @@ document.getElementById('decideRoomNameDisplay').textContent = document.getEleme
       <span id="decideRoomNameDisplay" style="font-weight:bold;"></span>
       <span id="decideModeDisplay" style="margin-left:10px; font-weight:bold; color:#2c3e50;"></span>
     </div>
-    <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
+    <div style="display:flex; gap:6px;">
+      <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="requestReedit()">← 重新編輯</button>
+      <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
+    </div>
   </div>
-<div><strong>參與者：</strong>
-  <div id="decideParticipantContainer" class="item-container"></div>
-</div>
-
-
+  <div>
+    <strong id="decideParticipantCount">參與者(0人)：</strong>
+    <div id="decideParticipantContainer" class="item-container"></div>
+  </div>
   <div style="text-align:center; margin-top: 30px;">
     <button class="btn-primary" onclick="startDraw()">🎲 開始抽籤</button>
     <div id="resultArea" style="font-size: 2em; margin-top: 20px;"></div>
   </div>
+  <div id="decideDebugBox" class="debug-box"></div>
 </div>
-<script>
-window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('setupPage').classList.add('active');
-});
-const params = new URLSearchParams(window.location.search);
-const roomParam = params.get('room');
-const codeParam = params.get('code');
-if (roomParam) {
-    document.getElementById('roomNameInput').value = decodeURIComponent(roomParam);
-}
-if (codeParam) {
-    document.getElementById('verificationCodeInput').value = decodeURIComponent(codeParam);
-}
-
-function startDraw() {
-  const roomId = localStorage.getItem('currentRoomId');
-  const finalResultRef = db.ref(`rooms/${roomId}/finalResult`);
-  const listRef = db.ref('rooms/' + roomId + '/list');
-  const modeRef = db.ref('rooms/' + roomId + '/decisionMode');
-
-  // 先檢查是否已經有最終結果
-  finalResultRef.once('value').then(finalSnap => {
-    const existingResult = finalSnap.val();
-    if (existingResult) {
-      showModal(`⚠️ 本次抽籤已完成，結果為：${existingResult}`, [
-        { text: '好的', class: 'btn-confirm', onClick: () => {} }
-      ]);
-      return; // 阻止繼續抽籤
-    }
-
-    // 若無結果，進行抽籤流程
-    Promise.all([
-      listRef.once('value'),
-      modeRef.once('value')
-    ]).then(([listSnap, modeSnap]) => {
-      const items = listSnap.val() || [];
-      const mode = modeSnap.val() || '一抽入魂'; // 預設一抽入魂
-
-      if (items.length === 0) {
-        alert('⚠️ 目前沒有可抽籤的項目');
-        return;
-      }
-
-      const spinList = [];
-      for (let i = 0; i < 60; i++) {
-        spinList.push(items[Math.floor(Math.random() * items.length)]);
-      }
-      const finalItem = items[Math.floor(Math.random() * items.length)];
-      spinList.push(finalItem);
-
-      const resultArea = document.getElementById('resultArea');
-      resultArea.textContent = '🎰 抽籤中...';
-
-      let index = 0;
-      const interval = setInterval(() => {
-        resultArea.textContent = spinList[index];
-        index++;
-        if (index >= spinList.length) {
-          clearInterval(interval);
-
-          if (mode === '一抽入魂') {
-            db.ref(`rooms/${roomId}/finalResult`).set(finalItem); // 記錄最終結果
-            showFinalResult(finalItem);
-          } else if (mode === '多數決' || mode === '共識決') {
-            initiateVoting(finalItem, mode);
-          } else {
-            alert(`⚠️ 未知決定模式，預設採用一抽入魂`);
-            db.ref(`rooms/${roomId}/finalResult`).set(finalItem); // 記錄最終結果
-            showFinalResult(finalItem);
-          }
-        }
-      }, 50);
-    });
-  });
-}
-
-
-function chooseDecisionMode() {
-  showModal('選擇決定方式', [
-    { text: '一抽入魂', onClick: () => setDecisionMode('一抽入魂') },
-    { text: '多數決', onClick: () => setDecisionMode('多數決') },
-    { text: '共識決', onClick: () => setDecisionMode('共識決') },
-  ]);
-}
-
-function setDecisionMode(mode) {
-  const roomId = localStorage.getItem('currentRoomId');
-  db.ref(`rooms/${roomId}/decisionMode`).set(mode);
-  document.getElementById('selectedMode').textContent = `已選擇：${mode}`;
-}
-function showFinalResult(result) {
-  const modal = document.createElement('div');
-  modal.className = 'modal';
-  const modalContent = document.createElement('div');
-  modalContent.className = 'modal-content';
-  modalContent.innerHTML = `
-    <h2 style="font-size:2em;">🎉 最終結果 🎉</h2>
-    <p style="font-size:1.8em; color:#3db8c4; font-weight:bold; margin: 20px 0;">${result}</p>
-    <p style="font-size:1em;">恭喜！本次抽籤已完成</p>
-  `;
-
-  // 彩帶特效（簡易動畫）
-  confettiEffect();
-
-  const btn = document.createElement('button');
-  btn.className = 'btn-confirm';
-  btn.textContent = '關閉';
-  btn.onclick = () => modal.remove();
-  modalContent.appendChild(btn);
-
-  modal.appendChild(modalContent);
-  document.body.appendChild(modal);
-}
-
-// 可選擇是否使用，如不要可刪除
-
-function confettiEffect() {
-  for (let i = 0; i < 30; i++) {
-    const confetti = document.createElement('div');
-    confetti.textContent = '🎊';
-    confetti.style.position = 'fixed';
-    confetti.style.top = '-50px';
-    confetti.style.left = Math.random() * 100 + 'vw';
-    confetti.style.fontSize = '2em';
-    confetti.style.animation = `fall ${2 + Math.random() * 3}s linear forwards`;
-    document.body.appendChild(confetti);
-
-    confetti.addEventListener('animationend', () => {
-      confetti.remove();
-    });
-  }
-}
-
-// 加入簡易 falling 動畫
-const style = document.createElement('style');
-style.textContent = `
-@keyframes fall {
-  to {
-    transform: translateY(110vh) rotate(360deg);
-    opacity: 0;
-  }
-}
-`;
-document.head.appendChild(style);
-
-function initiateVoting(finalItem, mode) {
-  const roomId = localStorage.getItem('currentRoomId');
-  const voteRef = db.ref(`rooms/${roomId}/vote`);
-
-  // 清除先前投票紀錄
-  voteRef.set({
-    item: finalItem,
-    mode: mode,
-    votes: {}
-  });
-
-  // 發送投票彈窗給使用者
-  showModal(`是否同意將 "${finalItem}" 作為最終結果？`, [
-    {
-      text: '同意',
-      class: 'btn-confirm',
-      onClick: () => {
-        const userId = localStorage.getItem('currentUserId');
-        voteRef.child('votes').child(userId).set(true);
-      }
-    },
-    {
-      text: '不同意',
-      class: 'btn-primary',
-      onClick: () => {
-        const userId = localStorage.getItem('currentUserId');
-        voteRef.child('votes').child(userId).set(false);
-      }
-    }
-  ]);
-
-  // 監聽投票進度
-  db.ref(`rooms/${roomId}/participants`).once('value').then(snap => {
-    const participants = snap.val() || {};
-    const total = Object.keys(participants).length;
-
-    voteRef.child('votes').on('value', snapshot => {
-      const votes = snapshot.val() || {};
-      const agreeCount = Object.values(votes).filter(v => v === true).length;
-      const disagreeCount = Object.values(votes).filter(v => v === false).length;
-
-      // 判斷投票結束條件
-      if (Object.keys(votes).length === total) {
-        voteRef.child('votes').off(); // 停止監聽
-
-        if (mode === '多數決' && agreeCount > total / 2) {
-db.ref(`rooms/${roomId}/finalResult`).set(finalItem);
-
-          showFinalResult(finalItem);
-        } else if (mode === '共識決' && agreeCount === total) {
-db.ref(`rooms/${roomId}/finalResult`).set(finalItem);
-
-          showFinalResult(finalItem);
-        } else {
-          showModal('❌ 未達成條件，請重新抽籤', [
-            { text: '好的', class: 'btn-primary', onClick: () => voteRef.remove() }
-          ]);
-        }
-      }
-    });
-  });
-}
-function leaveRoom() {
-    showModal('確定要離開此房間嗎？', [
-        {
-            text: '確定',
-            class: 'btn-confirm',
-            onClick: () => {
-                // 清除 localStorage 資料
-                localStorage.removeItem('currentRoomId');
-                localStorage.removeItem('currentUserId');
-
-                // 導回 index.html
-                window.location.href = 'index.html';
-            }
-        },
-        {
-            text: '取消',
-            class: 'btn-primary',
-            onClick: () => {}
-        }
-    ]);
-}
-function generateVerificationCode() {
-    const digits = Math.floor(Math.random() * 90 + 10).toString(); // 10~99
-    const letters = String.fromCharCode(
-        Math.floor(Math.random() * 26) + 97,
-        Math.floor(Math.random() * 26) + 97
-    );
-    return digits + letters;
-}
-
-
-</script>
 </body>
 </html>
-
-
 
