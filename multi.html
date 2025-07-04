@@ -183,6 +183,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
+function logDebug() {}
 const firebaseConfig = {
     apiKey: "AIzaSyBUbKgC4P7wGFQqZZmgJU890qOe_4yC9kA",
     authDomain: "choosehel.firebaseapp.com",
@@ -1636,13 +1637,18 @@ if (mode === '共識決') {
     }, 500));
 }
 function leaveRoom() {
-    logDebug("leaveRoom: Initiating room exit");
+    logDebug && logDebug("leaveRoom: Initiating room exit");
+    // 判斷目前是不是 setupPage
+    if (document.getElementById('setupPage').classList.contains('active')) {
+        window.location.href = 'index.html';
+        return;
+    }
     showModal('確定要離開此房間嗎？', [
         {
             text: '確定',
             class: 'btn-confirm',
             onClick: () => {
-                logDebug("leaveRoom: Confirm leave clicked");
+                logDebug && logDebug("leaveRoom: Confirm leave clicked");
                 const roomId = localStorage.getItem('currentRoomId');
                 const userId = localStorage.getItem(`currentUserId_${roomId}`);
                 const roomRef = db.ref(`rooms/${roomId}`);
@@ -1652,7 +1658,6 @@ function leaveRoom() {
                     delete participants[userId];
                     const participantCount = Object.keys(participants).length;
                     roomRef.child('participants/' + userId).remove();
-                    logDebug(`leaveRoom: Removed user ${userId}, remaining: ${participantCount}`);
 
                     if (participantCount === 0) {
                         roomRef.update({
@@ -1663,7 +1668,6 @@ function leaveRoom() {
                             confirm: null,
                             editConfirm: null
                         });
-                        logDebug("leaveRoom: Cleared room data as last participant");
                     }
                     localStorage.removeItem('currentRoomId');
                     localStorage.removeItem(`currentUserId_${roomId}`);
@@ -1675,7 +1679,7 @@ function leaveRoom() {
             text: '取消',
             class: 'btn-primary',
             onClick: () => {
-                logDebug("leaveRoom: Cancel leave clicked");
+                logDebug && logDebug("leaveRoom: Cancel leave clicked");
             }
         }
     ], 'leave');
