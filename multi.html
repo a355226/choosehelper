@@ -2545,7 +2545,13 @@ function renderCertificateCanvas(data) {
   <input type="text" id="roomNameInput" placeholder="房間名稱" />
   <input type="text" id="verificationCodeInput" placeholder="驗證碼（新房間免填）" />
   <input type="text" id="userNameInput" placeholder="你的名稱" />
-  <button class="btn-primary" onclick="createRoom()">建立 / 加入</button>
+  <div style="margin-top: 30px; text-align:center;">
+  <button class="btn-primary"
+    style="font-size:1.4em; padding:18px 55px; border-radius:18px; letter-spacing:3px; box-shadow:0 8px 28px #3db8c433;"
+    onclick="createRoom()">
+    建立 / 加入
+  </button>
+</div>
 </div>
 <div class="page" id="multiPage">
 <div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
