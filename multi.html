@@ -722,12 +722,12 @@ function loadRoomData(roomId) {
         const now = Date.now();
         const users = snap.val() || {};
         Object.entries(users).forEach(([uid, obj]) => {
-          if (obj.lastActive && now - obj.lastActive > 2*60*1000) { // 2分鐘
+          if (obj.lastActive && now - obj.lastActive > 1*30*1000) { // 2分鐘
             db.ref(`rooms/${roomId}/participants/${uid}`).remove();
           }
         });
       });
-    }, 20000);
+    }, 15000);
 
     window.addEventListener('beforeunload', () => {
       clearInterval(window.inactiveCleanupTimer);
@@ -770,8 +770,13 @@ roomRef.child('finalResult').on('value', snap => {
         if (!document.getElementById('decidePage').classList.contains('active')) {
             document.getElementById('multiPage').classList.remove('active');
             document.getElementById('decidePage').classList.add('active');
-            logDebug("loadRoomData: Switched to decidePage due to finalResult");
-        }
+            document.getElementById('resultArea').innerHTML = '';
+    const drawBtn = document.querySelector('#decidePage .btn-draw');
+    if (drawBtn) drawBtn.style.display = '';
+    const modeBtn = document.querySelector('#decidePage .btn-primary[onclick="chooseDecisionMode()"]');
+    if (modeBtn) modeBtn.style.display = '';
+    logDebug("loadRoomData: Switched to decidePage due to finalResult");
+}
         setTimeout(() => {
             showFinalResult(result);
         }, 150);
@@ -865,6 +870,22 @@ roomRef.child('isDeciding').on('value', snap => {
         confirmRef.remove();
         listenReedit(roomId);
         listenVote(roomId);
+// =======【加在這裡】=======
+    // 只要進入 decidePage，如果沒有 finalResult，恢復按鈕和清獎狀
+    db.ref(`rooms/${roomId}/finalResult`).once('value').then(snap => {
+        if (!snap.val()) {
+            const drawBtn = document.querySelector('#decidePage .btn-draw');
+            if (drawBtn) {
+                drawBtn.style.display = '';
+                drawBtn.disabled = false;
+            }
+            const modeBtn = document.querySelector('#decidePage .btn-primary[onclick="chooseDecisionMode()"]');
+            if (modeBtn) modeBtn.style.display = '';
+document.getElementById('decideModeDisplay').style.display = '';
+            document.getElementById('resultArea').innerHTML = '';
+        }
+    });
+    // =========================
     } else if (!isDeciding && !multiPage.classList.contains('active')) {
         logDebug("loadRoomData: Switching to multiPage");
         decidePage.classList.remove('active');
@@ -1405,6 +1426,13 @@ async function setDecisionMode(mode) {
 }
 
 function showFinalResult(result) {
+
+    // 1. 隱藏抽籤按鈕和決定方式
+    const drawBtn = document.querySelector('#decidePage .btn-draw');
+    if (drawBtn) drawBtn.style.display = 'none';
+    const modeBtn = document.querySelector('#decidePage .btn-primary[onclick="chooseDecisionMode()"]');
+    if (modeBtn) modeBtn.style.display = 'none';
+
     logDebug(`showFinalResult: Displaying final result: ${result}`);
     const roomId = localStorage.getItem('currentRoomId');
     const confirmRef = db.ref(`rooms/${roomId}/confirm`);
@@ -1443,6 +1471,7 @@ btn.onclick = () => {
 modalContent.appendChild(btn);
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
+ showCertificate(result);
 }
 
 function confettiEffect() {
@@ -2356,6 +2385,149 @@ async function importItemsFromArray(items) {
     }
 }
 
+function showCertificate(result) {
+  // 先隱藏決定方式
+  document.getElementById('decideModeDisplay').style.display = 'none';
+  // 取得日期
+  const date = new Date();
+  const dateStr = `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日`;
+  const roomId = localStorage.getItem('currentRoomId');
+  db.ref(`rooms/${roomId}/participants`).once('value').then(snap => {
+    const membersArr = Object.values(snap.val() || {}).map(u => u.name);
+    db.ref(`rooms/${roomId}/decisionMode`).once('value').then(modeSnap => {
+      const mode = modeSnap.val() || '一抽入魂';
+      // 填寫所有資料
+      renderCertificateCanvas({
+        title: '抽籤決議證明書',
+        date: dateStr,
+        membersArr,
+        mode,
+        result,
+        statement: [
+          "【共同聲明】",
+          "本次抽籤結果即為最終決議，",
+          "參與者皆承諾共同遵守，",
+          "不得任意更改或拒絕執行。"
+        ]
+      });
+    });
+  });
+}
+
+function renderCertificateCanvas(data) {
+  const targetDiv = document.getElementById('resultArea');
+  targetDiv.innerHTML = '';
+
+  // 獎狀底圖尺寸
+  const W = 640, H = 452;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // 字體
+  const fontFamily = '"標楷體","DFKai-SB","BiauKai","Noto Serif TC",serif';
+
+  // 區塊配置
+  const titleY = 62;
+  const infoStartY = 110;
+  const infoGapY = 37;
+  const membersBlockY = 147;
+  const resultBlockY = 235;
+  const statementBlockY = 340; // 共同聲明區再往下拉
+
+  // 背景圖
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/paper.png';
+
+  img.onload = function () {
+    ctx.drawImage(img, 0, 0, W, H);
+
+    // 1. 抬頭
+    ctx.font = `bold 32px ${fontFamily}`;
+    ctx.fillStyle = '#8a3605';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = "#ffeedd";
+    ctx.shadowBlur = 8;
+    ctx.fillText(data.title, W / 2, titleY);
+    ctx.shadowBlur = 0;
+
+    // 2. 日期
+    ctx.font = `21px ${fontFamily}`;
+    ctx.fillStyle = '#111';
+    ctx.textAlign = 'left';
+    ctx.fillText(`🗓️ 日期：${data.date}`, 60, infoStartY);
+
+    // 3. 決定方式
+    ctx.font = `21px ${fontFamily}`;
+    ctx.fillStyle = '#111';
+    ctx.textAlign = 'right';
+    ctx.fillText(`抽籤方式：${data.mode}`, W - 60, infoStartY);
+
+    // 4. 參與者區塊（自動行分割＆自動縮字）
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#111';
+    let membersText = `本次參與者：${data.membersArr.join('、')}`;
+    let memberFontSize = 23, minFont = 13;
+    // 參與者長度自動縮字
+    ctx.font = `${memberFontSize}px ${fontFamily}`;
+    while (memberFontSize > minFont && ctx.measureText(membersText).width > W - 80) {
+      memberFontSize--;
+      ctx.font = `${memberFontSize}px ${fontFamily}`;
+    }
+    // 多行分割
+    let lines = [];
+    let maxLineW = W - 80;
+    let names = data.membersArr;
+    ctx.font = `${memberFontSize}px ${fontFamily}`;
+    let current = "本次參與者：";
+    for (let i = 0; i < names.length; i++) {
+      let next = (current.endsWith('：') ? current : current + '、') + names[i];
+      if (ctx.measureText(next).width > maxLineW && current !== "本次參與者：") {
+        lines.push(current);
+        current = names[i];
+      } else {
+        current = next;
+      }
+    }
+    lines.push(current);
+
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], W / 2, membersBlockY + i * memberFontSize * 1.24);
+    }
+
+    // 5. 決議結果（紅色大字，線條細，清晰！）
+    ctx.save();
+    // 主標
+    ctx.font = `bold 32px ${fontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = "#b15906";
+    ctx.fillText(`🎉 本次決議結果：`, W / 2, resultBlockY);
+
+    // 決議結果大紅字（微白光，無粗描邊）
+    ctx.font = `bold 54px ${fontFamily}`;
+    ctx.shadowColor = "#fff";
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = "#cf2d3a";
+    ctx.fillText(data.result, W / 2, resultBlockY + 56);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    // 6. 共同聲明（縮小，不搶焦）
+    ctx.font = `17px ${fontFamily}`;
+    ctx.fillStyle = '#555';
+    ctx.textAlign = 'center';
+    let statementGapY = 22;
+    for (let i = 0; i < data.statement.length; i++) {
+      ctx.fillText(data.statement[i], W / 2, statementBlockY + i * statementGapY);
+    }
+  };
+
+  targetDiv.appendChild(canvas);
+}
+
+
 </script>
 </head>
 <body>
@@ -2434,6 +2606,8 @@ async function importItemsFromArray(items) {
 </div>
 </body>
 </html>
+
+
 
 
 
