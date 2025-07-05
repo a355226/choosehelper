@@ -284,15 +284,26 @@ async function createRoom() {
                 creator: userName                
             });
             const participantRef = roomRef.child('participants/' + userId);
-            await participantRef.set({ name: userName });
-            participantRef.onDisconnect().remove();
+            await participantRef.set({ name: userName, lastActive: Date.now() });
             logDebug(`createRoom: Added user ${userId} (${userName})`);
 
             document.getElementById('setupPage').classList.remove('active');
             document.getElementById('multiPage').classList.add('active');
             document.getElementById('roomNameDisplay').textContent = `房間：${roomName} (驗證碼：${verificationCode})`;
             logDebug("createRoom: Switched to multiPage");
+window.keepAliveTimer && clearInterval(window.keepAliveTimer);
+window.keepAliveTimer = setInterval(() => {
+  const roomId = localStorage.getItem('currentRoomId');
+  const userId = localStorage.getItem(`currentUserId_${roomId}`);
+  if (roomId && userId) {
+    db.ref(`rooms/${roomId}/participants/${userId}/lastActive`).set(Date.now());
+  }
+}, 30000); // 每30秒
 
+window.addEventListener('beforeunload', () => {
+  clearInterval(window.keepAliveTimer);
+});
+// ⬆⬆⬆ 到這裡 ⬆⬆⬆
             loadRoomData(roomId);
             listenConfirmation(roomId);
             listenVote(roomId);
@@ -362,6 +373,25 @@ function closeAllModals() {
 
 function loadRoomData(roomId) {
     logDebug("loadRoomData: Loading room data");
+     // ⬇⬇⬇ 加在這裡（只要進房就一定會掃描） ⬇⬇⬇
+    window.inactiveCleanupTimer && clearInterval(window.inactiveCleanupTimer);
+    window.inactiveCleanupTimer = setInterval(() => {
+      if (!roomId) return;
+      db.ref(`rooms/${roomId}/participants`).once('value').then(snap => {
+        const now = Date.now();
+        const users = snap.val() || {};
+        Object.entries(users).forEach(([uid, obj]) => {
+          if (obj.lastActive && now - obj.lastActive > 2*60*1000) { // 2分鐘
+            db.ref(`rooms/${roomId}/participants/${uid}`).remove();
+          }
+        });
+      });
+    }, 20000);
+
+    window.addEventListener('beforeunload', () => {
+      clearInterval(window.inactiveCleanupTimer);
+    });
+    // ⬆⬆⬆ 到這裡 ⬆⬆⬆
     const roomRef = db.ref('rooms/' + roomId);
     const participantContainer = document.getElementById('participantContainer');
     const listContainer = document.getElementById('listContainer');
