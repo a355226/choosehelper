@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -143,7 +144,7 @@
     text-align: center;
   }
   .modal-content button {
-    margin: 6px 10px;
+    margin: 6px 6px;
   }
   .hidden { display: none; }
   @keyframes spin {
@@ -180,6 +181,145 @@
     font-family: monospace;
   }
   .debug-box { display: none !important; }
+
+.exit-btn {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  background: url('https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/exit.jpg') center center no-repeat;
+  background-size: 24px 24px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  opacity: 0.7;
+  cursor: pointer;
+  z-index: 20000;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  background-color: #e7faf1;
+  border: 1.5px solid #dbf4e6;
+}
+.exit-btn:hover {
+  opacity: 1;
+  box-shadow: 0 3px 10px rgba(50,150,120,0.18);
+  background-color: #d1f7e4;
+}
+
+.btn-draw {
+  background: linear-gradient(90deg, #FFD267 40%, #FFB85C 100%);
+  color: #323e50;
+  border: none;
+  border-radius: 18px;
+  font-size: 1.5em;
+  font-weight: 700;
+  padding: 18px 38px;
+  box-shadow: 0 6px 20px rgba(255, 213, 103, 0.13);
+  cursor: pointer;
+  transition: background 0.18s, transform 0.08s;
+  margin: 22px auto 10px auto;
+  display: block;
+  letter-spacing: 2px;
+}
+.btn-draw:hover {
+  background: linear-gradient(90deg, #FFB85C 40%, #FFA63C 100%);
+  color: #fff;
+  transform: scale(1.07);
+  box-shadow: 0 8px 24px rgba(255, 184, 92, 0.19);
+}
+
+/* 決定方式字體色彩更融合 */
+#decideModeDisplay {
+  color: #FF7577 !important; /* 較淺紅橘 */
+  background: linear-gradient(135deg, rgba(255, 237, 237, 0.78) 0%, rgba(255, 173, 173, 0.28) 100%);
+  padding: 4px 16px;
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 1.1em;
+  letter-spacing: 1.2px;
+  margin-top: 10px;
+  display: inline-block;
+  /* 柔和淡淡的陰影 */
+  box-shadow: 0 2px 10px 0 rgba(255, 120, 120, 0.10);
+  transition: box-shadow 0.19s;
+  border: none;
+}
+
+
+/* 動畫區域外框 */
+.lottery-animate-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;      /* 高度加高一些 */
+  min-width: 240px;
+  padding: 32px 36px;     /* 上下左右都一樣多 */
+  border-radius: 28px;    /* 圓角稍小一點更和諧 */
+  background: linear-gradient(135deg, #fff3e3 0%, #ffe8ee 100%);
+  box-shadow: 0 0 36px 0 rgba(255, 160, 90, 0.09), 0 2px 12px 0 rgba(255,77,79,0.06);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.35s;
+}
+
+/* 字體動畫 */
+.lottery-animate-text {
+  font-size: 2.5em;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #FF4D4F;
+  text-shadow: 0 4px 24px rgba(255,77,79,0.25), 0 1px 0 #fff;
+  animation: pop-in 0.33s cubic-bezier(.52,2.1,.45,.85);
+  will-change: transform;
+  user-select: none;
+  transition: color 0.2s;
+}
+@keyframes pop-in {
+  0%   { transform: scale(0.7) rotate(-7deg);}
+  60%  { transform: scale(1.25) rotate(3deg);}
+  90%  { transform: scale(0.92);}
+  100% { transform: scale(1);}
+}
+/* 最終定格閃爍效果 */
+.lottery-final {
+  background: linear-gradient(98deg, #A5252B 0%, #C72A36 44%, #FFD600 51%, #C72A36 58%, #A5252B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+
+  font-family: 'Segoe UI', 'PingFang TC', 'Heiti TC', 'Arial', sans-serif;
+  font-weight: 900;
+  font-size: 2.7em;
+  letter-spacing: 2.5px;
+
+  /* 主體深紅，金光偏淡收斂 */
+  text-shadow:
+    0 1px 5px #FFD60024,     /* 柔和小金暈 */
+    0 0 1px #C72A36ee,     /* 主陰影-深紅 */
+    0 1.2px 0 #A5252Bdd,     /* 邊緣壓線 */
+    0 0 6px #FFD6001a;       /* 補充金光，非常淡 */
+
+  animation: final-glow-redgold 1.2s ease-in-out alternate infinite;
+}
+
+@keyframes final-glow-redgold {
+  0% {
+    text-shadow:
+      0 1px 5px #FFD6001a,
+      0 0 2.5px #C72A36ee,
+      0 1.2px 0 #A5252Bdd,
+      0 0 6px #FFD6000f;
+  }
+  15% {
+    text-shadow:
+      0 1px 5px #FFD60038,
+      0 0 4px #C72A36cc,
+      0 1.5px 0 #A5252Bcc,
+      0 0 5px #FFD60022;
+  }
+}
+
+
 </style>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -289,7 +429,9 @@ async function createRoom() {
 
             document.getElementById('setupPage').classList.remove('active');
             document.getElementById('multiPage').classList.add('active');
-            document.getElementById('roomNameDisplay').textContent = `房間：${roomName} (驗證碼：${verificationCode})`;
+            document.getElementById('roomNameDisplay').textContent = `房間：${roomName} `;
+document.getElementById('roomCodeDisplay').textContent = `(驗證碼：${verificationCode})`;
+
             logDebug("createRoom: Switched to multiPage");
 window.keepAliveTimer && clearInterval(window.keepAliveTimer);
 window.keepAliveTimer = setInterval(() => {
@@ -404,20 +546,39 @@ function loadRoomData(roomId) {
         }
     });
 
-    roomRef.child('finalResult').on('value', snap => {
-        const result = snap.val();
-        logDebug(`loadRoomData: finalResult changed to ${result}`);
-        if (result) {
-            if (!document.getElementById('decidePage').classList.contains('active')) {
-                document.getElementById('multiPage').classList.remove('active');
-                document.getElementById('decidePage').classList.add('active');
-                logDebug("loadRoomData: Switched to decidePage due to finalResult");
-            }
-            setTimeout(() => {
-                showFinalResult(result);
-            }, 150);
+// 你的原本監聽 isDrawing
+roomRef.child('isDrawing').on('value', snap => {
+    const isDrawing = snap.val();
+    logDebug(`loadRoomData: isDrawing changed to ${isDrawing}`);
+    // 控制抽籤按鈕
+    const drawBtn = document.querySelector('#decidePage .btn-draw');
+    if (drawBtn) drawBtn.disabled = !!isDrawing;
+
+    if (isDrawing) {
+        playDrawAnimation(roomId);
+    }
+});
+
+// 你的原本監聽 finalResult
+roomRef.child('finalResult').on('value', snap => {
+    const result = snap.val();
+    logDebug(`loadRoomData: finalResult changed to ${result}`);
+    // 控制抽籤按鈕
+    const drawBtn = document.querySelector('#decidePage .btn-draw');
+    if (drawBtn) drawBtn.disabled = !!result; // 結果有值也禁用
+
+    if (result) {
+        if (!document.getElementById('decidePage').classList.contains('active')) {
+            document.getElementById('multiPage').classList.remove('active');
+            document.getElementById('decidePage').classList.add('active');
+            logDebug("loadRoomData: Switched to decidePage due to finalResult");
         }
-    });
+        setTimeout(() => {
+            showFinalResult(result);
+        }, 150);
+    }
+});
+
 
     roomRef.child('participants').on('value', snapshot => {
         const data = snapshot.val() || {};
@@ -470,22 +631,24 @@ function loadRoomData(roomId) {
     roomRef.child('decisionMode').on('value', snapshot => {
         const mode = snapshot.val() || '';
         logDebug(`loadRoomData: Decision mode changed to ${mode}`);
-        document.getElementById('selectedMode').textContent = mode ? `已選擇：${mode}` : '';
+        document.getElementById('selectedMode').textContent = mode ? `已選擇【${mode}】` : '';
+
         const decideModeDisplay = document.getElementById('decideModeDisplay');
-        if (decideModeDisplay) decideModeDisplay.textContent = mode ? `決定方式：${mode}` : '';
+        if (decideModeDisplay) decideModeDisplay.textContent = mode ? `【${mode}】` : '';
     });
 
     roomRef.child('name').once('value').then(nameSnap => {
-        const roomName = nameSnap.val() || '';
-        roomRef.child('code').once('value').then(codeSnap => {
-            const verificationCode = codeSnap.val() || '';
-            const decideRoomNameDisplay = document.getElementById('decideRoomNameDisplay');
-            if (decideRoomNameDisplay) {
-                decideRoomNameDisplay.textContent = `房間：${roomName} (驗證碼：${verificationCode})`;
-                logDebug(`loadRoomData: Room name set to ${roomName}, code: ${verificationCode}`);
-            }
-        });
+    const roomName = nameSnap.val() || '';
+    roomRef.child('code').once('value').then(codeSnap => {
+        const verificationCode = codeSnap.val() || '';
+        const decideRoomNameDisplay = document.getElementById('decideRoomNameDisplay');
+        const decideRoomCodeDisplay = document.getElementById('decideRoomCodeDisplay');
+        if (decideRoomNameDisplay) decideRoomNameDisplay.textContent = `房間：${roomName}`;
+        if (decideRoomCodeDisplay) decideRoomCodeDisplay.textContent = `(驗證碼：${verificationCode})`;
+        logDebug(`loadRoomData: Room name set to ${roomName}, code: ${verificationCode}`);
     });
+});
+
 
 roomRef.child('isDeciding').on('value', snap => {
     const isDeciding = snap.val();
@@ -750,7 +913,7 @@ if (!data) {
                 logDebug("listenConfirmation: Someone disagreed, cancelling");
                 await confirmRef.update({ status: 'cancelled', active: false });
                 closeAllModals();
-                showModal(`❌ 有人不同意清單（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`, [
+                showModal(`❌ 有人不同意清單<br>（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`, [
                     { text: '好的', class: 'btn-confirm', onClick: () => {} }
                 ], 'error');
                 await confirmRef.remove();
@@ -776,20 +939,20 @@ if (!data) {
 
             if (responses[userId] === true) {
                 logDebug("listenConfirmation: User has agreed, showing waiting modal");
-                showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中... ${progressText}`, modalId);
+                showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
                 return;
             }
 
             logDebug("listenConfirmation: Showing confirmation modal for user");
 closeAllModals();
-            showModal(`已發起清單確認，是否同意？${progressText}`, [
+            showModal(`已發起清單確認，是否同意？<br>${progressText}`, [
                 {
                     text: '同意',
                     class: 'btn-confirm',
                     onClick: async () => {
                         logDebug("listenConfirmation: User agrees");
                         await confirmRef.child('responses').child(userId).set(true);
-                        showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中... ${progressText}`, modalId);
+                        showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中...<br> ${progressText}`, modalId);
                     }
                 },
                 {
@@ -923,13 +1086,29 @@ function showWaitingModal(ref, userId, message, modalId) {
 
 async function startDraw() {
     logDebug("startDraw: Starting draw process");
-    const drawBtn = document.querySelector('#decidePage .btn-primary[onclick="startDraw()"]');
+    const drawBtn = document.querySelector('#decidePage .btn-draw');
     drawBtn.disabled = true;
     drawBtn.innerHTML = '<span class="spin-animation">⏳</span> 抽籤中...';
     const roomId = localStorage.getItem('currentRoomId');
     const roomRef = db.ref(`rooms/${roomId}`);
 
     try {
+        // 1. 用 transaction 搶鎖，isDrawing 填 userId（誰先搶到誰抽）
+        const txResult = await roomRef.child('isDrawing').transaction(current => {
+            if (current) return; // 有人正在抽籤，不動
+            return userId;       // 把 userId 當抽籤鎖
+        });
+
+        if (!txResult.committed) {
+            showModal('已有人正在抽籤，請等待結果...', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'info');
+            drawBtn.disabled = false;
+            drawBtn.innerHTML = '🎲 開始抽籤';
+            return;
+        }
+
+        // 2. 基本狀態檢查
         const [finalResultSnap, isDecidingSnap] = await Promise.all([
             roomRef.child('finalResult').once('value'),
             roomRef.child('isDeciding').once('value')
@@ -938,18 +1117,20 @@ async function startDraw() {
             logDebug(`startDraw: Invalid state - finalResult: ${finalResultSnap.val()}, isDeciding: ${isDecidingSnap.val()}`);
             showModal(
                 finalResultSnap.val()
-                    ? `本次結果已出爐[${finalResultSnap.val()}]，請重新編輯清單以開始新抽籤！`
+                    ? `本次結果出爐[${finalResultSnap.val()}]<br>，請重新編輯清單以開始新抽籤！`
                     : '房間狀態無效，請重新確認清單！',
                 [
                     { text: '好的', class: 'btn-confirm', onClick: () => {} }
                 ],
                 'error'
             );
+            await roomRef.child('isDrawing').set(null); // 還原鎖
             drawBtn.disabled = false;
             drawBtn.innerHTML = '🎲 開始抽籤';
             return;
         }
 
+        // 3. 產生項目
         const [listSnap, modeSnap] = await Promise.all([
             roomRef.child('list').once('value'),
             roomRef.child('decisionMode').once('value')
@@ -963,12 +1144,13 @@ async function startDraw() {
             showModal('⚠️ 目前沒有可抽籤的項目', [
                 { text: '好的', class: 'btn-confirm', onClick: () => {} }
             ], 'error');
-            roomRef.child('isDrawing').remove();
+            await roomRef.child('isDrawing').set(null); // 還原鎖
             drawBtn.disabled = false;
             drawBtn.innerHTML = '🎲 開始抽籤';
             return;
         }
 
+        // 4. 抽選流程
         const finalItem = items[Math.floor(Math.random() * items.length)];
         const spinList = [];
         for (let i = 0; i < 35; i++) {
@@ -977,8 +1159,9 @@ async function startDraw() {
         spinList.push(finalItem);
         logDebug(`startDraw: Generated spinList, finalItem: ${finalItem}`);
 
+        // 5. 記錄結果
         await roomRef.update({
-            isDrawing: true,
+            isDrawing: userId,
             drawResult: finalItem,
             drawAnimation: spinList,
             vote: null // Clear vote data before draw
@@ -988,6 +1171,7 @@ async function startDraw() {
         drawBtn.innerHTML = '🎲 開始抽籤';
     } catch (error) {
         logDebug(`startDraw: Firebase error: ${error.message}`);
+        await db.ref(`rooms/${roomId}/isDrawing`).set(null); // 錯誤要釋放鎖
         showModal('抽籤失敗，請稍後再試！', [
             { text: '好的', class: 'btn-confirm', onClick: () => {} }
         ], 'error');
@@ -995,6 +1179,7 @@ async function startDraw() {
         drawBtn.innerHTML = '🎲 開始抽籤';
     }
 }
+
 function chooseDecisionMode() {
     logDebug("chooseDecisionMode: Opening decision mode modal");
     showModal('選擇決定方式', [
@@ -1009,7 +1194,7 @@ async function setDecisionMode(mode) {
     const roomId = localStorage.getItem('currentRoomId');
     try {
         await db.ref(`rooms/${roomId}/decisionMode`).set(mode);
-        document.getElementById('selectedMode').textContent = `已選擇：${mode}`;
+        document.getElementById('selectedMode').textContent = `已選擇【${mode}】`;
         logDebug(`setDecisionMode: Successfully set mode ${mode}`);
     } catch (error) {
         logDebug(`setDecisionMode: Firebase error: ${error.message}`);
@@ -1042,7 +1227,7 @@ function showFinalResult(result) {
     modalContent.innerHTML = `
         <h2 style="font-size:2em;">🎉 最終結果 🎉</h2>
         <p style="font-size:1.8em; color:#3db8c4; font-weight:bold; margin: 20px 0;">${result}</p>
-        <p style="font-size:1em;">本次結果已出爐，請務必遵守哦！</p>
+        <p style="font-size:1em;">結果已出爐，請務必遵守哦！</p>
     `;
 
     confettiEffect();
@@ -1053,9 +1238,9 @@ btn.textContent = '關閉';
 btn.onclick = () => {
     logDebug("showFinalResult: Close button clicked");
     modal.remove();
-    const drawBtn = document.querySelector('#decidePage .btn-primary[onclick="startDraw()"]');
-    if (drawBtn) drawBtn.disabled = false; // 確保按鈕禁用
+    safeEnableDrawBtn(); // ← 使用冷卻機制啟用按鈕
 };
+
 modalContent.appendChild(btn);
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
@@ -1311,14 +1496,14 @@ closeAllModals();
             if (responses[userId] === true) {
                 logDebug("listenReedit: User has agreed, showing waiting modal");
                 closeAllModals();
-                showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... ${progressText}`, modalId);
+                showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
                 return;
             }
 
             // 尚未表態，顯示同意/不同意選擇
             logDebug("listenReedit: Showing confirmation modal for user");
             closeAllModals();
-            showModal(`已發起重新編輯，是否同意？${progressText}`, [
+            showModal(`已發起重新編輯，是否同意？<br>${progressText}`, [
                 {
                     text: '同意',
                     class: 'btn-confirm',
@@ -1326,7 +1511,7 @@ closeAllModals();
                         logDebug("listenReedit: User agrees");
                         await reeditRef.child('responses').child(userId).set(true);
                         closeAllModals();
-                        showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... ${progressText}`, modalId);
+                        showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
                     }
                 },
                 {
@@ -1351,100 +1536,130 @@ closeAllModals();
 }
 
 async function playDrawAnimation(roomId) {
-    logDebug("playDrawAnimation: Starting draw animation");
-    const roomRef = db.ref(`rooms/${roomId}`);
-    try {
-        const finalResultSnap = await roomRef.child('finalResult').once('value');
-        if (finalResultSnap.val()) {
-            logDebug(`playDrawAnimation: Final result already exists: ${finalResultSnap.val()}`);
-            showModal(`本次結果[${finalResultSnap.val()}]，請務必遵守哦！`, [
-                { text: '好的', class: 'btn-confirm', onClick: () => {} }
-            ], 'info');
-            return;
+  logDebug("playDrawAnimation: Starting draw animation");
+  const roomRef = db.ref(`rooms/${roomId}`);
+  try {
+      const finalResultSnap = await roomRef.child('finalResult').once('value');
+      if (finalResultSnap.val()) {
+          showModal(`本次結果[${finalResultSnap.val()}]，請務必遵守哦！`, [
+              { text: '好的', class: 'btn-confirm', onClick: () => {} }
+          ], 'info');
+          return;
+      }
+
+      const [spinListSnap, resultSnap, modeSnap] = await Promise.all([
+          roomRef.child('drawAnimation').once('value'),
+          roomRef.child('drawResult').once('value'),
+          roomRef.child('decisionMode').once('value')
+      ]);
+      const spinList = spinListSnap.val() || [];
+      const finalItem = resultSnap.val();
+      const mode = modeSnap.val() || '一抽入魂';
+
+      if (!spinList.length || !finalItem) {
+          showModal('抽籤動畫數據未載入，請重新抽籤！', [
+              { text: '好的', class: 'btn-confirm', onClick: () => {} }
+          ], 'error');
+          roomRef.update({ isDrawing: null, drawAnimation: null });
+          return;
+      }
+
+      // 新動畫模組
+      closeModalById('drawAnimation');
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.dataset.modalId = 'drawAnimation';
+
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal-content';
+
+      // 加入動畫外框
+      const frame = document.createElement('div');
+      frame.className = 'lottery-animate-frame';
+
+      const resultArea = document.createElement('div');
+      resultArea.className = 'lottery-animate-text';
+      resultArea.textContent = '🎰 抽籤中...';
+
+      frame.appendChild(resultArea);
+      modalContent.appendChild(frame);
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+
+      // 柔和漸層配色輪替
+      const bgColors = [
+        'linear-gradient(135deg,#fff3e3 0%,#ffe8ee 100%)',
+        'linear-gradient(135deg,#f0f9ff 0%,#e6ffe9 100%)',
+        'linear-gradient(135deg,#ffede0 0%,#f2f3ff 100%)',
+        'linear-gradient(135deg,#fff7eb 0%,#f9e7f7 100%)',
+        'linear-gradient(135deg,#fffbe2 0%,#fff3e3 100%)'
+      ];
+      const textColors = [
+        '#FF4D4F', '#3db8c4', '#FFA63C', '#FF7577', '#3CC288'
+      ];
+
+      let index = 0;
+      let total = spinList.length;
+      let time = 75; // 最快速度
+      function animate() {
+        if (index >= total) {
+          // 最後一格定格大字+閃光
+          resultArea.className = 'lottery-animate-text lottery-final';
+resultArea.textContent = finalItem;
+
+// 讓使用者讀4秒再慢慢消失
+setTimeout(() => {
+  resultArea.style.transition = 'opacity 0.8s';
+  resultArea.style.opacity = 0;
+  setTimeout(() => {
+    modal.remove();
+    // 接下來處理資料庫狀態和流程
+    roomRef.update({
+      isDrawing: null,
+      drawAnimation: null
+    }).then(() => {
+      if (mode === '一抽入魂') {
+        roomRef.update({ finalResult: finalItem });
+      } else {
+        initiateVoting(mode, finalItem).then(() => {
+          listenVote(roomId); // Reattach vote listener
+        });
+      }
+    });
+  }, 800);  // 這裡是 0.8 秒（淡出時長）
+}, 4000);   // 這裡是顯示 4 秒
+
+          return;
         }
 
-        const [spinListSnap, resultSnap, modeSnap] = await Promise.all([
-            roomRef.child('drawAnimation').once('value'),
-            roomRef.child('drawResult').once('value'),
-            roomRef.child('decisionMode').once('value')
-        ]);
-        const spinList = spinListSnap.val() || [];
-        const finalItem = resultSnap.val();
-        const mode = modeSnap.val() || '一抽入魂';
+        // 跑馬燈效果
+        resultArea.className = 'lottery-animate-text';
+        resultArea.textContent = spinList[index];
 
-        if (!spinList.length || !finalItem) {
-            logDebug("playDrawAnimation: Invalid spinList or finalItem");
-            showModal('抽籤動畫數據未載入，請重新抽籤！', [
-                { text: '好的', class: 'btn-confirm', onClick: () => {} }
-            ], 'error');
-            roomRef.update({ isDrawing: null, drawAnimation: null });
-            return;
-        }
+        // 讓背景＆字體色彩輪流換
+        const bg = bgColors[index % bgColors.length];
+        const tc = textColors[index % textColors.length];
+        frame.style.background = bg;
+        resultArea.style.color = tc;
 
-        closeModalById('drawAnimation');
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.dataset.modalId = 'drawAnimation';
-        const modalContent = document.createElement('div');
-        modalContent.className = 'modal-content';
-        const resultArea = document.createElement('p');
-        resultArea.style.fontSize = '2em';
-        resultArea.className = 'spin-animation';
-        resultArea.textContent = '🎰 抽籤中...';
-        modalContent.appendChild(resultArea);
-        modal.appendChild(modalContent);
-        document.body.appendChild(modal);
-        logDebug("playDrawAnimation: Displayed draw animation modal");
+        // 模擬抽籤緊張感：後段變慢
+        if (index > total * 0.72) time += 32;
+        if (index > total * 0.87) time += 48;
 
-        let index = 0;
-        function animate() {
-            if (index >= spinList.length) {
-                resultArea.className = 'result-final';
-                resultArea.textContent = finalItem;
-                logDebug(`playDrawAnimation: Final item: ${finalItem}`);
-                setTimeout(() => {
-                    modal.remove();
-                    roomRef.update({
-                        isDrawing: null,
-                        drawAnimation: null
-                    }).then(() => {
-                        logDebug("playDrawAnimation: Cleared draw data");
-                        if (mode === '一抽入魂') {
-                            roomRef.update({ finalResult: finalItem }).then(() => {
-                                logDebug("playDrawAnimation: Set finalResult for 一抽入魂");
-                            });
-                        } else {
-                            initiateVoting(mode, finalItem).then(() => {
-                                logDebug("playDrawAnimation: Voting initiated");
-                                listenVote(roomId); // Reattach vote listener
-                            });
-                        }
-                    }).catch(error => {
-                        logDebug(`playDrawAnimation: Firebase update error: ${error.message}`);
-                        showModal('抽籤完成失敗，請重新抽籤！', [
-                            { text: '好的', class: 'btn-confirm', onClick: () => {} }
-                        ], 'error');
-                    });
-                }, 2000);
-                return;
-            }
+        index++;
+        setTimeout(() => requestAnimationFrame(animate), time);
+      }
 
-            resultArea.textContent = spinList[index];
-            logDebug(`playDrawAnimation: Showing item ${spinList[index]} at index ${index}`);
-            index++;
-            setTimeout(() => requestAnimationFrame(animate), 100); // Add slight delay for smoother animation
-        }
-
-        requestAnimationFrame(animate);
-    } catch (error) {
-        logDebug(`playDrawAnimation: Firebase error: ${error.message}`);
-        console.error('playDrawAnimation: Firebase error:', error);
-        showModal('抽籤動畫失敗，請重新抽籤！', [
-            { text: '好的', class: 'btn-confirm', onClick: () => {} }
-        ], 'error');
-        roomRef.update({ isDrawing: null, drawAnimation: null });
-    }
+      requestAnimationFrame(animate);
+  } catch (error) {
+      logDebug(`playDrawAnimation: Firebase error: ${error.message}`);
+      showModal('抽籤動畫失敗，請重新抽籤！', [
+          { text: '好的', class: 'btn-confirm', onClick: () => {} }
+      ], 'error');
+      roomRef.update({ isDrawing: null, drawAnimation: null });
+  }
 }
+
 async function importItems() {
     logDebug("importItems: Starting item import");
     const roomId = localStorage.getItem('currentRoomId');
@@ -1560,7 +1775,7 @@ if (!data || !data.active || !data.item || data.status === 'cancelled') {
             if (!(userId in votes)) {
                 logDebug(`listenVote: User ${userId} has not voted, showing vote modal`);
                 closeAllModals();
-                showModal(`是否同意將「${item}」作為最終結果？${progressText}`, [
+                showModal(`是否同意將「${item}」作為最終結果？<br>${progressText}`, [
     {
         text: '同意',
         class: 'btn-confirm',
@@ -1570,7 +1785,7 @@ if (!data || !data.active || !data.item || data.status === 'cancelled') {
             await voteRef.child('votes/' + userId).set(true)
                 .then(() => logDebug('set(true) 寫入成功！'))
                 .catch(e => logDebug('set(true) 失敗：' + e.message));
-            showWaitingModal(voteRef, userId, `已同意，等待其他人投票中... ${progressText}`, modalId);
+            showWaitingModal(voteRef, userId, `已同意，等待其他人投票中... <br>${progressText}`, modalId);
             lastProcessedData = null; // Reset to ensure updates
         }
     },
@@ -1590,7 +1805,7 @@ if (!data || !data.active || !data.item || data.status === 'cancelled') {
 
             } else {
                 logDebug(`listenVote: User ${userId} has voted, showing waiting modal`);
-                showWaitingModal(voteRef, userId, `已投票，等待其他人投票中... ${progressText}`, modalId);
+                showWaitingModal(voteRef, userId, `已投票，等待其他人投票中... <br>${progressText}`, modalId);
             }
 
             let passed = false;
@@ -1611,19 +1826,22 @@ if (mode === '共識決') {
         } else {
             closeAllModals();
             showModal(
-                `❌ 未達成條件（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
-                [{ text: '好的', class: 'btn-confirm', onClick: async () => {
-                    await db.ref(`rooms/${roomId}`).update({
-                        vote: null,
-                        isDrawing: null,
-                        drawAnimation: null,
-                        drawResult: null
-                    });
-                    const drawBtn = document.querySelector('#decidePage .btn-primary[onclick="startDraw()"]');
-                    if (drawBtn) drawBtn.disabled = false;
-                }}],
-                'error'
-            );
+    `❌ 未達成條件<br>（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+    [{ 
+        text: '好的', 
+        class: 'btn-confirm', 
+        onClick: async () => {
+            await db.ref(`rooms/${roomId}`).update({
+                vote: null,
+                isDrawing: null,
+                drawAnimation: null,
+                drawResult: null
+            });
+            safeEnableDrawBtn(); // ← 這裡改用冷卻機制
+        }
+    }],
+    'error'
+);
         }
     }
 } else if (mode === '多數決') {
@@ -1647,7 +1865,7 @@ if (mode === '共識決') {
                         drawAnimation: null,
                         drawResult: null
                     });
-                    const drawBtn = document.querySelector('#decidePage .btn-primary[onclick="startDraw()"]');
+                    const drawBtn = document.querySelector('#decidePage .btn-draw');
                     if (drawBtn) drawBtn.disabled = false;
                 }}],
                 'error'
@@ -1735,13 +1953,161 @@ window.addEventListener('DOMContentLoaded', function() {
     if (room) document.getElementById('roomNameInput').value = decodeURIComponent(room);
     if (code) document.getElementById('verificationCodeInput').value = decodeURIComponent(code);
 });
+
+// 頁面載入後執行
+window.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.item-container').forEach(function(box) {
+    box.addEventListener('touchstart', function(e) {
+      // 記住觸控開始時的scrollTop
+      box._startY = e.touches[0].clientY;
+      box._startScroll = box.scrollTop;
+    }, {passive: false});
+
+    box.addEventListener('touchmove', function(e) {
+      const scrollTop = box.scrollTop;
+      const scrollHeight = box.scrollHeight;
+      const offsetHeight = box.offsetHeight;
+      const atTop = scrollTop === 0;
+      const atBottom = scrollTop + offsetHeight >= scrollHeight - 1;
+      const moveY = e.touches[0].clientY - box._startY;
+      // 向下滑且在頂部、或向上滑且在底部 => 阻止
+      if ((atTop && moveY > 0) || (atBottom && moveY < 0)) {
+        e.preventDefault();
+      }
+    }, {passive: false});
+  });
+});
+function chooseImportType() {
+  showModal('請選擇匯入方式', [
+    {
+      text: '單筆匯入',
+      class: 'btn-primary',
+      onClick: () => importItems()
+    },
+    {
+      text: '本地清單',
+      class: 'btn-confirm',
+      onClick: () => showLocalListForImport()
+    },
+    {
+      text: '✕',
+      class: 'btn-primary',
+      onClick: () => {}
+    }
+  ], 'importType');
+}
+function showLocalListForImport() {
+  // 找出所有 localStorage 裡的清單（你自己定義的 key 名）
+  const lists = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('chooseHelperList_')) {
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+        lists.push({
+          key,
+          name: data.name || key,
+          items: data.items || []
+        });
+      } catch {}
+    }
+  }
+  if (lists.length === 0) {
+    showModal('找不到任何本地清單！', [
+      { text: '好的', class: 'btn-confirm', onClick: () => {} }
+    ], 'error');
+    return;
+  }
+
+  // 用彈窗顯示所有清單讓用戶選
+  const content = `<div style="max-height:320px;overflow:auto;text-align:left;">
+    ${lists.map((list, idx) => `
+      <div style="margin-bottom:8px;padding:8px 0;">
+        <b>${list.name}</b>
+        <span style="color:#888;font-size:0.93em;">（${list.items.length} 項）</span>
+        <button class="btn-primary" style="margin-left:12px;padding:2px 14px;font-size:14px;" onclick="window._importLocalList('${list.key}')">匯入</button>
+      </div>
+    `).join('')}
+  </div>`;
+
+  showModal(content, [
+    { text: '取消', class: 'btn-primary', onClick: () => {} }
+  ], 'localListImport');
+
+  // 為避免作用域問題，臨時掛到 window
+  window._importLocalList = function(key) {
+    try {
+      const data = JSON.parse(localStorage.getItem(key));
+      if (data && Array.isArray(data.items)) {
+        importItemsFromArray(data.items);
+      } else {
+        showModal('清單格式錯誤，無法匯入', [
+          { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+      }
+    } catch {
+      showModal('匯入失敗', [
+        { text: '好的', class: 'btn-confirm', onClick: () => {} }
+      ], 'error');
+    }
+    closeAllModals();
+  }
+}
+async function importItemsFromArray(items) {
+    logDebug("importItemsFromArray: Importing array items");
+    const roomId = localStorage.getItem('currentRoomId');
+    if (!Array.isArray(items) || items.length === 0) {
+      showModal('沒有可匯入的項目！', [
+        { text: '好的', class: 'btn-confirm', onClick: () => {} }
+      ], 'error');
+      return;
+    }
+    const listRef = db.ref('rooms/' + roomId + '/list');
+    const importBtn = document.querySelector('#multiPage .btn-primary[onclick="chooseImportType()"]');
+    if (importBtn) {
+      importBtn.disabled = true;
+      importBtn.innerHTML = '<span class="spin-animation">⏳</span> 匯入中...';
+    }
+    let attempt = 0, maxRetries = 3;
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await listRef.once('value');
+            let list = snapshot.val() || [];
+            list = list.concat(items);
+            await listRef.set(list);
+            logDebug(`importItemsFromArray: Imported ${items.length} items`);
+            if (importBtn) {
+              importBtn.disabled = false;
+              importBtn.innerHTML = '匯入';
+            }
+            showModal('已匯入本地清單', [
+              { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'success');
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`importItemsFromArray: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                showModal('匯入項目失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                if (importBtn) {
+                  importBtn.disabled = false;
+                  importBtn.innerHTML = '匯入';
+                }
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+}
+
 </script>
 </head>
 <body>
 <h1><img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/icon.png" alt="icon" width="32"> 決策小幫手</h1>
 <div class="page active" id="setupPage">
+<div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
   <div class="header-row" style="justify-content: flex-end;">
-    <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
   </div>
   <h2>建立 / 加入房間</h2>
   <input type="text" id="roomNameInput" placeholder="房間名稱" />
@@ -1750,26 +2116,30 @@ window.addEventListener('DOMContentLoaded', function() {
   <button class="btn-primary" onclick="createRoom()">建立 / 加入</button>
 </div>
 <div class="page" id="multiPage">
-  <div class="header-row" style="justify-content: space-between;">
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span id="roomNameDisplay" style="font-weight:bold;"></span>
-      <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="shareRoom()">分享</button>
-    </div>
-    <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
+<div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
+  <div class="header-row" style="display: flex; justify-content: space-between; align-items: center;">
+  <div>
+    <span id="roomNameDisplay" style="font-weight:bold; font-size:1.2em; letter-spacing:1px;"></span>
+    <span id="roomCodeDisplay" style="color:#888; font-size:0.95em; margin-left: 5px;"></span>
   </div>
+  <button class="btn-primary" style="padding:6px 14px; font-size:15px; background:#2894FF;" onclick="shareRoom()">分享</button>
+
+</div>
+
   <div><strong id="participantCount">參與者(0人)： </strong>
     <div id="participantContainer" class="item-container"></div>
   </div>
   <div style="margin-top: 10px; text-align:left;">
     <button class="btn-primary" onclick="chooseDecisionMode()">決定方式</button>
-    <span id="selectedMode" style="margin-left:8px; font-weight:bold; color:#2c3e50;"></span>
+    <span id="selectedMode" style="margin-left:8px; font-weight:bold; color:#0080FF;"></span>
   </div>
   <div style="margin-top: 20px;"><strong>📃 清單項目：</strong>
     <div id="listContainer" class="item-container"></div>
     <input type="text" id="itemInput" placeholder="輸入項目" onkeypress="if(event.key==='Enter') addItem();" />
     <div style="display:flex; gap:6px; margin-top:4px;">
       <button class="btn-primary" onclick="addItem()">新增項目</button>
-      <button class="btn-primary" onclick="importItems()">匯入</button>
+      <button class="btn-primary" onclick="chooseImportType()">匯入</button>
+
     </div>
     <div style="margin-top:30px;">
       <button class="btn-confirm-red" onclick="requestConfirmation()">我同意此清單</button>
@@ -1778,26 +2148,33 @@ window.addEventListener('DOMContentLoaded', function() {
   <div id="multiDebugBox" class="debug-box"></div>
 </div>
 <div class="page" id="decidePage">
-  <div class="header-row" style="justify-content: space-between;">
-    <div>
-      <span id="decideRoomNameDisplay" style="font-weight:bold;"></span>
-      <span id="decideModeDisplay" style="margin-left:10px; font-weight:bold; color:#2c3e50;"></span>
-    </div>
-    <div style="display:flex; gap:6px;">
-      <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="requestReedit()">← 重新編輯</button>
-      <button class="btn-primary" style="padding:6px 12px; font-size:14px;" onclick="leaveRoom()">🏃 離開</button>
-    </div>
+<div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
+
+  <div class="header-row" style="align-items:flex-start; justify-content:space-between;">
+  <div style="display:flex; flex-direction:column; align-items:flex-start;">
+<div style="display:inline-flex; align-items:center;">
+  <span id="decideRoomNameDisplay" style="font-weight:bold; font-size:1.25em;"></span>
+  <span id="decideRoomCodeDisplay" style="color:#888; font-size:1em; margin-left:8px;"></span>
+</div>
+
+
+    <button class="btn-primary" style="padding:3px 10px; font-size:12px; margin-top:8px; border-radius:8px;" onclick="requestReedit()">← 重新編輯</button>
+
   </div>
+  <div>
+  </div>
+</div>
+
   <div>
     <strong id="decideParticipantCount">參與者(0人)：</strong>
     <div id="decideParticipantContainer" class="item-container"></div>
   </div>
   <div style="text-align:center; margin-top: 30px;">
-    <button class="btn-primary" onclick="startDraw()">🎲 開始抽籤</button>
+    <button class="btn-draw" onclick="startDraw()">🎲 開始抽籤</button>
+<div id="decideModeDisplay"></div>
     <div id="resultArea" style="font-size: 2em; margin-top: 20px;"></div>
   </div>
   <div id="decideDebugBox" class="debug-box"></div>
 </div>
 </body>
 </html>
-
