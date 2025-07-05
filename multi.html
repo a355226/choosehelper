@@ -2066,23 +2066,39 @@ function chooseImportType() {
   ], 'importType');
 }
 function showLocalListForImport() {
-  // 找出所有 localStorage 裡的清單（你自己定義的 key 名）
   const lists = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
+
+    // 你可以加自己的 key 條件，例如 key === 'memoryData' 或其它
     if (key.startsWith('chooseHelperList_') || key === 'memoryData') {
-  try {
-  const data = JSON.parse(localStorage.getItem(key));
-  if (data && Array.isArray(data.items)) {
-    lists.push({
-      key,
-      name: data.name || key,
-      items: data.items
-    });
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+
+        // 格式1：有 items 陣列
+        if (data && Array.isArray(data.items)) {
+          lists.push({
+            key,
+            name: data.name || key,
+            items: data.items
+          });
+        } 
+        // 格式2：key-value map，每個 key 一個 array
+        else if (data && typeof data === 'object') {
+          for (const k in data) {
+            if (Array.isArray(data[k])) {
+              lists.push({
+                key: key + ':' + k, // key:memoryData:晚餐吃什麼
+                name: k,
+                items: data[k]
+              });
+            }
+          }
+        }
+      } catch (e) {}
+    }
   }
-} catch {}
-  }
-}
+
   if (lists.length === 0) {
     showModal('找不到任何本地清單！', [
       { text: '好的', class: 'btn-confirm', onClick: () => {} }
@@ -2090,7 +2106,7 @@ function showLocalListForImport() {
     return;
   }
 
-  // 用彈窗顯示所有清單讓用戶選
+  // 彈窗讓用戶選
   const content = `<div style="max-height:320px;overflow:auto;text-align:left;">
     ${lists.map((list, idx) => `
       <div style="margin-bottom:8px;padding:8px 0;">
@@ -2105,12 +2121,22 @@ function showLocalListForImport() {
     { text: '取消', class: 'btn-primary', onClick: () => {} }
   ], 'localListImport');
 
-  // 為避免作用域問題，臨時掛到 window
-  window._importLocalList = function(key) {
+  // 臨時掛 window，做 key-value 取出
+  window._importLocalList = function(fullKey) {
+    let key = fullKey, subkey = null;
+    if (fullKey.includes(':')) {
+      [key, subkey] = fullKey.split(':');
+    }
     try {
       const data = JSON.parse(localStorage.getItem(key));
-      if (data && Array.isArray(data.items)) {
-        importItemsFromArray(data.items);
+      let items = [];
+      if (subkey) {
+        items = data[subkey];
+      } else {
+        items = data.items;
+      }
+      if (Array.isArray(items) && items.length > 0) {
+        importItemsFromArray(items);
       } else {
         showModal('清單格式錯誤，無法匯入', [
           { text: '好的', class: 'btn-confirm', onClick: () => {} }
@@ -2124,6 +2150,7 @@ function showLocalListForImport() {
     closeAllModals();
   }
 }
+
 async function importItemsFromArray(items) {
     logDebug("importItemsFromArray: Importing array items");
     const roomId = localStorage.getItem('currentRoomId');
