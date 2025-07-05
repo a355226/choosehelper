@@ -1695,6 +1695,16 @@ function generateVerificationCode() {
     logDebug(`generateVerificationCode: Generated code ${code}`);
     return code;
 }
+
+window.addEventListener('DOMContentLoaded', function() {
+    // 取得網址參數
+    const params = new URLSearchParams(window.location.search);
+    const room = params.get('room');
+    const code = params.get('code');
+    // 如果有就自動填入 input
+    if (room) document.getElementById('roomNameInput').value = decodeURIComponent(room);
+    if (code) document.getElementById('verificationCodeInput').value = decodeURIComponent(code);
+});
 </script>
 </head>
 <body>
