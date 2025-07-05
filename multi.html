@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -254,7 +253,7 @@
   min-width: 240px;
   padding: 32px 36px;     /* 上下左右都一樣多 */
   border-radius: 28px;    /* 圓角稍小一點更和諧 */
-  background: linear-gradient(135deg, #fff3e3 0%, #ffe8ee 100%);
+  background: linear-gradient(120deg, #c2e9fb 0%, #a1c4fd 50%, #70a1ff 100%);
   box-shadow: 0 0 36px 0 rgba(255, 160, 90, 0.09), 0 2px 12px 0 rgba(255,77,79,0.06);
   position: relative;
   overflow: hidden;
@@ -317,6 +316,50 @@
       0 1.5px 0 #A5252Bcc,
       0 0 5px #FFD60022;
   }
+}
+/* 最終結果動畫 - 以亮藍色為基底的顏色閃爍＋漸放大 */
+@keyframes blueGrowFlash {
+  0%   { color: #0080FF; transform: scale(1);}
+  20%  { color: #38A1FF; transform: scale(1.08);}
+  40%  { color: #6EC1FF; transform: scale(1.14);}
+  60%  { color: #0080FF; transform: scale(1.22);}
+  80%  { color: #1677B3; transform: scale(1.13);}
+  100% { color: #0080FF; transform: scale(1.25);}
+}
+
+.lottery-final-blue {
+  font-family: 'Segoe UI', 'PingFang TC', 'Heiti TC', 'Arial', sans-serif;
+  font-weight: 900;
+  font-size: 2.7em;
+  letter-spacing: 2.5px;
+  color: #0080FF;
+  text-shadow:
+    0 1px 8px #bfe2ffcc,
+    0 0 4px #0080FF22;
+  animation: blueGrowFlash 1.3s cubic-bezier(.65,.13,.31,1.06) infinite alternate;
+  transition: color 0.2s, transform 0.2s;
+}
+@keyframes blue-bg-flash {
+  0% {
+    background: linear-gradient(120deg, #e3f2fd 0%, #c8e6fa 80%, #bbdefb 100%);
+    filter: brightness(1) blur(0.1px);
+  }
+  35% {
+    background: linear-gradient(120deg, #d2ecfa 5%, #b3e6fb 60%, #b6ccf2 100%);
+    filter: brightness(1.06) blur(0.25px);
+  }
+  60% {
+    background: linear-gradient(120deg, #caeafc 0%, #e0f4fc 80%, #b3d8f5 100%);
+    filter: brightness(1.09) blur(0.4px);
+  }
+  100% {
+    background: linear-gradient(120deg, #e3f2fd 0%, #c8e6fa 80%, #bbdefb 100%);
+    filter: brightness(1) blur(0.1px);
+  }
+}
+.lottery-final-bg-blue {
+  animation: blue-bg-flash 2.8s cubic-bezier(.75,.13,.19,.95) infinite alternate;
+  background: linear-gradient(120deg, #e3f2fd 0%, #c8e6fa 80%, #bbdefb 100%) !important;
 }
 
 
@@ -1604,7 +1647,8 @@ async function playDrawAnimation(roomId) {
       function animate() {
         if (index >= total) {
           // 最後一格定格大字+閃光
-          resultArea.className = 'lottery-animate-text lottery-final';
+          resultArea.className = 'lottery-animate-text lottery-final-blue';
+frame.classList.add('lottery-final-bg-blue');
 resultArea.textContent = finalItem;
 
 // 讓使用者讀4秒再慢慢消失
@@ -1627,7 +1671,7 @@ setTimeout(() => {
       }
     });
   }, 800);  // 這裡是 0.8 秒（淡出時長）
-}, 4000);   // 這裡是顯示 4 秒
+}, 2500);   // 這裡是顯示 4 秒
 
           return;
         }
@@ -1663,28 +1707,47 @@ setTimeout(() => {
 async function importItems() {
     logDebug("importItems: Starting item import");
     const roomId = localStorage.getItem('currentRoomId');
-    const text = prompt('請貼上要匯入的項目（JSON 或每行一項）：');
+    let text = prompt('請貼上要匯入的項目（JSON 或每行一項）：');
     if (!text) {
         logDebug("importItems: No input provided");
         return;
     }
+    text = text.trim(); // 關鍵：去頭尾空白、空行
+
     let items = [];
     try {
         const parsed = JSON.parse(text);
-        if (parsed.items) items = parsed.items;
-        else throw new Error();
+        if (parsed && parsed.items) {
+            // 不管是不是陣列，只要有 items 都抓
+            if (Array.isArray(parsed.items)) {
+                items = parsed.items;
+            } else {
+                items = [parsed.items];
+            }
+        } else if (Array.isArray(parsed)) {
+            items = parsed;
+        } else {
+            throw new Error();
+        }
     } catch {
+        // JSON 解析失敗，當換行
         items = text.split('\n').map(s => s.trim()).filter(Boolean);
     }
-    if (items.length === 0) {
+
+    if (!items.length) {
         logDebug("importItems: No valid items to import");
+        showModal('沒有可匯入的項目，請檢查格式！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
         return;
     }
     logDebug(`importItems: Parsed ${items.length} items`);
 
     const importBtn = document.querySelector('#multiPage .btn-primary[onclick="importItems()"]');
-    importBtn.disabled = true;
-    importBtn.innerHTML = '<span class="spin-animation">⏳</span> 匯入中...';
+    if (importBtn) {
+        importBtn.disabled = true;
+        importBtn.innerHTML = '<span class="spin-animation">⏳</span> 匯入中...';
+    }
     logDebug("importItems: Button disabled, importing items");
 
     const listRef = db.ref('rooms/' + roomId + '/list');
@@ -1698,8 +1761,10 @@ async function importItems() {
             list = list.concat(items);
             await listRef.set(list);
             logDebug(`importItems: Imported ${items.length} items`);
-            importBtn.disabled = false;
-            importBtn.innerHTML = '匯入';
+            if (importBtn) {
+                importBtn.disabled = false;
+                importBtn.innerHTML = '匯入';
+            }
             return;
         } catch (error) {
             attempt++;
@@ -1709,13 +1774,17 @@ async function importItems() {
                 showModal('匯入項目失敗，請稍後再試！', [
                     { text: '好的', class: 'btn-confirm', onClick: () => {} }
                 ], 'error');
-                importBtn.disabled = false;
-                importBtn.innerHTML = '匯入';
+                if (importBtn) {
+                    importBtn.disabled = false;
+                    importBtn.innerHTML = '匯入';
+                }
             }
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
 }
+
+
 
 function listenVote(roomId) {
     logDebug("listenVote: Starting vote listener");
@@ -2001,17 +2070,19 @@ function showLocalListForImport() {
   const lists = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key.startsWith('chooseHelperList_')) {
-      try {
-        const data = JSON.parse(localStorage.getItem(key));
-        lists.push({
-          key,
-          name: data.name || key,
-          items: data.items || []
-        });
-      } catch {}
-    }
+    if (key.startsWith('chooseHelperList_') || key === 'memoryData') {
+  try {
+  const data = JSON.parse(localStorage.getItem(key));
+  if (data && Array.isArray(data.items)) {
+    lists.push({
+      key,
+      name: data.name || key,
+      items: data.items
+    });
   }
+} catch {}
+  }
+}
   if (lists.length === 0) {
     showModal('找不到任何本地清單！', [
       { text: '好的', class: 'btn-confirm', onClick: () => {} }
