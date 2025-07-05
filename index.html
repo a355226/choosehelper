@@ -1,1362 +1,2180 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<!-- 分頁用 -->
+<meta charset="UTF-8">
+<title>決策小幫手-建立房間</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
-<!-- iOS 主畫面用 -->
 <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
-<!-- Android PWA -->
 <link rel="manifest" href="manifest.json">
-  <meta charset="UTF-8">
-  <title>選擇小幫手</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f0f9ff;
-      margin: 0;
-      padding: 0;
-    }
-    .footer-note {
-  position: fixed;
-  bottom: 10px;
-  right: 15px;
-  font-size: 0.9em;
-  color: #aaa;
-  font-style: italic;
-  pointer-events: none;
-  user-select: none;
-}
-    .nav {
-      display: flex;
-      justify-content: center;
-      background-color: #a8dadc;
-      padding: 10px 0;
-      flex-wrap: wrap;
-    }
-    .nav button {
-      font-size: 16px;
-      padding: 10px 20px;
-      margin: 6px;
-      border: none;
-      background-color: #ffffff;
-      border-radius: 5px;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      transition: all 0.2s ease;
-    }
-    .nav button.active {
-      background-color: #ffe066;
-      font-weight: bold;
-      transform: scale(1.05);
-    }
-    .page {
-      display: none;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    .page.active {
-      display: block;
-    }
-    h1 {
-      text-align: center;
-      padding: 20px;
-      color: #2c3e50;
-      margin: 0;
-    }
-    .btn-primary {
-      background-color: #3db8c4;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      transition: all 0.2s ease;
-    }
-.btn-primary:hover {
-  background-color: #35a4af;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-}
-.btn-primary:active {
-  background-color: #2d8e98;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
-}
-    .btn-yellow {
-      background-color: #fff3b0;
-      color: #333;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 16px;
-      margin: 4px;
-      cursor: pointer;
-    }
-    input, select, button {
-      padding: 10px;
-      font-size: 16px;
-      margin: 6px 4px 10px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    input, select {
-      width: 100%;
-    }
-ul#sortList {
-  max-width: 320px;
-  width: 90%;
-  margin: 0 auto;          /* 置中 */
-  padding: 0 8px;          /* 適度內距 */
-  padding-right: 16px; /* 增加右側滑動緩衝區 */
-}
-li {
-  background: #f0fdf4;     /* 淡綠底 */
-  padding: 6px 8px;
-  max-width: 200px;
-width: 85%;
-  margin-bottom: 4px;
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-    li span {
-      flex-grow: 1;
-      min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .remove-btn {
-      background: none;
-      border: none;
-      color: #c0392b;
-      font-size: 18px;
-      cursor: pointer;
-      margin-left: 10px;
-      flex-shrink: 0;
-    }
-    .random-container {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .result-card {
-      margin-top: 30px;
-      padding: 30px;
-      background: linear-gradient(145deg, #fff8dc, #fff6ae);
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-      font-size: 2.2em;
-      font-weight: bold;
-      color: #b34400;
-      opacity: 0;
-      transform: scale(0.5);
-      transition: all 0.6s ease;
-        white-space: nowrap;             /* 不換行 */
-  overflow: hidden;                /* 超出隱藏 */
-  text-overflow: ellipsis;        /* 加上省略號（可選） */
-  font-size: clamp(1.5em, 7vw, 3em); /* 自動縮放文字大小，避免換行 */
-    }
-    .result-card.show {
-      opacity: 1;
-      transform: scale(1);
-    }
-    .result-card.glow {
-      animation: multiGlow 1.8s ease-out;
-      animation-fill-mode: both;
-    }
-    @keyframes fadeOutShrink {
-  0% {
-    opacity: 1;
-    transform: scale(1);
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: #f0f9ff;
+    margin: 0;
+    padding: 0;
+    color: #2c3e50;
   }
-  100% {
-    opacity: 0;
-    transform: scale(0.6);
+  h1 {
+    text-align: center;
+    padding: 20px 10px;
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.6em;
   }
-}
-.result-card.fade-out {
-  animation: fadeOutShrink 0.4s ease forwards;
-}
-    @keyframes multiGlow {
-      0%   { box-shadow: 0 0 0 transparent; }
-      20%  { box-shadow: 0 0 20px #ffd700; }
-      40%  { box-shadow: 0 0 25px #ffffff; }
-      60%  { box-shadow: 0 0 30px #ff8c00; }
-      80%  { box-shadow: 0 0 25px #ffe066; }
-      100% { box-shadow: 0 0 20px #ffd700; }
-    }
-    .current-list-label {
-      font-size: 16px;
-      margin-bottom: 10px;
-      color: #333;
-    }
-    .current-list-label select {
-      font-weight: bold;
-      color: #2c3e50;
-      background-color: #fff;
-      border: 1px solid #aaa;
-    }
-    .btn-pink {
-      background-color: #fcebeb;
-      color: #333;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 16px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .btn-lightblue {
-      background-color: #e0f4ff;
-      color: #333;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 16px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-.slot-machine {
-  display: none; /* ← 初始不顯示 */
-  height: 60px;
-  overflow: hidden;
-  position: relative;
-  margin: 30px auto 0;
-  width: 80%;
-  max-width: 300px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  font-size: 26px;
-  font-weight: bold;
-  text-align: center;
-  color: #b34400;
-  border: 3px dashed #ffe066;
-  opacity: 0;
-  transition: all 0.4s ease;
-}
-.slot-machine.show {
-  display: block;
-  opacity: 1;
-}
-.slot-content {
-  display: flex;
-  flex-direction: column;
-  animation: spinScroll 3.2s ease-out forwards;
-}
-@keyframes spinScroll {
-  0%   { transform: translateY(0); }
-  100% { transform: translateY(-100%); }
-}
-.current-list-label {
-  width: 100%;
-  margin: 10px 0;
-}
-.label-left {
-  text-align: left;
-  font-size: 1.2em;
-  margin-bottom: 4px;
-  padding-left: 12px;
-}
-.select-center {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-.select-center select {
-  min-width: 160px;
-  max-width: 80vw;
-  font-size: 1em;
-  text-align: center;       /* ← 控制開啟下拉選單時的選項置中 */
-  text-align-last: center;  /* ← 控制已選文字在框中置中 */
-}
-#effectSelectorContainer {
-  margin: 20px auto 0 auto;
-  text-align: center;
-  position: absolute;  /* ✅ 加這一行 */
-  width: 100%;         /* ✅ 可選，確保置中對齊 */
-  left: 0;             /* ✅ 固定左側 */
-}
-#effectSelect {
-  appearance: none;
-  font-size: 16px;
-  padding: 10px 16px;
-  color: #666;
-  background-color: #f0f9ff;  /* 與整體底色統一 */
-  border: none;               /* 移除邊框 */
-  border-radius: 8px;
-  font-weight: 500;
-  width: auto;
-  max-width: 80vw;
-  text-align-last: center;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-}
-#effectSelect:hover {
-  background-color: #e0f4ff;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-}
-#effectSelect:focus {
-  outline: none;
-  background-color: #d0ecff;
-  box-shadow: 0 0 0 3px rgba(61, 184, 196, 0.2);
-}
-.video-wrapper {
-  width: 100%;
-  max-width: 420px;
-  margin: 30px auto 20px auto;
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px;
-  box-shadow: 0 0 20px rgba(255, 223, 0, 0.4);
-  pointer-events: none;
-  max-height: 240px;          /* ✅ 限制最大高度 */
-  min-height: 200px;       /* ✅ 預留高度避免畫面突然撐開 */
-  opacity: 0;              /* ✅ 一開始隱藏 */
-  transition: opacity 0.3s ease;
-}
-.video-wrapper.show {
-  opacity: 1;              /* ✅ 出現時淡入 */
-}
-.custom-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 20px;
-  mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
-  mask-composite: exclude;
-}
-.video-wrapper.glow-out {
-  animation: glowOut 1s ease forwards;
-}
-@keyframes glowOut {
-  0% {
-    box-shadow: 0 0 20px rgba(255, 200, 0, 0.6);
-    opacity: 1;
-    transform: scale(1);
+  .page {
+    display: none;
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
   }
-  100% {
-    box-shadow: 0 0 80px rgba(255, 255, 0, 0.2);
-    opacity: 0;
-    transform: scale(1.4);
-    margin-bottom: -200px; /* ← 強制壓縮空間 */
-    visibility: hidden;
+  .page.active {
+    display: block;
   }
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-.result-card.transitioning {
-  opacity: 0;
-  transform: scale(0.9);
-}
-.result-card.reveal {
-  transition: all 0.6s ease;
-  opacity: 1;
-  transform: scale(1);
-}
-.btn-primary.disabled {
-  background-color: #ddd !important;
-  color: #999 !important;
-  cursor: not-allowed !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-.fade-out-smooth {
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-.fade-in-smooth {
-    opacity: 1;
-    transition: opacity 0.6s ease;
-    visibility: visible; /* ✅ 加上這行 */
-}
-@keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-6px); }
-  40% { transform: translateX(6px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
-  100% { transform: translateX(0); }
-}
-.shake {
-  animation: shake 0.4s;
-  will-change: transform; /* 提前通知瀏覽器加速渲染，減少撕裂 */
-}
-@keyframes dropAndShrink {
-  0% {
-    opacity: 0;
-    transform: translateY(-150px) scale(1.4);
+  .btn-primary, .btn-confirm {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.2s, transform 0.1s;
   }
-  50% {
-    opacity: 1;
-    transform: translateY(20px) scale(0.9);
+  .btn-primary {
+    background-color: #3db8c4;
+    color: white;
   }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+  .btn-primary:hover {
+    background-color: #35a4af;
   }
-}
-.result-card.drop-in {
-  animation: dropAndShrink 0.7s ease forwards;
-}
-@keyframes fadeInEffectSelector {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-.fade-in-anim {
-  animation: fadeInEffectSelector 0.6s ease forwards;
-}
-@keyframes fadeInEffectSelector {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-.fade-in-anim {
-  animation: fadeInEffectSelector 0.6s ease forwards;
-}
-.fade-out-smooth {
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-@keyframes refreshFadeScale {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-    filter: brightness(1.3);
+  .btn-confirm {
+    background-color: #2c3e50;
+    color: white;
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-    filter: brightness(1);
+  .btn-confirm:hover {
+    background-color: #1e2a38;
   }
-  100% {
-    transform: scale(1);
-    filter: brightness(1);
+  .btn-confirm-red {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
   }
-}
-.result-card.refresh-fade-scale {
-  animation: refreshFadeScale 0.5s ease;
-}
-body.dark-mode {
-  background-color: #1e1e1e;
-  color: #ddd;
-}
-body.dark-mode .nav {
-  background-color: #333;
-}
-body.dark-mode .nav button {
-  background-color: #555;
-  color: #eee;
-}
-body.dark-mode .nav button.active {
-  background-color: #888;
-}
-body.dark-mode .page {
-  background-color: #1e1e1e;
-}
-body.dark-mode h1 {
-  color: #eee;
-}
-body.dark-mode .btn-primary {
-  background-color: #555;
-  color: #ddd;
-}
-body.dark-mode .btn-primary:hover {
-  background-color: #666;
-}
-body.dark-mode .btn-pink {
-  background-color: #664;
-  color: #ddd;
-}
-body.dark-mode .btn-lightblue {
-  background-color: #334;
-  color: #ddd;
-}
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode button {
-  background-color: #333;
-  color: #ddd;
-  border: 1px solid #555;
-}
-body.dark-mode li {
-  background: #333;
-  color: #ddd;
-}
-body.dark-mode .result-card {
-  background: linear-gradient(145deg, #333, #444);
-  color: #ffe066;
-}
-body.dark-mode #effectSelect {
-  background-color: #333;
-  color: #ddd;
-}
-body.dark-mode .slot-machine {
-  background-color: #333;
-  color: #ffe066;
-  border-color: #555;
-}
-body.dark-mode .footer-note {
-  color: #666;
-}
-
-body.dark-mode #sortModal > div {
-  background: #2b2b2b !important; /* 深灰背景 */
-  color: #ddd !important;         /* 柔和淺字 */
-  border: 1px solid #444;         /* 可選：增加分界感 */
-}
-
-body.dark-mode #sortModal h3 {
-  color: #eee !important;         /* 標題更亮 */
-}
-
-body.dark-mode #sortModal button {
-  background-color: #444 !important;
-  color: #eee !important;
-  border: 1px solid #555 !important;
-}
-
-body.dark-mode #sortModal button:hover {
-  background-color: #555 !important;
-  color: #2b2b2b !important;
-}
-body.dark-mode #sortModal li {
-  background: #3a3a3a !important; /* 深灰背景，與整體深色一致 */
-  color: #fff !important;         /* 白字，清晰可見 */
-  border: 1px solid #555;         /* 可增加分隔感 */
-}
-
-body.dark-mode #sortModal li:hover {
-  background: #4a4a4a !important; /* 滑過時加亮 */
-}
-
-  </style>
-</head>
-<body>
-<a href="multi.html" id="multiLinkBtn" title="多人連線" style="
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 999;
-  background: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 18px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-">👥</a>
-
-<button id="darkModeToggle" title="切換深色模式" style="
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 999;
-  background: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 18px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-">🌙</button>
-<h1><img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/icon.png" alt="icon" width="32">
-選擇小幫手</h1>
-<div class="nav">
-  <button class="active" onclick="showPage('randomPage')">🎯 快速決定</button>
-  <button onclick="showPage('editPage')">📝 編輯清單</button>
-</div>
-<div class="page active" id="randomPage">
-  <div class="current-list-label">
-  <div class="label-left">目前清單：</div>
-  <div class="select-center">
-    <select id="topMemorySelect" onchange="switchMemoryFromTop()">
-      <option value="">-- 請選擇 --</option>
-    </select>
-  </div>
-  </div>
-  <div class="random-container">
-    <button class="btn-primary" style="width:100%; font-size:20px;" onclick="chooseRandom()">🎲 隨機選 🎲</button>
-    <div id="resultCard" class="result-card">請先建立清單</div>
-<div id="slotMachine" class="slot-machine"></div>
-    <div id="appealArea"></div>
-  </div>
-</div>
-  <div id="effectSelectorContainer" style="margin-top: 80px; text-align: center;">
-  <label for="effectSelect" style="font-weight: bold;"></label>
-<select id="effectSelect" onchange="handleEffectChange()">
-  <option value="default">預設</option>
-  <option value="video001">恐怖貞子</option>
-  <option value="video002">德州撲克</option>
-  <option value="video003">可愛貓咪</option>
-  <option value="video004">外星生物</option>
-  <option value="video005">尾牙抽獎</option>
-  <option value="random">隨機</option>
-</select>
-</div>
-<div class="page" id="editPage">
-  <div class="section-title">📂 切換清單：</div>
-  <select id="memorySelect" onchange="loadMemoryList()">
-    <option value="">-- 請選擇 --</option>
-  </select>
-<button class="btn-lightblue" onclick="openSortModal()">🔃排序</button>
-  <button class="btn-pink" onclick="deleteMemoryList()">🗑 刪除清單</button>
-  <div class="section-title">🖊 輸入項目：</div>
-  <input type="text" id="foodInput" placeholder="請輸入" />
-  <button class="btn-primary" onclick="addFood()">加入</button>
-  <button class="btn-lightblue" onclick="saveCurrentList()">建立</button>
-  <button class="btn-lightblue" onclick="updateCurrentList()">更新</button>
-  <button class="btn-pink"  onclick="clearAllItems()">全部清除</button>
-  <div class="section-title">📃 目前清單：</div>
-  <ul id="foodList"></ul>
-  <div style="margin-top: 70px;">
-<button class="btn-lightblue" onclick="openExportImportModal()">匯出 / 匯入</button>
-
-  </div>
-</div>
-<script>
-let currentSortable = null; // 全域保存 Sortable 實例
-window._introPlayed = false; // ✅ 用於控制切頁時動畫只跑一次
-window._introPlayed = false;
-let currentList = [];
-let memoryData = JSON.parse(localStorage.getItem('memoryData')) || {};
-let currentListName = "";
-function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-    const btn = id === 'randomPage' ? document.querySelectorAll('.nav button')[0] : document.querySelectorAll('.nav button')[1];
-    btn.classList.add('active');
-    if (id === 'randomPage') {
-        const slotMachine = document.getElementById('slotMachine');
-        const resultCard = document.getElementById('resultCard');
-        const appealArea = document.getElementById('appealArea');
-        slotMachine.innerHTML = '';
-        slotMachine.classList.remove('show');
-        if (!currentListName || currentList.length === 0) {
-            resultCard.textContent = '先選擇清單';
-        } else {
-            resultCard.textContent = `來決定「${currentListName}」!`;
-        }
-        resultCard.classList.remove('glow', 'show');
-        appealArea.innerHTML = '';
-        enableRandomButton();
-        // 同步下拉選單顯示狀態
-const topMemorySelect = document.getElementById('topMemorySelect');
-if (!currentListName) {
-    topMemorySelect.value = "";
-} else {
-    topMemorySelect.value = currentListName;
-}
-        // ✅ 僅第一次切換時播放動畫，避免多次排程錯亂
-        if (!window._introPlayed) {
-            window._introPlayed = true; // ⚡️ 標記已觸發
-            setTimeout(() => {
-                revealIntroText();
-            }, 300);
-        }
-    }
-    const effectContainer = document.getElementById('effectSelectorContainer');
-    effectContainer.style.display = (id === 'randomPage') ? 'block' : 'none';
-}
-function saveMemoryData() {
-  localStorage.setItem('memoryData', JSON.stringify(memoryData));
-}
-function addFood() {
-  const input = document.getElementById('foodInput');
-  const food = input.value.trim();
-  if (food) {
-    currentList.push(food);
-    input.value = '';
-    renderCurrentList();
+  .btn-confirm-red:hover {
+    background-color: #c0392b;
   }
-}
-function renderCurrentList() {
-  const ul = document.getElementById('foodList');
-  ul.innerHTML = '';
-  currentList.forEach((item, index) => {
-    const li = document.createElement('li');
-    const span = document.createElement('span');
-    span.textContent = item;
-    const btn = document.createElement('button');
-    btn.textContent = '✕';
-    btn.className = 'remove-btn';
-    btn.onclick = () => removeItem(index);
-    li.appendChild(span);
-    li.appendChild(btn);
-    ul.appendChild(li);
-  });
-}
-function removeItem(index) {
-  currentList.splice(index, 1);
-  renderCurrentList();
-}
-function clearAllItems() {
-  if (confirm("確定要清除目前所有項目？")) {
-    currentList = [];
-    renderCurrentList();
+  input {
+    padding: 10px;
+    font-size: 16px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border 0.2s, box-shadow 0.2s;
   }
-}
-function saveCurrentList() {
-  const name = prompt("請輸入此清單的名稱：");
-  if (name && name.trim()) {
-    memoryData[name] = [...currentList];
-    currentListName = name;
-    saveMemoryData();
-    // 🔸修正：插入新名稱到 memoryOrder 並存回
-    let memoryOrder = [];
-    try { memoryOrder = JSON.parse(localStorage.getItem('memoryOrder')) || []; } catch {}
-    if (!memoryOrder.includes(name)) {
-      memoryOrder.push(name);
-      localStorage.setItem('memoryOrder', JSON.stringify(memoryOrder));
-    }
-    updateMemorySelect();
-    alert(`已記憶清單：「${name}」`);
+  input:focus {
+    border-color: #3db8c4;
+    box-shadow: 0 0 5px rgba(61, 184, 196, 0.5);
+    outline: none;
   }
-}
-function loadMemoryList() {
-  const selected = document.getElementById('memorySelect').value;
-  if (!selected) {
-    currentList = [];
-    currentListName = "";
-    renderCurrentList();
-    return;
+  .item-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: calc(1.8em * 3 + 20px);
+    overflow-y: auto;
+    padding: 6px;
+    background: #ffffffcc;
+    border-radius: 10px;
   }
-  if (memoryData[selected]) {
-    currentList = [...memoryData[selected]];
-    currentListName = selected;
-    updateMemorySelect();
-    renderCurrentList();
-  }
-}
-function switchMemoryFromTop() {
-  const selected = document.getElementById('topMemorySelect').value;
-  if (!selected) {
-    currentList = [];
-    currentListName = "";
-    renderCurrentList();
-    return;
-  }
-  if (memoryData[selected]) {
-    currentList = [...memoryData[selected]];
-    currentListName = selected;
-    updateMemorySelect();
-    renderCurrentList();
-  }
-}
-function deleteMemoryList() {
-  const selected = document.getElementById('memorySelect').value;
-  if (selected && memoryData[selected]) {
-    if (confirm(`確定要刪除記憶清單：「${selected}」？`)) {
-      delete memoryData[selected];
-      if (currentListName === selected) {
-        currentListName = "";
-        currentList = [];
-        renderCurrentList();
-      }
-      saveMemoryData();
-      updateMemorySelect();
-      alert(`「${selected}」已刪除`);
-    }
-  } else {
-    alert("請先選擇要刪除的清單");
-  }
-}
-function shareList() {
-  const text = JSON.stringify({ name: currentListName, items: currentList });
-  if (navigator.share) {
-    navigator.share({
-      title: '我的選擇清單',
-      text: text
-    }).catch(err => alert("分享失敗：" + err));
-  } else {
-    prompt("請複製以下內容以分享：", text);
-  }
-}
-function importList() {
-  const text = prompt("請貼上分享內容：");
-  if (!text) return;
-  try {
-    const parsed = JSON.parse(text);
-    if (!parsed.name || !Array.isArray(parsed.items)) throw new Error("格式錯誤");
-    memoryData[parsed.name] = parsed.items;
-    currentListName = parsed.name;
-    currentList = [...parsed.items];
-    saveMemoryData();
-
-    // ✅ 修正：插入匯入名稱到記憶順序
-    let memoryOrder = [];
-    try { memoryOrder = JSON.parse(localStorage.getItem('memoryOrder')) || []; } catch {}
-    if (!memoryOrder.includes(parsed.name)) {
-        memoryOrder.push(parsed.name);
-        localStorage.setItem('memoryOrder', JSON.stringify(memoryOrder));
-    }
-
-    updateMemorySelect();
-    renderCurrentList();
-    alert(`成功匯入清單：「${parsed.name}」`);
-  } catch (e) {
-    alert("❌ 匯入失敗：格式錯誤");
-  }
-}
-
-// 初始化
-updateMemorySelect();
-renderCurrentList();
-// ✅ 修正：恢復上次使用的特效（讓 effectSelect 記住使用者選擇）
-const lastEffect = localStorage.getItem('lastEffect') || 'default';
-document.getElementById('effectSelect').value = lastEffect;
-let appealCount = 3;
-let lastIndex = -1; // 記錄上次的結果位置
-function secureRandomIndex(max) {
-  const arr = new Uint32Array(1);
-  window.crypto.getRandomValues(arr);
-  return Math.floor(arr[0] / (2**32) * max);
-}
-function chooseRandom(isAppeal = false) {window._introPlayed = false; // ✅ 點擊抽籤後，下次切頁會重新播放動畫
-window._resultShown = false; // ✅ 每次抽選前重置
-  if (!currentListName || currentList.length === 0) {
-    const randomBtn = document.querySelector('.btn-primary');
-    randomBtn.classList.add('shake');
-    // 同時彈出提示
-    setTimeout(() => {
-      alert("🚫 請先選擇清單");
-      randomBtn.classList.remove('shake');
-    }, 50);
-    return;
-  } 
-  randomBtn.classList.add('disabled');
-  randomBtn.disabled = true;
-  const resultCard = document.getElementById('resultCard');
-  const appealArea = document.getElementById('appealArea');
-  const slotMachine = document.getElementById('slotMachine');
-  const effectContainer = document.getElementById('effectSelectorContainer'); // ← 新增
- slotMachine.style.display = ''; 
-  let effect = document.getElementById('effectSelect')?.value || 'default';
-// 如果是隨機，從 default 與 5 個影片隨機選一個
-if (effect === 'random') {
-    const options = ['default', 'video001', 'video002', 'video003', 'video004', 'video005'];
-    effect = options[Math.floor(Math.random() * options.length)];
-}
-  if (!isAppeal) appealCount = 3;
-  appealArea.innerHTML = '';
-  // ➤ 清除影片區
-  const oldWrapper = document.querySelector('.video-wrapper');
-  if (oldWrapper) oldWrapper.remove();
-  // ➤ 重置拉霸動畫
-  slotMachine.innerHTML = '';
-  slotMachine.classList.remove('show');
-// ✅ 僅第一次隨機選 / 上訴時淡出，之後過程中不會再次淡出
-if (effectContainer.style.display !== 'none') {
-    effectContainer.classList.remove('fade-in-smooth', 'fade-in-anim');
-    effectContainer.classList.add('fade-out-smooth');
-    setTimeout(() => {
-        effectContainer.style.visibility = 'hidden';
-        effectContainer.classList.remove('fade-out-smooth');
-    }, 600);
-}
-if (['video001', 'video002', 'video003', 'video004', 'video005'].includes(effect)) {
-    resultCard.style.display = 'none';
-        let finalIndex = secureRandomIndex(currentList.length); // ✅ 新增
-    lastIndex = finalIndex; // ✅ 新增
-    playVideoEffect(resultCard, effect);
-} else {
-    // ✅ 拉霸前記錄穩定位置（首次執行時記錄）
-    if (!window.effectSelectorStableTop) {
-        const rect = effectContainer.getBoundingClientRect();
-        const scrollTop = window.scrollY || window.pageYOffset;
-        window.effectSelectorStableTop = rect.top + scrollTop;
-    }
-    // ✅ 使用穩定位置鎖定 Effect Selector，避免被推下
-    effectContainer.style.position = 'fixed';
-    effectContainer.style.top = window.effectSelectorStableTop + 'px';
-    resultCard.textContent = '🎰 正在抽籤...';
-    resultCard.classList.add('show', 'glow');
-    runSlotAnimation();
-}
-}
-function updateCurrentList() {
-  if (!currentListName) {
-    alert("⚠️ 尚未選擇任何記憶清單，請先選擇一個要更新的清單");
-    return;
-  }
-  memoryData[currentListName] = [...currentList];
-  saveMemoryData();
-  alert(`✅ 已更新清單：「${currentListName}」`);
-  updateMemorySelect();// 可選，有時候會刷新下拉選單顯示狀態
-// ✅ 套用上次使用的特效
-const lastEffect = localStorage.getItem('lastEffect') || 'default';
-const effectSelect = document.getElementById('effectSelect');
-if (effectSelect) {
-    effectSelect.value = lastEffect;
-}
-}
- function runSlotAnimation() {
-  // ✅ 執行拉霸前固定 Effect Selector 位置避免跳動
-const effectContainer = document.getElementById('effectSelectorContainer');
-  const slotMachine = document.getElementById('slotMachine');
-  const resultCard = document.getElementById('resultCard');
-  const appealArea = document.getElementById('appealArea');
-  let finalIndex = secureRandomIndex(currentList.length);
-  lastIndex = finalIndex;
-  const spinList = [];
-  for (let i = 0; i < 90; i++) {
-    spinList.push(currentList[secureRandomIndex(currentList.length)]);
-  }
-  spinList.push(currentList[finalIndex]);
-  const slotContent = document.createElement('div');
-  slotContent.className = 'slot-content';
-  slotContent.style.animation = 'none';
-  slotContent.innerHTML = spinList.map(item => `<div>${item}</div>`).join('');
-  slotMachine.innerHTML = '';
-  slotMachine.appendChild(slotContent);
-  slotMachine.classList.add('show');
-  void slotContent.offsetWidth;
-  slotContent.style.animation = 'spinScroll 3.2s ease-out forwards';
-  setTimeout(() => {
-    revealResult();
-  }, 3300);
-}
-function revealResult(currentEffect)  {
-console.log('[DEBUG] revealResult currentEffect =', currentEffect);
-if (window._revealRunning) return;
-window._revealRunning = true;
-setTimeout(() => window._revealRunning = false, 1500);
-    const effectContainer = document.getElementById('effectSelectorContainer');
-    const resultCard = document.getElementById('resultCard');
-    const appealArea = document.getElementById('appealArea');
-    const slotMachine = document.getElementById('slotMachine');
-    // ✅ 修正：先清除 refresh-fade-scale，避免污染影片特效
-    resultCard.classList.remove('refresh-fade-scale');
-  // 測量穩定位置一次記錄
-  if (!window.effectSelectorStableTop) {
-    const rect = effectContainer.getBoundingClientRect();
-    const scrollTop = window.scrollY || window.pageYOffset;
-    window.effectSelectorStableTop = rect.top + scrollTop;
-  }
-  setTimeout(() => {
-    resultCard.style.display = '';
-}, 50);
- if (lastIndex < 0) {
-    lastIndex = secureRandomIndex(currentList.length);
-}
-const finalIndex = lastIndex;
-resultCard.textContent = `🎉 ${currentList[finalIndex]}`;
-window._resultShown = true; // ✅ 標記結果已顯示
-requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-        resultCard.classList.add('show', 'glow', 'drop-in');
-        // 只有在需要時加上 refresh-fade-scale
-        if (currentEffect === 'default' || currentEffect === 'random') {
-            resultCard.classList.add('refresh-fade-scale');
-        }
-    });
-});
-resultCard.classList.remove('drop-in');
-requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-        resultCard.classList.add('show', 'glow', 'drop-in');
-    });
-});
-    // ✅ 修正核心：顯式使用傳入的 currentEffect
-    currentEffect = currentEffect || document.getElementById('effectSelect').value;
-    if (currentEffect === 'default' || currentEffect === 'random') {
-        resultCard.classList.remove('refresh-fade-scale');
-        void resultCard.offsetWidth;
-        resultCard.classList.add('refresh-fade-scale');
-    }
-  // ✅ 刷新特效：在結果顯示時套用一次刷新動畫
-  resultCard.classList.add('refresh-pulse');
-  resultCard.addEventListener('animationend', () => {
-    resultCard.classList.remove('refresh-pulse');
-  }, { once: true });
- // 將插入上訴按鈕的程式碼延後到動畫完全完成後再插入
-setTimeout(() => {
-    if (appealCount > 0) {
-        const btn = document.createElement('button');
-        btn.textContent = `上訴！（剩餘${appealCount}次）`;
-        btn.className = 'btn-pink';
-        btn.style.marginTop = '20px';
-        btn.style.backgroundColor = ['#ffe6e6', '#ffb3b3', '#ff6666'][3 - appealCount] || '#ff6666';
-        btn.style.color = '#800000';
-        btn.onclick = () => {
-            appealCount--;
-            chooseRandom(true);
-        };
-        appealArea.appendChild(btn);
-    } else {
-        const finalText = document.createElement('div');
-        finalText.textContent = '認命吧，這就是最好的選擇！';
-        finalText.style.marginTop = '20px';
-        finalText.style.fontWeight = 'bold';
-        finalText.style.color = '#b34400';
-        appealArea.appendChild(finalText);
-    }
-}, 50); // 建議延遲 600~800 ms，與動畫時間對齊
-  enableRandomButton();
-  // ✅ 淡出 slot-machine
-  slotMachine.classList.remove('show');
-  slotMachine.style.display = 'none';
-  // 拉霸結束後恢復原本定位
-  effectContainer.style.position = 'absolute';
-  effectContainer.style.top = '';
-  delete window.effectSelectorStableTop; // ✅ 恢復後清除暫存
-  // ✅ 修正淡入效果確實觸發
-setTimeout(() => {
-    effectContainer.classList.remove('fade-in-anim', 'fade-in-smooth', 'fade-out-smooth');
-    effectContainer.style.visibility = 'visible';
-    void effectContainer.offsetWidth;                // 強制重排以確保動畫觸發
-    effectContainer.classList.add('fade-in-anim');   // 執行動畫
-}, 100);
-}
-  const v = Date.now(); // 每次刷新都帶入唯一值，避開快取
-document.querySelectorAll('link[rel="icon"], link[rel="manifest"]').forEach(el => {
-  if (el.href) {
-    el.href += (el.href.includes('?') ? '&' : '?') + 'v=' + v;
-  }
-});
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js?v=' + v)
-    .then(reg => console.log('SW 註冊成功', reg.scope))
-    .catch(err => console.log('SW 註冊失敗', err));
-}
-const randomBtn = document.querySelector('.btn-primary');
-randomBtn.classList.remove('disabled');
-randomBtn.disabled = false;
-function enableRandomButton() {
-  const randomBtn = document.querySelector('.btn-primary');
-  randomBtn.classList.remove('disabled');
-  randomBtn.disabled = false;
-}
-function fadeOutAndHide(element) {
-    element.classList.add('fade-out-smooth');
-}
-function playVideoEffect(resultCard, effect) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'video-wrapper';
-    document.querySelector('.random-container').insertBefore(wrapper, resultCard);
-    const video = document.createElement('video');
-    const videoMap = {
-    'video001': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video001.mp4',
-    'video002': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video002.mp4',
-    'video003': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video003.mp4',
-    'video004': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video004.mp4',
-    'video005': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video005.mp4',
-};
-video.src = videoMap[effect] || videoMap['video001'];
-    video.autoplay = true;
-    video.playsInline = true;
-    video.muted = true;
-    video.className = "custom-video";
-    wrapper.appendChild(video);
-// ✅ 播放影片前固定 Effect Selector 位置避免跳動
-const effectContainer = document.getElementById('effectSelectorContainer');
-const rect = effectContainer.getBoundingClientRect();
-const scrollTop = window.scrollY || window.pageYOffset;
-effectContainer.style.position = 'fixed';
-effectContainer.style.top = (rect.top + scrollTop) + 'px';
-    // 出現動畫
-    setTimeout(() => {
-        wrapper.classList.add('show');
-    }, 50);
-video.onended = () => {
-    wrapper.classList.add('glow-out');
-    setTimeout(() => {
-        wrapper.remove();
-        // ✅ 播放影片後恢復原本定位
-        effectContainer.style.position = 'absolute';
-        effectContainer.style.top = '';
-        revealResult(effect);// 顯示最終結果
-    }, 1000);
-};
-}
-  function handleEffectChange() {
-    const effect = document.getElementById('effectSelect').value;
-    localStorage.setItem('lastEffect', effect);
-}
-// 深色模式切換與記憶
-const darkModeToggle = document.getElementById('darkModeToggle');
-if (localStorage.getItem('darkMode') === 'enabled') {
-  document.body.classList.add('dark-mode');
-  darkModeToggle.textContent = '☀️';
-}
-darkModeToggle.addEventListener('click', () => {
-  document.body.classList.toggle('dark-mode');
-  if (document.body.classList.contains('dark-mode')) {
-    localStorage.setItem('darkMode', 'enabled');
-    darkModeToggle.textContent = '☀️';
-  } else {
-    localStorage.setItem('darkMode', 'disabled');
-    darkModeToggle.textContent = '🌙';
-  }
-});
-// 排序 Modal 開啟
-function openSortModal() {
-  document.body.style.overflow = 'hidden';
-    const sortList = document.getElementById('sortList');
-    sortList.innerHTML = '';
-let memoryOrder = [];
-try {
-    memoryOrder = JSON.parse(localStorage.getItem('memoryOrder')) || [];
-} catch (e) {
-    memoryOrder = [];
-}
-if (!Array.isArray(memoryOrder) || memoryOrder.length === 0) {
-    memoryOrder = Object.keys(memoryData);
-}
-
-memoryOrder.forEach(name => {
-    if (memoryData[name]) {
-        const li = document.createElement('li');
-        li.textContent = name;
-        li.style.padding = '8px';
-        li.style.margin = '4px 0';
-        li.style.background = '#e9fce6';
-        li.style.borderRadius = '5px';
-        li.style.cursor = 'grab';
-        sortList.appendChild(li);
-    }
-});
-    // 修正：每次開啟前先 destroy 上一次的 sortable 實例，避免觸控無效
-    if (currentSortable) {
-        currentSortable.destroy();
-        currentSortable = null;
-    }
-    currentSortable = Sortable.create(sortList, {
-        animation: 150,
-        touchStartThreshold: 14 // (可選) 提高容錯讓手機更易觸發拖曳
-    });
-    document.getElementById('sortModal').style.display = 'flex';
-}
-// 排序 Modal 關閉
-function closeSortModal() {
-  document.body.style.overflow = '';
-    if (currentSortable) {
-        currentSortable.destroy();
-        currentSortable = null;
-    }
-    document.getElementById('sortModal').style.display = 'none';
-}
-// 排序結果儲存
-function saveSortOrder() {
-    const sortList = document.getElementById('sortList');
-    const sortedNames = Array.from(sortList.children).map(li => li.textContent);
-    localStorage.setItem('memoryOrder', JSON.stringify(sortedNames));
-    closeSortModal();
-    updateMemorySelect();
-}
-// 更新下拉選單使用排序
-function updateMemorySelect() {
-    const selects = [document.getElementById('memorySelect'), document.getElementById('topMemorySelect')];
-    let memoryOrder = [];
-    try {
-        memoryOrder = JSON.parse(localStorage.getItem('memoryOrder'));
-    } catch(e) {
-        memoryOrder = null;
-    }
-    if (!Array.isArray(memoryOrder) || memoryOrder.length === 0) {
-        memoryOrder = Object.keys(memoryData);
-    }
-    selects.forEach(select => {
-        select.innerHTML = '<option value="">-- 請選擇 --</option>';
-        memoryOrder.forEach(name => {
-            if (memoryData[name]) {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                if (name === currentListName) option.selected = true;
-                select.appendChild(option);
-            }
-        });
-    });
-}
-function revealIntroText() {
-    if (window._resultShown) return; // 若已顯示結果，不重播動畫
-    if (window._introTextAnimating) return; // 防止重複觸發
-    const resultCard = document.getElementById('resultCard');
-    const text = resultCard.textContent.trim();
-    if (text === '先選擇清單' || text.startsWith('來決定「')) {
-        // ⚠️ 如果是提示文字，直接顯示並保持，不執行動畫重置
-        resultCard.style.opacity = 1;
-        resultCard.style.transform = 'scale(1)';
-        resultCard.classList.add('show'); // 保證可見
-        return;
-    }
-    window._introTextAnimating = true;
-    resultCard.classList.remove('drop-in', 'refresh-fade-scale', 'glow', 'show');
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            resultCard.classList.add('show', 'glow', 'drop-in');
-            setTimeout(() => { window._introTextAnimating = false; }, 800);
-        });
-    });
-}
-
-function openExportImportModal() {
-  document.getElementById('exportImportModal').style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
-function closeExportImportModal() {
-  document.getElementById('exportImportModal').style.display = 'none';
-  document.body.style.overflow = '';
-}
-
-function singleExport() {
-  shareList(); // 使用原有文字匯出
-}
-
-function singleImport() {
-  importList(); // 使用原有文字匯入
-}
-
-async function multiExport() {
-  const names = Object.keys(memoryData);
-  if (names.length === 0) return alert('⚠️ 沒有可匯出的清單');
-  const dataStr = JSON.stringify(memoryData, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
-  const file = new File([blob], 'ChooseHelper_Lists.json', { type: 'application/json' });
-
-  try {
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        title: '我的選擇小幫手清單',
-        files: [file]
-      });
-    } else if (navigator.share) {
-      await navigator.share({
-        title: '我的選擇小幫手清單',
-        text: dataStr
-      });
-    } else {
-      throw new Error('不支援分享');
-    }
-  } catch (e) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'ChooseHelper_Lists.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-}
-
-function multiImport() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'application/json';
-  input.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const importedData = JSON.parse(ev.target.result);
-        if (typeof importedData !== 'object' || Array.isArray(importedData)) throw new Error();
-        const keys = Object.keys(importedData);
-        if (keys.length === 0) return alert('❌ 匯入檔案內沒有任何清單');
-        const selections = confirm(`將匯入以下 ${keys.length} 筆清單：\n${keys.join(', ')}\n\n確定匯入？`);
-        if (selections) {
-          keys.forEach(name => {
-            if (Array.isArray(importedData[name])) {
-              memoryData[name] = importedData[name];
-            }
-          });
-          saveMemoryData();
-          updateMemorySelect();
-          alert(`✅ 已匯入 ${keys.length} 筆清單`);
-        }
-      } catch {
-        alert('❌ 匯入失敗：檔案格式錯誤');
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-</script>
-  <div class="footer-note">Designed by KJ&nbsp;&nbsp;</div>
-<div id="sortModal" style="
+  .item-box {
+    background: #e0f4ff;
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 14px;
+    white-space: nowrap;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-direction: column;
+  }
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #c0392b;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: 6px;
+    flex-shrink: 0;
+  }
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     z-index: 9999;
-    display: none; /* 預設隱藏，打開時設為 flex */
-">
-  <div style="
-    background: #fff;
-    padding: 16px;
-    border-radius: 8px;
-    max-width: 320px;
-    width: 85%;
-    max-height: 65vh;                 /* ✅ 修正 h → vh */
-    overflow-y: auto;                 /* ✅ 可滑動 */
-    touch-action: pan-y;              /* ✅ 空白處可滑動 */
-    -webkit-overflow-scrolling: touch; /* ✅ iOS 慣性滑動 */
-">
-    <h3>拖曳排序清單</h3>
-    <ul id="sortList" style="list-style: none; padding: 0; max-height: 300px; overflow: auto;"></ul>
-    <button class="btn-primary" onclick="saveSortOrder()">儲存順序</button>
-    <button class="btn-pink" onclick="closeSortModal()">關閉</button>
+  }
+  .modal-content {
+    background: white;
+    max-width: 90%;
+    max-height: 80%;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+  }
+  .modal-content button {
+    margin: 6px 6px;
+  }
+  .hidden { display: none; }
+  @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+  }
+  .spin-animation {
+      animation: spin 1s linear infinite;
+      display: inline-block;
+  }
+  .result-final {
+    font-size: 1.8em;
+    color: #3db8c4;
+    font-weight: bold;
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  .debug-box {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    height: 150px;
+    background: #f0f0f0;
+    border: 1px solid #000;
+    overflow-y: auto;
+    padding: 10px;
+    font-size: 12px;
+    z-index: 10000;
+    font-family: monospace;
+  }
+  .debug-box { display: none !important; }
+
+.exit-btn {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  background: url('https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/exit.jpg') center center no-repeat;
+  background-size: 24px 24px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  opacity: 0.7;
+  cursor: pointer;
+  z-index: 20000;
+  transition: opacity 0.2s, box-shadow 0.2s;
+  background-color: #e7faf1;
+  border: 1.5px solid #dbf4e6;
+}
+.exit-btn:hover {
+  opacity: 1;
+  box-shadow: 0 3px 10px rgba(50,150,120,0.18);
+  background-color: #d1f7e4;
+}
+
+.btn-draw {
+  background: linear-gradient(90deg, #FFD267 40%, #FFB85C 100%);
+  color: #323e50;
+  border: none;
+  border-radius: 18px;
+  font-size: 1.5em;
+  font-weight: 700;
+  padding: 18px 38px;
+  box-shadow: 0 6px 20px rgba(255, 213, 103, 0.13);
+  cursor: pointer;
+  transition: background 0.18s, transform 0.08s;
+  margin: 22px auto 10px auto;
+  display: block;
+  letter-spacing: 2px;
+}
+.btn-draw:hover {
+  background: linear-gradient(90deg, #FFB85C 40%, #FFA63C 100%);
+  color: #fff;
+  transform: scale(1.07);
+  box-shadow: 0 8px 24px rgba(255, 184, 92, 0.19);
+}
+
+/* 決定方式字體色彩更融合 */
+#decideModeDisplay {
+  color: #FF7577 !important; /* 較淺紅橘 */
+  background: linear-gradient(135deg, rgba(255, 237, 237, 0.78) 0%, rgba(255, 173, 173, 0.28) 100%);
+  padding: 4px 16px;
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 1.1em;
+  letter-spacing: 1.2px;
+  margin-top: 10px;
+  display: inline-block;
+  /* 柔和淡淡的陰影 */
+  box-shadow: 0 2px 10px 0 rgba(255, 120, 120, 0.10);
+  transition: box-shadow 0.19s;
+  border: none;
+}
+
+
+/* 動畫區域外框 */
+.lottery-animate-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;      /* 高度加高一些 */
+  min-width: 240px;
+  padding: 32px 36px;     /* 上下左右都一樣多 */
+  border-radius: 28px;    /* 圓角稍小一點更和諧 */
+  background: linear-gradient(135deg, #fff3e3 0%, #ffe8ee 100%);
+  box-shadow: 0 0 36px 0 rgba(255, 160, 90, 0.09), 0 2px 12px 0 rgba(255,77,79,0.06);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.35s;
+}
+
+/* 字體動畫 */
+.lottery-animate-text {
+  font-size: 2.5em;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #FF4D4F;
+  text-shadow: 0 4px 24px rgba(255,77,79,0.25), 0 1px 0 #fff;
+  animation: pop-in 0.33s cubic-bezier(.52,2.1,.45,.85);
+  will-change: transform;
+  user-select: none;
+  transition: color 0.2s;
+}
+@keyframes pop-in {
+  0%   { transform: scale(0.7) rotate(-7deg);}
+  60%  { transform: scale(1.25) rotate(3deg);}
+  90%  { transform: scale(0.92);}
+  100% { transform: scale(1);}
+}
+/* 最終定格閃爍效果 */
+.lottery-final {
+  background: linear-gradient(98deg, #A5252B 0%, #C72A36 44%, #FFD600 51%, #C72A36 58%, #A5252B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+
+  font-family: 'Segoe UI', 'PingFang TC', 'Heiti TC', 'Arial', sans-serif;
+  font-weight: 900;
+  font-size: 2.7em;
+  letter-spacing: 2.5px;
+
+  /* 主體深紅，金光偏淡收斂 */
+  text-shadow:
+    0 1px 5px #FFD60024,     /* 柔和小金暈 */
+    0 0 1px #C72A36ee,     /* 主陰影-深紅 */
+    0 1.2px 0 #A5252Bdd,     /* 邊緣壓線 */
+    0 0 6px #FFD6001a;       /* 補充金光，非常淡 */
+
+  animation: final-glow-redgold 1.2s ease-in-out alternate infinite;
+}
+
+@keyframes final-glow-redgold {
+  0% {
+    text-shadow:
+      0 1px 5px #FFD6001a,
+      0 0 2.5px #C72A36ee,
+      0 1.2px 0 #A5252Bdd,
+      0 0 6px #FFD6000f;
+  }
+  15% {
+    text-shadow:
+      0 1px 5px #FFD60038,
+      0 0 4px #C72A36cc,
+      0 1.5px 0 #A5252Bcc,
+      0 0 5px #FFD60022;
+  }
+}
+
+
+</style>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyBUbKgC4P7wGFQqZZmgJU890qOe_4yC9kA",
+    authDomain: "choosehel.firebaseapp.com",
+    databaseURL: "https://choosehel-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "choosehel",
+    storageBucket: "choosehel.appspot.com",
+    messagingSenderId: "116763876894",
+    appId: "1:116763876894:web:1662b36ef2fa815863d80f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let userId;
+let hasShownReeditSuccess = false;
+let hasShownConfirmModal = false;
+let hasShownReeditModal = false;
+let lastConfirmInitiator = null;
+let lastReeditInitiator = null;
+
+// Debug function to log messages to the appropriate debug box
+function logDebug(message) {
+    const activePage = document.querySelector('.page.active');
+    let debugBox;
+    if (activePage.id === 'multiPage') {
+        debugBox = document.getElementById('multiDebugBox');
+    } else if (activePage.id === 'decidePage') {
+        debugBox = document.getElementById('decideDebugBox');
+    }
+    if (debugBox) {
+        debugBox.innerHTML += `<p>${new Date().toLocaleTimeString()} - ${message}</p>`;
+        debugBox.scrollTop = debugBox.scrollHeight;
+    }
+}
+
+// Debounce function to reduce repeated Firebase triggers
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+async function createRoom() {
+    logDebug("createRoom: Starting room creation");
+    const roomName = document.getElementById('roomNameInput').value.trim();
+    const verificationCodeInput = document.getElementById('verificationCodeInput').value.trim();
+    const userName = document.getElementById('userNameInput').value.trim();
+
+    if (!roomName || !userName) {
+        logDebug("createRoom: Missing roomName or userName");
+        showModal('請輸入房間名稱和你的名稱', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+        return;
+    }
+
+    let verificationCode = verificationCodeInput || generateVerificationCode();
+    const roomIdRaw = `${roomName}-${verificationCode}`;
+    const roomId = encodeURIComponent(roomIdRaw);
+    const createBtn = document.querySelector('#setupPage .btn-primary');
+    createBtn.disabled = true;
+    createBtn.innerHTML = '<span class="spin-animation">⏳</span> 建立中...';
+    logDebug(`createRoom: Attempting to create/join room ${roomId}`);
+
+    userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem(`currentUserId_${roomId}`, userId);
+    localStorage.setItem('currentRoomId', roomId);
+    logDebug(`createRoom: Generated userId ${userId} for user ${userName} in room ${roomId}`);
+
+    const roomRef = db.ref('rooms/' + roomId);
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await roomRef.child('participants').once('value');
+            const participants = snapshot.val() || {};
+            logDebug(`createRoom: Found ${Object.keys(participants).length} participants`);
+            if (Object.keys(participants).length === 0) {
+                await roomRef.update({
+                    finalResult: null,
+                    drawResult: null,
+                    isDrawing: null,
+                    vote: null,
+                    confirm: null,
+                    editConfirm: null
+                });
+                logDebug("createRoom: Initialized empty room");
+            }
+            await roomRef.update({
+                name: roomName,
+                code: verificationCode,
+                creator: userName                
+            });
+            const participantRef = roomRef.child('participants/' + userId);
+            await participantRef.set({ name: userName, lastActive: Date.now() });
+            logDebug(`createRoom: Added user ${userId} (${userName})`);
+
+            document.getElementById('setupPage').classList.remove('active');
+            document.getElementById('multiPage').classList.add('active');
+            document.getElementById('roomNameDisplay').textContent = `房間：${roomName} `;
+document.getElementById('roomCodeDisplay').textContent = `(驗證碼：${verificationCode})`;
+
+            logDebug("createRoom: Switched to multiPage");
+window.keepAliveTimer && clearInterval(window.keepAliveTimer);
+window.keepAliveTimer = setInterval(() => {
+  const roomId = localStorage.getItem('currentRoomId');
+  const userId = localStorage.getItem(`currentUserId_${roomId}`);
+  if (roomId && userId) {
+    db.ref(`rooms/${roomId}/participants/${userId}/lastActive`).set(Date.now());
+  }
+}, 30000); // 每30秒
+
+window.addEventListener('beforeunload', () => {
+  clearInterval(window.keepAliveTimer);
+});
+// ⬆⬆⬆ 到這裡 ⬆⬆⬆
+            loadRoomData(roomId);
+            listenConfirmation(roomId);
+            listenVote(roomId);
+            listenReedit(roomId); // 確保重新編輯監聽在房間創建時啟動
+            createBtn.disabled = false;
+            createBtn.innerHTML = '建立 / 加入';
+            logDebug("createRoom: Successfully created/joined room");
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`createRoom: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                console.error('createRoom: Firebase error after retries:', error);
+                showModal('房間建立失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                createBtn.disabled = false;
+                createBtn.innerHTML = '建立 / 加入';
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+}
+
+function showModal(content, buttons, modalId = 'generic') {
+    if (document.querySelector(`.modal[data-modalId="${modalId}"]`)) {
+        logDebug(`showModal: Modal ${modalId} already exists, skipping`);
+        return;
+    }
+    closeModalById(modalId);
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.dataset.modalId = modalId;
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    modalContent.innerHTML = `<p style="font-size:18px;">${content}</p>`;
+    buttons.forEach(btn => {
+        const button = document.createElement('button');
+        button.className = btn.class || 'btn-primary';
+        button.textContent = btn.text;
+        button.onclick = () => {
+            logDebug(`showModal: Button clicked - ${btn.text} for modal ${modalId}`);
+            modal.remove();
+            btn.onClick();
+        };
+        modalContent.appendChild(button);
+    });
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    logDebug(`showModal: Displayed modal ${modalId} with content: ${content}`);
+}
+
+function closeModalById(modalId) {
+    const modal = document.querySelector(`.modal[data-modalId="${modalId}"]`);
+    if (modal) {
+        modal.remove();
+        logDebug(`closeModalById: Closed modal ${modalId}`);
+    }
+}
+
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        logDebug(`closeAllModals: Closing modal ${modal.dataset.modalId}`);
+        modal.remove();
+    });
+}
+
+function loadRoomData(roomId) {
+    logDebug("loadRoomData: Loading room data");
+     // ⬇⬇⬇ 加在這裡（只要進房就一定會掃描） ⬇⬇⬇
+    window.inactiveCleanupTimer && clearInterval(window.inactiveCleanupTimer);
+    window.inactiveCleanupTimer = setInterval(() => {
+      if (!roomId) return;
+      db.ref(`rooms/${roomId}/participants`).once('value').then(snap => {
+        const now = Date.now();
+        const users = snap.val() || {};
+        Object.entries(users).forEach(([uid, obj]) => {
+          if (obj.lastActive && now - obj.lastActive > 2*60*1000) { // 2分鐘
+            db.ref(`rooms/${roomId}/participants/${uid}`).remove();
+          }
+        });
+      });
+    }, 20000);
+
+    window.addEventListener('beforeunload', () => {
+      clearInterval(window.inactiveCleanupTimer);
+    });
+    // ⬆⬆⬆ 到這裡 ⬆⬆⬆
+    const roomRef = db.ref('rooms/' + roomId);
+    const participantContainer = document.getElementById('participantContainer');
+    const listContainer = document.getElementById('listContainer');
+
+    roomRef.child('isDrawing').on('value', snap => {
+        const isDrawing = snap.val();
+        logDebug(`loadRoomData: isDrawing changed to ${isDrawing}`);
+        if (isDrawing) {
+            playDrawAnimation(roomId);
+        }
+    });
+
+// 你的原本監聽 isDrawing
+roomRef.child('isDrawing').on('value', snap => {
+    const isDrawing = snap.val();
+    logDebug(`loadRoomData: isDrawing changed to ${isDrawing}`);
+    // 控制抽籤按鈕
+    const drawBtn = document.querySelector('#decidePage .btn-draw');
+    if (drawBtn) drawBtn.disabled = !!isDrawing;
+
+    if (isDrawing) {
+        playDrawAnimation(roomId);
+    }
+});
+
+// 你的原本監聽 finalResult
+roomRef.child('finalResult').on('value', snap => {
+    const result = snap.val();
+    logDebug(`loadRoomData: finalResult changed to ${result}`);
+    // 控制抽籤按鈕
+    const drawBtn = document.querySelector('#decidePage .btn-draw');
+    if (drawBtn) drawBtn.disabled = !!result; // 結果有值也禁用
+
+    if (result) {
+        if (!document.getElementById('decidePage').classList.contains('active')) {
+            document.getElementById('multiPage').classList.remove('active');
+            document.getElementById('decidePage').classList.add('active');
+            logDebug("loadRoomData: Switched to decidePage due to finalResult");
+        }
+        setTimeout(() => {
+            showFinalResult(result);
+        }, 150);
+    }
+});
+
+
+    roomRef.child('participants').on('value', snapshot => {
+        const data = snapshot.val() || {};
+        logDebug(`loadRoomData: Participants updated, count: ${Object.keys(data).length}`);
+        participantContainer.innerHTML = '';
+        const participantCountDisplay = document.getElementById('participantCount');
+        if (participantCountDisplay) {
+            participantCountDisplay.textContent = `參與者(${Object.keys(data).length}人)：`;
+        }
+
+        const decideParticipantContainer = document.getElementById('decideParticipantContainer');
+        const decideParticipantCountDisplay = document.getElementById('decideParticipantCount');
+        if (decideParticipantContainer) decideParticipantContainer.innerHTML = '';
+        if (decideParticipantCountDisplay) {
+            decideParticipantCountDisplay.textContent = `參與者(${Object.keys(data).length}人)：`;
+        }
+
+        Object.values(data).forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            div.textContent = p.name;
+            participantContainer.appendChild(div);
+
+            if (decideParticipantContainer) {
+                const divClone = div.cloneNode(true);
+                decideParticipantContainer.appendChild(divClone);
+            }
+        });
+    });
+
+    roomRef.child('list').on('value', snapshot => {
+        const items = snapshot.val() || [];
+        logDebug(`loadRoomData: List updated, items: ${items.length}`);
+        listContainer.innerHTML = '';
+        items.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'item-box';
+            const span = document.createElement('span');
+            span.textContent = item;
+            const btn = document.createElement('button');
+            btn.textContent = '✕';
+            btn.className = 'remove-btn';
+            btn.onclick = () => removeItem(index);
+            div.appendChild(span);
+            div.appendChild(btn);
+            listContainer.appendChild(div);
+        });
+    });
+
+    roomRef.child('decisionMode').on('value', snapshot => {
+        const mode = snapshot.val() || '';
+        logDebug(`loadRoomData: Decision mode changed to ${mode}`);
+        document.getElementById('selectedMode').textContent = mode ? `已選擇【${mode}】` : '';
+
+        const decideModeDisplay = document.getElementById('decideModeDisplay');
+        if (decideModeDisplay) decideModeDisplay.textContent = mode ? `【${mode}】` : '';
+    });
+
+    roomRef.child('name').once('value').then(nameSnap => {
+    const roomName = nameSnap.val() || '';
+    roomRef.child('code').once('value').then(codeSnap => {
+        const verificationCode = codeSnap.val() || '';
+        const decideRoomNameDisplay = document.getElementById('decideRoomNameDisplay');
+        const decideRoomCodeDisplay = document.getElementById('decideRoomCodeDisplay');
+        if (decideRoomNameDisplay) decideRoomNameDisplay.textContent = `房間：${roomName}`;
+        if (decideRoomCodeDisplay) decideRoomCodeDisplay.textContent = `(驗證碼：${verificationCode})`;
+        logDebug(`loadRoomData: Room name set to ${roomName}, code: ${verificationCode}`);
+    });
+});
+
+
+roomRef.child('isDeciding').on('value', snap => {
+    const isDeciding = snap.val();
+    logDebug(`loadRoomData: isDeciding changed to ${isDeciding}`);
+    const decidePage = document.getElementById('decidePage');
+    const multiPage = document.getElementById('multiPage');
+    const confirmRef = db.ref(`rooms/${roomId}/confirm`);
+    const reeditRef = db.ref(`rooms/${roomId}/editConfirm`);
+
+    if (isDeciding && !decidePage.classList.contains('active')) {
+        logDebug("loadRoomData: Switching to decidePage");
+        multiPage.classList.remove('active');
+        decidePage.classList.add('active');
+        confirmRef.off('value');
+        confirmRef.remove();
+        listenReedit(roomId);
+        listenVote(roomId);
+    } else if (!isDeciding && !multiPage.classList.contains('active')) {
+        logDebug("loadRoomData: Switching to multiPage");
+        decidePage.classList.remove('active');
+        multiPage.classList.add('active');
+        reeditRef.off('value');
+        reeditRef.remove();
+        confirmRef.remove();
+        closeAllModals();
+        listenConfirmation(roomId);
+    } else if (isDeciding) {
+        listenReedit(roomId);
+        listenVote(roomId);
+    }
+});
+
+}
+
+async function addItem() {
+    logDebug("addItem: Starting item addition");
+    const roomId = localStorage.getItem('currentRoomId');
+    const input = document.getElementById('itemInput');
+    const value = input.value.trim();
+    if (!value) {
+        logDebug("addItem: Empty input, aborting");
+        return;
+    }
+
+    const addBtn = document.querySelector('#multiPage .btn-primary[onclick="addItem()"]');
+    addBtn.disabled = true;
+    addBtn.innerHTML = '<span class="spin-animation">⏳</span> 新增中...';
+    logDebug("addItem: Button disabled, adding item");
+
+    const listRef = db.ref('rooms/' + roomId + '/list');
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await listRef.once('value');
+            let list = snapshot.val() || [];
+            list.push(value);
+            await listRef.set(list);
+            logDebug(`addItem: Added item ${value} to list`);
+            input.value = '';
+            addBtn.disabled = false;
+            addBtn.innerHTML = '新增項目';
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`addItem: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                console.error('addItem: Firebase error after retries:', error);
+                showModal('新增項目失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                addBtn.disabled = false;
+                addBtn.innerHTML = '新增項目';
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+}
+
+async function removeItem(index) {
+    logDebug(`removeItem: Attempting to remove item at index ${index}`);
+    const roomId = localStorage.getItem('currentRoomId');
+    const listRef = db.ref('rooms/' + roomId + '/list');
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await listRef.once('value');
+            let list = snapshot.val() || [];
+            list.splice(index, 1);
+            await listRef.set(list);
+            logDebug(`removeItem: Removed item at index ${index}`);
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`removeItem: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                console.error('removeItem: Firebase error after retries:', error);
+                showModal('移除項目失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+}
+
+function shareRoom() {
+    logDebug("shareRoom: Initiating room sharing");
+    const roomId = localStorage.getItem('currentRoomId');
+    const roomRef = db.ref(`rooms/${roomId}`);
+
+    roomRef.once('value').then(snapshot => {
+        const data = snapshot.val() || {};
+        const roomName = data.name || '';
+        const verificationCode = data.code || '';
+        const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(roomName)}&code=${encodeURIComponent(verificationCode)}`;
+        logDebug(`shareRoom: Generated share URL: ${url}`);
+
+        showModal('請選擇分享方式', [
+            {
+                text: '📤 分享',
+                class: 'btn-primary',
+                onClick: () => {
+                    logDebug("shareRoom: Share button clicked");
+                    if (navigator.share) {
+                        navigator.share({
+                            title: `加入我的選擇房間 - ${roomName}`,
+                            text: '點擊快速加入房間！',
+                            url
+                        }).catch(err => {
+                            logDebug(`shareRoom: Share failed: ${err.message}`);
+                            showModal('分享失敗: ' + err, [
+                                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                            ], 'error');
+                        });
+                    } else {
+                        logDebug("shareRoom: Device does not support sharing");
+                        showModal('此裝置不支援直接分享功能', [
+                            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                        ], 'error');
+                    }
+                }
+            },
+            {
+                text: '📋 複製連結',
+                class: 'btn-primary',
+                onClick: () => {
+                    logDebug("shareRoom: Copy link button clicked");
+                    navigator.clipboard.writeText(url)
+                        .then(() => {
+                            logDebug("shareRoom: Link copied successfully");
+                            showModal('已複製連結，可直接貼給朋友！', [
+                                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                            ], 'success');
+                        })
+                        .catch(err => {
+                            logDebug(`shareRoom: Copy failed: ${err.message}`);
+                            showModal('複製失敗，請手動複製', [
+                                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                            ], 'error');
+                        });
+                }
+            },
+            {
+                text: '❌ 取消',
+                class: 'btn-confirm',
+                onClick: () => {
+                    logDebug("shareRoom: Cancel button clicked");
+                }
+            }
+        ], 'share');
+    });
+}
+
+function listenConfirmation(roomId) {
+    logDebug("listenConfirmation: Starting confirmation listener");
+    const confirmRef = db.ref(`rooms/${roomId}/confirm`);
+    const modalId = 'confirm';
+    let lastProcessedData = null;
+
+    confirmRef.on('value', debounce(async snapshot => {
+        const data = snapshot.val();
+        const dataString = JSON.stringify(data);
+        if (dataString === lastProcessedData) {
+            logDebug("listenConfirmation: Data unchanged, skipping");
+            return;
+        }
+        closeModalById(modalId); // 提前關閉模態框
+        lastProcessedData = dataString;
+        logDebug(`listenConfirmation: Received data: ${dataString}, User: ${userId}`);
+
+        try {
+            const roomSnap = await db.ref(`rooms/${roomId}`).once('value');
+            const roomData = roomSnap.val() || {};
+            const isDeciding = roomData.isDeciding;
+            const hasFinalResult = !!roomData.finalResult;
+            logDebug(`listenConfirmation: Room state - isDeciding: ${isDeciding}, hasFinalResult: ${hasFinalResult}`);
+
+            if (isDeciding || hasFinalResult) {
+                logDebug("listenConfirmation: Terminating due to isDeciding or finalResult");
+                closeAllModals();
+                await confirmRef.remove();
+                confirmRef.off('value');
+                return;
+            }
+
+if (!data) {
+    logDebug("listenConfirmation: No data, skip showing cancel modal");
+    closeAllModals();
+    // 這裡不要 showModal，因為 confirm 本來就沒有
+    return;
+}
+
+
+            if (!data.active || data.status === 'cancelled') {
+                logDebug("listenConfirmation: Confirmation cancelled or inactive");
+                closeAllModals();
+                const cancelledByName = data.cancelledBy ? (await db.ref(`rooms/${roomId}/participants/${data.cancelledBy}`).once('value')).val()?.name || '未知用戶' : '未知用戶';
+                showModal(`❌ 確認流程已被 ${cancelledByName} 取消。`, [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                await confirmRef.remove();
+                return;
+            }
+
+            if (data.status !== 'pending') {
+                logDebug("listenConfirmation: Not pending, cleaning up");
+                closeModalById(modalId);
+                return;
+            }
+
+            if (!data.initiator || !data.initiatorName) {
+                logDebug("listenConfirmation: Invalid initiator data, ignoring");
+                await confirmRef.remove();
+                closeModalById(modalId);
+                showModal('❌ 確認流程無效，已取消。', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                return;
+            }
+
+            const participantSnap = await db.ref(`rooms/${roomId}/participants`).once('value');
+            const participants = participantSnap.val() || {};
+            const total = Object.keys(participants).length;
+            const responses = data.responses || {};
+            const agreeCount = Object.values(responses).filter(v => v === true).length;
+            const disagreeCount = Object.values(responses).filter(v => v === false).length;
+
+            // 確保票數更新
+            await confirmRef.update({
+                agreeCount: agreeCount,
+                disagreeCount: disagreeCount
+            });
+            logDebug(`listenConfirmation: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
+
+            const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+
+            if (disagreeCount > 0) {
+                logDebug("listenConfirmation: Someone disagreed, cancelling");
+                await confirmRef.update({ status: 'cancelled', active: false });
+                closeAllModals();
+                showModal(`❌ 有人不同意清單<br>（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`, [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                await confirmRef.remove();
+                return;
+            }
+
+            if (agreeCount === total && total > 0) {
+                logDebug("listenConfirmation: All agreed, switching to decidePage");
+                await confirmRef.update({ status: 'completed', active: false });
+                await db.ref(`rooms/${roomId}/isDeciding`).set(true);
+                const multiPage = document.getElementById('multiPage');
+                const decidePage = document.getElementById('decidePage');
+                if (!decidePage.classList.contains('active')) {
+                    logDebug("listenConfirmation: Forcing switch to decidePage");
+                    multiPage.classList.remove('active');
+                    decidePage.classList.add('active');
+                    showModal('✅ 所有人同意，進入抽籤頁面！', [
+                        { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                    ], 'success');
+                }
+                return;
+            }
+
+            if (responses[userId] === true) {
+                logDebug("listenConfirmation: User has agreed, showing waiting modal");
+                showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
+                return;
+            }
+
+            logDebug("listenConfirmation: Showing confirmation modal for user");
+closeAllModals();
+            showModal(`已發起清單確認，是否同意？<br>${progressText}`, [
+                {
+                    text: '同意',
+                    class: 'btn-confirm',
+                    onClick: async () => {
+                        logDebug("listenConfirmation: User agrees");
+                        await confirmRef.child('responses').child(userId).set(true);
+                        showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中...<br> ${progressText}`, modalId);
+                    }
+                },
+                {
+                    text: '不同意',
+                    class: 'btn-primary',
+                    onClick: async () => {
+                        logDebug("listenConfirmation: User disagrees");
+                        await confirmRef.child('responses').child(userId).set(false);
+                    }
+                }
+            ], modalId);
+        } catch (error) {
+            logDebug(`listenConfirmation: Error: ${error.message}`);
+            showModal('處理確認流程失敗，請稍後再試！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+        }
+    }, 500));
+}
+
+async function requestConfirmation() {
+    logDebug("requestConfirmation: Starting confirmation request");
+    const roomId = localStorage.getItem('currentRoomId');
+    const userId = localStorage.getItem(`currentUserId_${roomId}`);
+    if (!userId) {
+        logDebug("requestConfirmation: No userId found in localStorage");
+        showModal('用戶身份驗證失敗，請重新加入房間！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => { window.location.reload(); } }
+        ], 'error');
+        return;
+    }
+    logDebug(`requestConfirmation: Current userId: ${userId}`);
+    const confirmRef = db.ref(`rooms/${roomId}/confirm`);
+    const confirmBtn = document.querySelector('.btn-confirm-red');
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="spin-animation">⏳</span> 提交中...';
+    logDebug("requestConfirmation: Button disabled, initiating request");
+
+    try {
+        const modeSnap = await db.ref(`rooms/${roomId}/decisionMode`).once('value');
+        const mode = modeSnap.val();
+        if (!mode) {
+            logDebug("requestConfirmation: No decision mode selected");
+            showModal('請先選擇決定方式！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '我同意此清單';
+            return;
+        }
+
+        const isDecidingSnap = await db.ref(`rooms/${roomId}/isDeciding`).once('value');
+        if (isDecidingSnap.exists() && isDecidingSnap.val() === true) {
+            logDebug("requestConfirmation: Room is already deciding");
+            showModal('房間正在進行決定中，請稍後再試！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '我同意此清單';
+            return;
+        }
+
+        const participantSnap = await db.ref(`rooms/${roomId}/participants/${userId}`).once('value');
+        if (!participantSnap.exists()) {
+            logDebug("requestConfirmation: UserId not found in participants");
+            showModal('用戶身份無效，請重新加入房間！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => { window.location.reload(); } }
+            ], 'error');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '我同意此清單';
+            return;
+        }
+
+        await confirmRef.transaction(currentData => {
+            logDebug("requestConfirmation: Clearing confirm data via transaction");
+            return null;
+        });
+        const userName = participantSnap.val().name || '未知';
+        await confirmRef.set({
+            active: true,
+            initiator: userId,
+            initiatorName: userName,
+            status: 'pending',
+            responses: {},
+            agreeCount: 0,    // 新增：初始化同意票數
+            disagreeCount: 0, // 新增：初始化不同意票數
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        logDebug(`requestConfirmation: Set confirm data for initiator ${userName} (${userId})`);
+        showWaitingModal(confirmRef, userId, '已發起清單確認，等待所有人同意...', 'confirm');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '我同意此清單';
+    } catch (error) {
+        logDebug(`requestConfirmation: Firebase error: ${error.message}`);
+        console.error('requestConfirmation: Firebase 設定錯誤:', error);
+        showModal('確認流程啟動失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '我同意此清單';
+    }
+}
+
+function showWaitingModal(ref, userId, message, modalId) {
+    logDebug(`showWaitingModal: Displaying waiting modal ${modalId}`);
+    showModal(message, [
+        {
+            text: '取消',
+            class: 'btn-primary',
+            onClick: async () => {
+                logDebug(`showWaitingModal: Cancel button clicked for ${modalId} by user ${userId}`);
+                try {
+                    await ref.update({
+                        status: 'cancelled',
+                        active: false,
+                        cancelledBy: userId,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    logDebug(`showWaitingModal: Set ${modalId} to cancelled state`);
+                    closeModalById(modalId);
+                } catch (error) {
+                    logDebug(`showWaitingModal: Error setting cancelled state: ${error.message}`);
+                    showModal('取消流程失敗，請稍後再試！', [
+                        { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                    ], 'error');
+                }
+            }
+        }
+    ], modalId);
+}
+
+async function startDraw() {
+    logDebug("startDraw: Starting draw process");
+    const drawBtn = document.querySelector('#decidePage .btn-draw');
+    drawBtn.disabled = true;
+    drawBtn.innerHTML = '<span class="spin-animation">⏳</span> 抽籤中...';
+    const roomId = localStorage.getItem('currentRoomId');
+    const roomRef = db.ref(`rooms/${roomId}`);
+
+    try {
+        // 1. 用 transaction 搶鎖，isDrawing 填 userId（誰先搶到誰抽）
+        const txResult = await roomRef.child('isDrawing').transaction(current => {
+            if (current) return; // 有人正在抽籤，不動
+            return userId;       // 把 userId 當抽籤鎖
+        });
+
+        if (!txResult.committed) {
+            showModal('已有人正在抽籤，請等待結果...', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'info');
+            drawBtn.disabled = false;
+            drawBtn.innerHTML = '🎲 開始抽籤';
+            return;
+        }
+
+        // 2. 基本狀態檢查
+        const [finalResultSnap, isDecidingSnap] = await Promise.all([
+            roomRef.child('finalResult').once('value'),
+            roomRef.child('isDeciding').once('value')
+        ]);
+        if (finalResultSnap.val() || !isDecidingSnap.val()) {
+            logDebug(`startDraw: Invalid state - finalResult: ${finalResultSnap.val()}, isDeciding: ${isDecidingSnap.val()}`);
+            showModal(
+                finalResultSnap.val()
+                    ? `本次結果出爐[${finalResultSnap.val()}]<br>，請重新編輯清單以開始新抽籤！`
+                    : '房間狀態無效，請重新確認清單！',
+                [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ],
+                'error'
+            );
+            await roomRef.child('isDrawing').set(null); // 還原鎖
+            drawBtn.disabled = false;
+            drawBtn.innerHTML = '🎲 開始抽籤';
+            return;
+        }
+
+        // 3. 產生項目
+        const [listSnap, modeSnap] = await Promise.all([
+            roomRef.child('list').once('value'),
+            roomRef.child('decisionMode').once('value')
+        ]);
+        const items = listSnap.val() || [];
+        const mode = modeSnap.val() || '一抽入魂';
+        logDebug(`startDraw: Items count: ${items.length}, Mode: ${mode}`);
+
+        if (items.length === 0) {
+            logDebug("startDraw: No items to draw");
+            showModal('⚠️ 目前沒有可抽籤的項目', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            await roomRef.child('isDrawing').set(null); // 還原鎖
+            drawBtn.disabled = false;
+            drawBtn.innerHTML = '🎲 開始抽籤';
+            return;
+        }
+
+        // 4. 抽選流程
+        const finalItem = items[Math.floor(Math.random() * items.length)];
+        const spinList = [];
+        for (let i = 0; i < 35; i++) {
+            spinList.push(items[Math.floor(Math.random() * items.length)]);
+        }
+        spinList.push(finalItem);
+        logDebug(`startDraw: Generated spinList, finalItem: ${finalItem}`);
+
+        // 5. 記錄結果
+        await roomRef.update({
+            isDrawing: userId,
+            drawResult: finalItem,
+            drawAnimation: spinList,
+            vote: null // Clear vote data before draw
+        });
+        logDebug("startDraw: Updated Firebase with draw data");
+        drawBtn.disabled = false;
+        drawBtn.innerHTML = '🎲 開始抽籤';
+    } catch (error) {
+        logDebug(`startDraw: Firebase error: ${error.message}`);
+        await db.ref(`rooms/${roomId}/isDrawing`).set(null); // 錯誤要釋放鎖
+        showModal('抽籤失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+        drawBtn.disabled = false;
+        drawBtn.innerHTML = '🎲 開始抽籤';
+    }
+}
+
+function chooseDecisionMode() {
+    logDebug("chooseDecisionMode: Opening decision mode modal");
+    showModal('選擇決定方式', [
+        { text: '一抽入魂', onClick: () => setDecisionMode('一抽入魂') },
+        { text: '多數決', onClick: () => setDecisionMode('多數決') },
+        { text: '共識決', onClick: () => setDecisionMode('共識決') }
+    ], 'decisionMode');
+}
+
+async function setDecisionMode(mode) {
+    logDebug(`setDecisionMode: Setting mode to ${mode}`);
+    const roomId = localStorage.getItem('currentRoomId');
+    try {
+        await db.ref(`rooms/${roomId}/decisionMode`).set(mode);
+        document.getElementById('selectedMode').textContent = `已選擇【${mode}】`;
+        logDebug(`setDecisionMode: Successfully set mode ${mode}`);
+    } catch (error) {
+        logDebug(`setDecisionMode: Firebase error: ${error.message}`);
+        console.error('setDecisionMode: Firebase error:', error);
+        showModal('設置決定方式失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+    }
+}
+
+function showFinalResult(result) {
+    logDebug(`showFinalResult: Displaying final result: ${result}`);
+    const roomId = localStorage.getItem('currentRoomId');
+    const confirmRef = db.ref(`rooms/${roomId}/confirm`);
+    const reeditRef = db.ref(`rooms/${roomId}/editConfirm`);
+    const voteRef = db.ref(`rooms/${roomId}/vote`);
+
+    confirmRef.remove();
+    reeditRef.remove();
+    voteRef.remove();
+    voteRef.off('value');
+    closeAllModals();
+    logDebug("showFinalResult: Cleared confirm, reedit, and vote data");
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.dataset.modalId = 'finalResult';
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    modalContent.innerHTML = `
+        <h2 style="font-size:2em;">🎉 最終結果 🎉</h2>
+        <p style="font-size:1.8em; color:#3db8c4; font-weight:bold; margin: 20px 0;">${result}</p>
+        <p style="font-size:1em;">結果已出爐，請務必遵守哦！</p>
+    `;
+
+    confettiEffect();
+
+    const btn = document.createElement('button');
+btn.className = 'btn-confirm';
+btn.textContent = '關閉';
+btn.onclick = () => {
+    logDebug("showFinalResult: Close button clicked");
+    modal.remove();
+    safeEnableDrawBtn(); // ← 使用冷卻機制啟用按鈕
+};
+
+modalContent.appendChild(btn);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+}
+
+function confettiEffect() {
+    logDebug("confettiEffect: Starting confetti animation");
+    for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.textContent = '🎊';
+        confetti.style.position = 'fixed';
+        confetti.style.top = '-50px';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.fontSize = '2em';
+        confetti.style.animation = `fall ${2 + Math.random() * 3}s linear forwards`;
+        document.body.appendChild(confetti);
+        confetti.addEventListener('animationend', () => {
+            confetti.remove();
+        });
+    }
+}
+
+async function initiateVoting(mode, finalItem) {
+    logDebug(`initiateVoting: Starting voting for item ${finalItem}, mode: ${mode}`);
+    const roomId = localStorage.getItem('currentRoomId');
+    const voteRef = db.ref(`rooms/${roomId}/vote`);
+    try {
+        if (!finalItem) {
+            logDebug("initiateVoting: Invalid finalItem");
+            showModal('抽籤結果無效，請重新抽籤！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            return;
+        }
+        // 先檢查是否已經有投票資料，沒有再寫
+        const voteSnap = await voteRef.once('value');
+        if (voteSnap.exists()) {
+            logDebug("initiateVoting: Voting already initialized, skip.");
+            return;
+        }
+        await voteRef.set({
+            active: true,
+            item: finalItem,
+            mode: mode,
+            votes: {},
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        logDebug("initiateVoting: Voting initialized");
+    } catch (error) {
+        logDebug(`initiateVoting: Firebase error: ${error.message}`);
+        showModal('投票啟動失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+    }
+}
+
+
+async function requestReedit() {
+    logDebug("requestReedit: Starting reedit request");
+    const roomId = localStorage.getItem('currentRoomId');
+    const userId = localStorage.getItem(`currentUserId_${roomId}`);
+    if (!userId) {
+        logDebug("requestReedit: No userId found in localStorage");
+        showModal('用戶身份驗證失敗，請重新加入房間！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => { window.location.reload(); } }
+        ], 'error');
+        return;
+    }
+    logDebug(`requestReedit: Current userId: ${userId}`);
+    const reeditRef = db.ref(`rooms/${roomId}/editConfirm`);
+    const reeditBtn = document.querySelector('#decidePage .btn-primary[onclick="requestReedit()"]');
+    reeditBtn.disabled = true;
+    reeditBtn.innerHTML = '<span class="spin-animation">⏳</span> 提交中...';
+    logDebug("requestReedit: Button disabled, initiating request");
+
+    try {
+        const participantSnap = await db.ref(`rooms/${roomId}/participants/${userId}`).once('value');
+        if (!participantSnap.exists()) {
+            logDebug("requestReedit: UserId not found in participants");
+            showModal('用戶身份無效，請重新加入房間！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => { window.location.reload(); } }
+            ], 'error');
+            reeditBtn.disabled = false;
+            reeditBtn.innerHTML = '← 重新編輯';
+            return;
+        }
+
+        // 改動：移除自動同意，僅設置重新編輯請求
+        await reeditRef.transaction(currentData => {
+            logDebug("requestReedit: Clearing reedit data via transaction");
+            return null;
+        });
+        const userName = participantSnap.val().name || '未知';
+        await reeditRef.set({
+            active: true,
+            initiator: userId,
+            initiatorName: userName,
+            status: 'pending',
+            responses: {}, // 改動：不預設發起人同意
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        logDebug(`requestReedit: Set reedit data for initiator ${userName} (${userId})`);
+        showWaitingModal(reeditRef, userId, '已發起重新編輯，等待所有人同意...', 'reedit');
+        reeditBtn.disabled = false;
+        reeditBtn.innerHTML = '← 重新編輯';
+    } catch (error) {
+        logDebug(`requestReedit: Firebase error: ${error.message}`);
+        console.error('requestReedit: Firebase 設定錯誤:', error);
+        showModal('重新編輯請求失敗，請稍後再試！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+        reeditBtn.disabled = false;
+        reeditBtn.innerHTML = '← 重新編輯';
+    }
+}
+
+function listenReedit(roomId) {
+    logDebug("listenReedit: Starting reedit listener");
+    const reeditRef = db.ref(`rooms/${roomId}/editConfirm`);
+    const modalId = 'reedit';
+    let lastProcessedData = null;
+
+    reeditRef.on('value', debounce(async snap => {
+        const data = snap.val();
+        const dataString = JSON.stringify(data);
+        if (dataString === lastProcessedData) {
+            logDebug("listenReedit: Data unchanged, skipping");
+            return;
+        }
+        lastProcessedData = dataString;
+        logDebug(`listenReedit: Received data: ${dataString}, User: ${userId}`);
+
+        try {
+            const roomSnap = await db.ref(`rooms/${roomId}`).once('value');
+            const roomData = roomSnap.val() || {};
+            const isDeciding = roomData.isDeciding;
+            logDebug(`listenReedit: isDeciding: ${isDeciding}`);
+
+            if (!isDeciding) {
+                logDebug("listenReedit: Not in deciding phase, clearing reedit data");
+                await reeditRef.remove();
+                closeModalById(modalId);
+                return;
+            }
+
+            if (!data) {
+                logDebug("listenReedit: editConfirm is null, closing modal");
+                closeModalById(modalId);
+                return;
+            }
+
+            if (data.status === 'cancelled') {
+                logDebug("listenReedit: Reedit process cancelled!");
+                closeAllModals();
+                // 找出反對者名稱（或未知用戶）
+                let cancelledByName = '未知用戶';
+                if (data.responses) {
+                    const refusers = Object.entries(data.responses).filter(([uid, v]) => v === false);
+                    if (refusers.length > 0) {
+                        const [refuseId] = refusers[0];
+                        const snap = await db.ref(`rooms/${roomId}/participants/${refuseId}`).once('value');
+                        cancelledByName = snap.val() && snap.val().name ? snap.val().name : '未知用戶';
+                    }
+                }
+closeAllModals();
+                showModal(
+                    `❅ 重新編輯流程已被 ${cancelledByName} 取消！`,
+                    [{ text: '好的', class: 'btn-confirm', onClick: () => {} }],
+                    'error'
+                );
+                // 不切頁！只顯示訊息
+                return;
+            }
+
+            if (!data.active || data.status !== 'pending') {
+                logDebug("listenReedit: No active reedit or not pending, cleaning up");
+                await reeditRef.remove();
+                closeModalById(modalId);
+                return;
+            }
+
+            if (!data.initiator || !data.initiatorName) {
+                logDebug("listenReedit: Invalid initiator data, ignoring");
+                await reeditRef.remove();
+                closeModalById(modalId);
+                return;
+            }
+
+            const participantSnap = await db.ref(`rooms/${roomId}/participants`).once('value');
+            const participants = participantSnap.val() || {};
+            const total = Object.keys(participants).length;
+            const responses = data.responses || {};
+            const agreeCount = Object.values(responses).filter(v => v === true).length;
+            const disagreeCount = Object.values(responses).filter(v => v === false).length;
+            logDebug(`listenReedit: Total participants: ${total}, Agree: ${agreeCount}, Disagree: ${disagreeCount}, User: ${userId}`);
+
+            // 更新票數
+            await reeditRef.update({
+                agreeCount: agreeCount,
+                disagreeCount: disagreeCount
+            });
+            logDebug(`listenReedit: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
+
+            const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+
+            // 只要有人不同意，就彈窗，不動任何狀態，不切頁
+            if (disagreeCount > 0) {
+                logDebug("listenReedit: Someone disagreed, cancelling");
+                await reeditRef.update({ status: 'cancelled', active: false });
+                closeAllModals();
+                showModal(
+                    `❅ 有人不同意重新編輯（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`,
+                    [{ text: '好的', class: 'btn-confirm', onClick: () => {} }],
+                    'error'
+                );
+                // 不切頁、不動 isDeciding
+                return;
+            }
+
+            // 只有全同意，才切頁還原所有狀態
+            if (agreeCount === total && total > 0) {
+                logDebug("listenReedit: All agreed, returning to multiPage");
+                await reeditRef.update({ status: 'completed', active: false });
+                await db.ref(`rooms/${roomId}`).update({
+                    isDeciding: null,
+                    finalResult: null,
+                    drawResult: null,
+                    isDrawing: null,
+                    vote: null,
+                    confirm: null,
+                    editConfirm: null
+                });
+                closeAllModals();
+                showModal('✅ 所有人同意，返回編輯清單！', [
+                    {
+                        text: '好的',
+                        class: 'btn-confirm',
+                        onClick: () => {
+                            const decidePage = document.getElementById('decidePage');
+                            const multiPage = document.getElementById('multiPage');
+                            if (!multiPage.classList.contains('active')) {
+                                decidePage.classList.remove('active');
+                                multiPage.classList.add('active');
+                                listenVote(roomId);
+                            }
+                        }
+                    }
+                ], 'success');
+                return;
+            }
+
+            // 已同意的用戶，顯示等待
+            if (responses[userId] === true) {
+                logDebug("listenReedit: User has agreed, showing waiting modal");
+                closeAllModals();
+                showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
+                return;
+            }
+
+            // 尚未表態，顯示同意/不同意選擇
+            logDebug("listenReedit: Showing confirmation modal for user");
+            closeAllModals();
+            showModal(`已發起重新編輯，是否同意？<br>${progressText}`, [
+                {
+                    text: '同意',
+                    class: 'btn-confirm',
+                    onClick: async () => {
+                        logDebug("listenReedit: User agrees");
+                        await reeditRef.child('responses').child(userId).set(true);
+                        closeAllModals();
+                        showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
+                    }
+                },
+                {
+                    text: '不同意',
+                    class: 'btn-primary',
+                    onClick: async () => {
+                        logDebug("listenReedit: User disagrees");
+                        await reeditRef.child('responses').child(userId).set(false);
+                        closeModalById(modalId);
+                        // 不做任何切頁，只彈窗！
+                    }
+                }
+            ], modalId);
+
+        } catch (error) {
+            logDebug(`listenReedit: Error: ${error.message}`);
+            showModal('重新編輯處理失敗，請稍後再試！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+        }
+    }, 500));
+}
+
+async function playDrawAnimation(roomId) {
+  logDebug("playDrawAnimation: Starting draw animation");
+  const roomRef = db.ref(`rooms/${roomId}`);
+  try {
+      const finalResultSnap = await roomRef.child('finalResult').once('value');
+      if (finalResultSnap.val()) {
+          showModal(`本次結果[${finalResultSnap.val()}]，請務必遵守哦！`, [
+              { text: '好的', class: 'btn-confirm', onClick: () => {} }
+          ], 'info');
+          return;
+      }
+
+      const [spinListSnap, resultSnap, modeSnap] = await Promise.all([
+          roomRef.child('drawAnimation').once('value'),
+          roomRef.child('drawResult').once('value'),
+          roomRef.child('decisionMode').once('value')
+      ]);
+      const spinList = spinListSnap.val() || [];
+      const finalItem = resultSnap.val();
+      const mode = modeSnap.val() || '一抽入魂';
+
+      if (!spinList.length || !finalItem) {
+          showModal('抽籤動畫數據未載入，請重新抽籤！', [
+              { text: '好的', class: 'btn-confirm', onClick: () => {} }
+          ], 'error');
+          roomRef.update({ isDrawing: null, drawAnimation: null });
+          return;
+      }
+
+      // 新動畫模組
+      closeModalById('drawAnimation');
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.dataset.modalId = 'drawAnimation';
+
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal-content';
+
+      // 加入動畫外框
+      const frame = document.createElement('div');
+      frame.className = 'lottery-animate-frame';
+
+      const resultArea = document.createElement('div');
+      resultArea.className = 'lottery-animate-text';
+      resultArea.textContent = '🎰 抽籤中...';
+
+      frame.appendChild(resultArea);
+      modalContent.appendChild(frame);
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+
+      // 柔和漸層配色輪替
+      const bgColors = [
+        'linear-gradient(135deg,#fff3e3 0%,#ffe8ee 100%)',
+        'linear-gradient(135deg,#f0f9ff 0%,#e6ffe9 100%)',
+        'linear-gradient(135deg,#ffede0 0%,#f2f3ff 100%)',
+        'linear-gradient(135deg,#fff7eb 0%,#f9e7f7 100%)',
+        'linear-gradient(135deg,#fffbe2 0%,#fff3e3 100%)'
+      ];
+      const textColors = [
+        '#FF4D4F', '#3db8c4', '#FFA63C', '#FF7577', '#3CC288'
+      ];
+
+      let index = 0;
+      let total = spinList.length;
+      let time = 75; // 最快速度
+      function animate() {
+        if (index >= total) {
+          // 最後一格定格大字+閃光
+          resultArea.className = 'lottery-animate-text lottery-final';
+resultArea.textContent = finalItem;
+
+// 讓使用者讀4秒再慢慢消失
+setTimeout(() => {
+  resultArea.style.transition = 'opacity 0.8s';
+  resultArea.style.opacity = 0;
+  setTimeout(() => {
+    modal.remove();
+    // 接下來處理資料庫狀態和流程
+    roomRef.update({
+      isDrawing: null,
+      drawAnimation: null
+    }).then(() => {
+      if (mode === '一抽入魂') {
+        roomRef.update({ finalResult: finalItem });
+      } else {
+        initiateVoting(mode, finalItem).then(() => {
+          listenVote(roomId); // Reattach vote listener
+        });
+      }
+    });
+  }, 800);  // 這裡是 0.8 秒（淡出時長）
+}, 4000);   // 這裡是顯示 4 秒
+
+          return;
+        }
+
+        // 跑馬燈效果
+        resultArea.className = 'lottery-animate-text';
+        resultArea.textContent = spinList[index];
+
+        // 讓背景＆字體色彩輪流換
+        const bg = bgColors[index % bgColors.length];
+        const tc = textColors[index % textColors.length];
+        frame.style.background = bg;
+        resultArea.style.color = tc;
+
+        // 模擬抽籤緊張感：後段變慢
+        if (index > total * 0.72) time += 32;
+        if (index > total * 0.87) time += 48;
+
+        index++;
+        setTimeout(() => requestAnimationFrame(animate), time);
+      }
+
+      requestAnimationFrame(animate);
+  } catch (error) {
+      logDebug(`playDrawAnimation: Firebase error: ${error.message}`);
+      showModal('抽籤動畫失敗，請重新抽籤！', [
+          { text: '好的', class: 'btn-confirm', onClick: () => {} }
+      ], 'error');
+      roomRef.update({ isDrawing: null, drawAnimation: null });
+  }
+}
+
+async function importItems() {
+    logDebug("importItems: Starting item import");
+    const roomId = localStorage.getItem('currentRoomId');
+    const text = prompt('請貼上要匯入的項目（JSON 或每行一項）：');
+    if (!text) {
+        logDebug("importItems: No input provided");
+        return;
+    }
+    let items = [];
+    try {
+        const parsed = JSON.parse(text);
+        if (parsed.items) items = parsed.items;
+        else throw new Error();
+    } catch {
+        items = text.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+    if (items.length === 0) {
+        logDebug("importItems: No valid items to import");
+        return;
+    }
+    logDebug(`importItems: Parsed ${items.length} items`);
+
+    const importBtn = document.querySelector('#multiPage .btn-primary[onclick="importItems()"]');
+    importBtn.disabled = true;
+    importBtn.innerHTML = '<span class="spin-animation">⏳</span> 匯入中...';
+    logDebug("importItems: Button disabled, importing items");
+
+    const listRef = db.ref('rooms/' + roomId + '/list');
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await listRef.once('value');
+            let list = snapshot.val() || [];
+            list = list.concat(items);
+            await listRef.set(list);
+            logDebug(`importItems: Imported ${items.length} items`);
+            importBtn.disabled = false;
+            importBtn.innerHTML = '匯入';
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`importItems: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                console.error('importItems: Firebase error after retries:', error);
+                showModal('匯入項目失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                importBtn.disabled = false;
+                importBtn.innerHTML = '匯入';
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+}
+
+function listenVote(roomId) {
+    logDebug("listenVote: Starting vote listener");
+    const voteRef = db.ref(`rooms/${roomId}/vote`);
+    const modalId = 'vote';
+    let lastProcessedData = null;
+
+    voteRef.on('value', debounce(async snap => {
+        const data = snap.val();
+        const dataString = JSON.stringify(data);
+        if (dataString === lastProcessedData) {
+            logDebug("listenVote: Data unchanged, skipping");
+            return;
+        }
+        lastProcessedData = dataString;
+        logDebug(`listenVote: Received data: ${dataString}`);
+
+        try {
+            const finalResultSnap = await db.ref(`rooms/${roomId}/finalResult`).once('value');
+            if (finalResultSnap.val()) {
+                logDebug("listenVote: Final result exists, terminating vote listener");
+                await voteRef.remove();
+                voteRef.off('value');
+                closeModalById(modalId);
+                return;
+            }
+
+if (!data || !data.active || !data.item || data.status === 'cancelled') {
+    logDebug("listenVote: No active vote or invalid item, removing listener and clearing vote");
+    closeModalById(modalId);
+    await voteRef.remove();
+    voteRef.off('value');
+    return;
+}
+
+            const item = data.item;
+            const mode = data.mode;
+            const votes = data.votes || {};
+
+            const participantSnap = await db.ref(`rooms/${roomId}/participants`).once('value');
+            const participants = participantSnap.val() || {};
+            const total = Object.keys(participants).length;
+            const agreeCount = Object.values(votes).filter(v => v === true).length;
+            const disagreeCount = Object.values(votes).filter(v => v === false).length;
+            const totalVotes = Object.keys(votes).length;
+            logDebug(`listenVote: Total participants: ${total}, Agree: ${agreeCount}, Disagree: ${disagreeCount}, Total votes: ${totalVotes}`);
+
+            // 確保票數更新
+            await voteRef.update({
+                agreeCount: agreeCount,
+                disagreeCount: disagreeCount
+            });
+            logDebug(`listenVote: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
+
+            const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+
+            if (!(userId in votes)) {
+                logDebug(`listenVote: User ${userId} has not voted, showing vote modal`);
+                closeAllModals();
+                showModal(`是否同意將「${item}」作為最終結果？<br>${progressText}`, [
+    {
+        text: '同意',
+        class: 'btn-confirm',
+        onClick: async () => {
+            logDebug('你按了同意！userId=' + userId);
+            closeModalById(modalId);
+            await voteRef.child('votes/' + userId).set(true)
+                .then(() => logDebug('set(true) 寫入成功！'))
+                .catch(e => logDebug('set(true) 失敗：' + e.message));
+            showWaitingModal(voteRef, userId, `已同意，等待其他人投票中... <br>${progressText}`, modalId);
+            lastProcessedData = null; // Reset to ensure updates
+        }
+    },
+    {
+        text: '不同意',
+        class: 'btn-primary',
+        onClick: async () => {
+            logDebug('你按了不同意！userId=' + userId);
+            closeAllModals();
+            await voteRef.child('votes/' + userId).set(false)
+                .then(() => logDebug('set(false) 寫入成功！'))
+                .catch(e => logDebug('set(false) 失敗：' + e.message));
+            lastProcessedData = null; // Reset to ensure updates
+        }
+    }
+], modalId);
+
+            } else {
+                logDebug(`listenVote: User ${userId} has voted, showing waiting modal`);
+                showWaitingModal(voteRef, userId, `已投票，等待其他人投票中... <br>${progressText}`, modalId);
+            }
+
+            let passed = false;
+            if (mode === '共識決' && agreeCount === total && totalVotes === total) passed = true;
+            if (mode === '多數決' && agreeCount > total / 2) passed = true;
+
+            // 多數決與共識決分開判斷
+if (mode === '共識決') {
+    // 共識決：全員同意才通過
+    if (totalVotes === total) {
+        if (agreeCount === total) {
+            await db.ref(`rooms/${roomId}`).update({
+                finalResult: item,
+                isDrawing: null
+            });
+            closeAllModals();
+            voteRef.off('value');
+        } else {
+            closeAllModals();
+            showModal(
+    `❌ 未達成條件<br>（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+    [{ 
+        text: '好的', 
+        class: 'btn-confirm', 
+        onClick: async () => {
+            await db.ref(`rooms/${roomId}`).update({
+                vote: null,
+                isDrawing: null,
+                drawAnimation: null,
+                drawResult: null
+            });
+            safeEnableDrawBtn(); // ← 這裡改用冷卻機制
+        }
+    }],
+    'error'
+);
+        }
+    }
+} else if (mode === '多數決') {
+    // 多數決：只要過半就通過（**要等全員投完才判斷**）
+    if (totalVotes === total) {
+        if (agreeCount > total / 2) {
+            await db.ref(`rooms/${roomId}`).update({
+                finalResult: item,
+                isDrawing: null
+            });
+            closeAllModals();
+            voteRef.off('value');
+        } else {
+            closeAllModals();
+            showModal(
+                `❌ 未達成條件（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+                [{ text: '好的', class: 'btn-confirm', onClick: async () => {
+                    await db.ref(`rooms/${roomId}`).update({
+                        vote: null,
+                        isDrawing: null,
+                        drawAnimation: null,
+                        drawResult: null
+                    });
+                    const drawBtn = document.querySelector('#decidePage .btn-draw');
+                    if (drawBtn) drawBtn.disabled = false;
+                }}],
+                'error'
+            );
+        }
+    }
+}
+
+
+
+        } catch (error) {
+            logDebug(`listenVote: Error: ${error.message}`);
+            showModal('投票處理失敗，請稍後再試！', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+        }
+    }, 500));
+}
+function leaveRoom() {
+    logDebug && logDebug("leaveRoom: Initiating room exit");
+    // 判斷目前是不是 setupPage
+    if (document.getElementById('setupPage').classList.contains('active')) {
+        window.location.href = 'index.html';
+        return;
+    }
+    showModal('確定要離開此房間嗎？', [
+        {
+            text: '確定',
+            class: 'btn-confirm',
+            onClick: () => {
+                logDebug && logDebug("leaveRoom: Confirm leave clicked");
+                const roomId = localStorage.getItem('currentRoomId');
+                const userId = localStorage.getItem(`currentUserId_${roomId}`);
+                const roomRef = db.ref(`rooms/${roomId}`);
+
+                roomRef.child('participants').transaction(participants => {
+                    if (!participants) return;
+                    delete participants[userId];
+                    const participantCount = Object.keys(participants).length;
+                    roomRef.child('participants/' + userId).remove();
+
+                    if (participantCount === 0) {
+                        roomRef.update({
+                            drawResult: null,
+                            finalResult: null,
+                            isDrawing: null,
+                            vote: null,
+                            confirm: null,
+                            editConfirm: null
+                        });
+                    }
+                    localStorage.removeItem('currentRoomId');
+                    localStorage.removeItem(`currentUserId_${roomId}`);
+                    window.location.href = 'index.html';
+                });
+            }
+        },
+        {
+            text: '取消',
+            class: 'btn-primary',
+            onClick: () => {
+                logDebug && logDebug("leaveRoom: Cancel leave clicked");
+            }
+        }
+    ], 'leave');
+}
+
+function generateVerificationCode() {
+    const digits = Math.floor(Math.random() * 90 + 10).toString();
+    const letters = String.fromCharCode(
+        Math.floor(Math.random() * 26) + 97,
+        Math.floor(Math.random() * 26) + 97
+    );
+    const code = digits + letters;
+    logDebug(`generateVerificationCode: Generated code ${code}`);
+    return code;
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+    // 取得網址參數
+    const params = new URLSearchParams(window.location.search);
+    const room = params.get('room');
+    const code = params.get('code');
+    // 如果有就自動填入 input
+    if (room) document.getElementById('roomNameInput').value = decodeURIComponent(room);
+    if (code) document.getElementById('verificationCodeInput').value = decodeURIComponent(code);
+});
+
+// 頁面載入後執行
+window.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.item-container').forEach(function(box) {
+    box.addEventListener('touchstart', function(e) {
+      // 記住觸控開始時的scrollTop
+      box._startY = e.touches[0].clientY;
+      box._startScroll = box.scrollTop;
+    }, {passive: false});
+
+    box.addEventListener('touchmove', function(e) {
+      const scrollTop = box.scrollTop;
+      const scrollHeight = box.scrollHeight;
+      const offsetHeight = box.offsetHeight;
+      const atTop = scrollTop === 0;
+      const atBottom = scrollTop + offsetHeight >= scrollHeight - 1;
+      const moveY = e.touches[0].clientY - box._startY;
+      // 向下滑且在頂部、或向上滑且在底部 => 阻止
+      if ((atTop && moveY > 0) || (atBottom && moveY < 0)) {
+        e.preventDefault();
+      }
+    }, {passive: false});
+  });
+});
+function chooseImportType() {
+  showModal('請選擇匯入方式', [
+    {
+      text: '單筆匯入',
+      class: 'btn-primary',
+      onClick: () => importItems()
+    },
+    {
+      text: '本地清單',
+      class: 'btn-confirm',
+      onClick: () => showLocalListForImport()
+    },
+    {
+      text: '✕',
+      class: 'btn-primary',
+      onClick: () => {}
+    }
+  ], 'importType');
+}
+function showLocalListForImport() {
+  // 找出所有 localStorage 裡的清單（你自己定義的 key 名）
+  const lists = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('chooseHelperList_')) {
+      try {
+        const data = JSON.parse(localStorage.getItem(key));
+        lists.push({
+          key,
+          name: data.name || key,
+          items: data.items || []
+        });
+      } catch {}
+    }
+  }
+  if (lists.length === 0) {
+    showModal('找不到任何本地清單！', [
+      { text: '好的', class: 'btn-confirm', onClick: () => {} }
+    ], 'error');
+    return;
+  }
+
+  // 用彈窗顯示所有清單讓用戶選
+  const content = `<div style="max-height:320px;overflow:auto;text-align:left;">
+    ${lists.map((list, idx) => `
+      <div style="margin-bottom:8px;padding:8px 0;">
+        <b>${list.name}</b>
+        <span style="color:#888;font-size:0.93em;">（${list.items.length} 項）</span>
+        <button class="btn-primary" style="margin-left:12px;padding:2px 14px;font-size:14px;" onclick="window._importLocalList('${list.key}')">匯入</button>
+      </div>
+    `).join('')}
+  </div>`;
+
+  showModal(content, [
+    { text: '取消', class: 'btn-primary', onClick: () => {} }
+  ], 'localListImport');
+
+  // 為避免作用域問題，臨時掛到 window
+  window._importLocalList = function(key) {
+    try {
+      const data = JSON.parse(localStorage.getItem(key));
+      if (data && Array.isArray(data.items)) {
+        importItemsFromArray(data.items);
+      } else {
+        showModal('清單格式錯誤，無法匯入', [
+          { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+      }
+    } catch {
+      showModal('匯入失敗', [
+        { text: '好的', class: 'btn-confirm', onClick: () => {} }
+      ], 'error');
+    }
+    closeAllModals();
+  }
+}
+async function importItemsFromArray(items) {
+    logDebug("importItemsFromArray: Importing array items");
+    const roomId = localStorage.getItem('currentRoomId');
+    if (!Array.isArray(items) || items.length === 0) {
+      showModal('沒有可匯入的項目！', [
+        { text: '好的', class: 'btn-confirm', onClick: () => {} }
+      ], 'error');
+      return;
+    }
+    const listRef = db.ref('rooms/' + roomId + '/list');
+    const importBtn = document.querySelector('#multiPage .btn-primary[onclick="chooseImportType()"]');
+    if (importBtn) {
+      importBtn.disabled = true;
+      importBtn.innerHTML = '<span class="spin-animation">⏳</span> 匯入中...';
+    }
+    let attempt = 0, maxRetries = 3;
+    while (attempt < maxRetries) {
+        try {
+            const snapshot = await listRef.once('value');
+            let list = snapshot.val() || [];
+            list = list.concat(items);
+            await listRef.set(list);
+            logDebug(`importItemsFromArray: Imported ${items.length} items`);
+            if (importBtn) {
+              importBtn.disabled = false;
+              importBtn.innerHTML = '匯入';
+            }
+            showModal('已匯入本地清單', [
+              { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'success');
+            return;
+        } catch (error) {
+            attempt++;
+            logDebug(`importItemsFromArray: Error on attempt ${attempt}: ${error.message}`);
+            if (attempt === maxRetries) {
+                showModal('匯入項目失敗，請稍後再試！', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error');
+                if (importBtn) {
+                  importBtn.disabled = false;
+                  importBtn.innerHTML = '匯入';
+                }
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+}
+
+</script>
+</head>
+<body>
+<h1><img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/icon.png" alt="icon" width="32"> 決策小幫手</h1>
+<div class="page active" id="setupPage">
+<div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
+  <div class="header-row" style="justify-content: flex-end;">
+  </div>
+  <h2>建立 / 加入房間</h2>
+  <input type="text" id="roomNameInput" placeholder="房間名稱" />
+  <input type="text" id="verificationCodeInput" placeholder="驗證碼（新房間免填）" />
+  <input type="text" id="userNameInput" placeholder="你的名稱" />
+  <button class="btn-primary" onclick="createRoom()">建立 / 加入</button>
+</div>
+<div class="page" id="multiPage">
+<div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
+  <div class="header-row" style="display: flex; justify-content: space-between; align-items: center;">
+  <div>
+    <span id="roomNameDisplay" style="font-weight:bold; font-size:1.2em; letter-spacing:1px;"></span>
+    <span id="roomCodeDisplay" style="color:#888; font-size:0.95em; margin-left: 5px;"></span>
+  </div>
+  <button class="btn-primary" style="padding:6px 14px; font-size:15px; background:#2894FF;" onclick="shareRoom()">分享</button>
+
+</div>
+
+  <div><strong id="participantCount">參與者(0人)： </strong>
+    <div id="participantContainer" class="item-container"></div>
+  </div>
+  <div style="margin-top: 10px; text-align:left;">
+    <button class="btn-primary" onclick="chooseDecisionMode()">決定方式</button>
+    <span id="selectedMode" style="margin-left:8px; font-weight:bold; color:#0080FF;"></span>
+  </div>
+  <div style="margin-top: 20px;"><strong>📃 清單項目：</strong>
+    <div id="listContainer" class="item-container"></div>
+    <input type="text" id="itemInput" placeholder="輸入項目" onkeypress="if(event.key==='Enter') addItem();" />
+    <div style="display:flex; gap:6px; margin-top:4px;">
+      <button class="btn-primary" onclick="addItem()">新增項目</button>
+      <button class="btn-primary" onclick="chooseImportType()">匯入</button>
+
+    </div>
+    <div style="margin-top:30px;">
+      <button class="btn-confirm-red" onclick="requestConfirmation()">我同意此清單</button>
+    </div>
+  </div>
+  <div id="multiDebugBox" class="debug-box"></div>
+</div>
+<div class="page" id="decidePage">
+<div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
+
+  <div class="header-row" style="align-items:flex-start; justify-content:space-between;">
+  <div style="display:flex; flex-direction:column; align-items:flex-start;">
+<div style="display:inline-flex; align-items:center;">
+  <span id="decideRoomNameDisplay" style="font-weight:bold; font-size:1.25em;"></span>
+  <span id="decideRoomCodeDisplay" style="color:#888; font-size:1em; margin-left:8px;"></span>
+</div>
+
+
+    <button class="btn-primary" style="padding:3px 10px; font-size:12px; margin-top:8px; border-radius:8px;" onclick="requestReedit()">← 重新編輯</button>
+
+  </div>
+  <div>
   </div>
 </div>
 
-<div id="exportImportModal" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  z-index: 9999;
-  align-items: center;
-  justify-content: center;
-">
-  <div style="
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 340px;
-    width: 85%;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  ">
-    <h3>請選擇匯出 / 匯入方式</h3>
-    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-      <button class="btn-lightblue" style="flex: 1;" onclick="singleExport()">單筆匯出</button>
-      <button class="btn-lightblue" style="flex: 1;" onclick="multiExport()">多筆匯出</button>
-    </div>
-    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-      <button style="flex: 1; background-color: #e9fce6; color: #333; border: none; border-radius: 5px; padding: 10px 16px; font-size: 14px; cursor: pointer;" onclick="singleImport()">單筆匯入</button>
-      <button style="flex: 1; background-color: #e9fce6; color: #333; border: none; border-radius: 5px; padding: 10px 16px; font-size: 14px; cursor: pointer;" onclick="multiImport()">多筆匯入</button>
-    </div>
-    <button class="btn-pink" style="margin-top: 10px;" onclick="closeExportImportModal()">關閉</button>
+  <div>
+    <strong id="decideParticipantCount">參與者(0人)：</strong>
+    <div id="decideParticipantContainer" class="item-container"></div>
   </div>
+  <div style="text-align:center; margin-top: 30px;">
+    <button class="btn-draw" onclick="startDraw()">🎲 開始抽籤</button>
+<div id="decideModeDisplay"></div>
+    <div id="resultArea" style="font-size: 2em; margin-top: 20px;"></div>
+  </div>
+  <div id="decideDebugBox" class="debug-box"></div>
 </div>
 </body>
 </html>
