@@ -728,7 +728,7 @@ function loadRoomData(roomId) {
         const now = Date.now();
         const users = snap.val() || {};
         Object.entries(users).forEach(([uid, obj]) => {
-          if (obj.lastActive && now - obj.lastActive > 1*90*1000) { // 2分鐘
+          if (obj.lastActive && now - obj.lastActive > 1*120*1000) { // 2分鐘
             db.ref(`rooms/${roomId}/participants/${uid}`).remove();
           }
         });
