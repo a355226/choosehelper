@@ -2075,37 +2075,61 @@ if (!data || !data.active || !data.item || data.status === 'cancelled') {
 
             // 多數決與共識決分開判斷
 if (mode === '共識決') {
-    // 共識決：全員同意才通過
-    if (totalVotes === total) {
-        if (agreeCount === total) {
-            await db.ref(`rooms/${roomId}`).update({
-                finalResult: item,
-                isDrawing: null
-            });
-            closeAllModals();
-            voteRef.off('value');
-        } else {
-            closeAllModals();
-            showModal(
-    `❌ 未達成條件<br>（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
-    [{ 
-        text: '好的', 
-        class: 'btn-confirm', 
-        onClick: async () => {
-            await db.ref(`rooms/${roomId}`).update({
-                vote: null,
-                isDrawing: null,
-                drawAnimation: null,
-                drawResult: null
-            });
-            safeEnableDrawBtn(); // ← 這裡改用冷卻機制
-        }
-    }],
-    'error'
-);
-        }
+    // 共識決：只要有人不同意就失敗，所有同意就成功
+    if (disagreeCount > 0) {
+        closeAllModals();
+        await voteRef.update({ status: 'cancelled', active: false });
+        showModal(
+            `❌ 未達成共識（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+            [{ text: '好的', class: 'btn-confirm', onClick: async () => {
+                await db.ref(`rooms/${roomId}`).update({
+                    vote: null,
+                    isDrawing: null,
+                    drawAnimation: null,
+                    drawResult: null
+                });
+                safeEnableDrawBtn();
+            }}],
+            'error'
+        );
+        voteRef.off('value');
+    } else if (agreeCount === total && total > 0) {
+        await db.ref(`rooms/${roomId}`).update({
+            finalResult: item,
+            isDrawing: null
+        });
+        closeAllModals();
+        voteRef.off('value');
     }
 } else if (mode === '多數決') {
+    // 多數決：同意票過半即成功
+    if (agreeCount > total / 2) {
+        await db.ref(`rooms/${roomId}`).update({
+            finalResult: item,
+            isDrawing: null
+        });
+        closeAllModals();
+        voteRef.off('value');
+    } else if (disagreeCount >= total / 2) {
+        closeAllModals();
+        await voteRef.update({ status: 'cancelled', active: false });
+        showModal(
+            `❌ 未達成多數決（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+            [{ text: '好的', class: 'btn-confirm', onClick: async () => {
+                await db.ref(`rooms/${roomId}`).update({
+                    vote: null,
+                    isDrawing: null,
+                    drawAnimation: null,
+                    drawResult: null
+                });
+                safeEnableDrawBtn();
+            }}],
+            'error'
+        );
+        voteRef.off('value');
+    }
+}
+ else if (mode === '多數決') {
     // 多數決：只要過半就通過（**要等全員投完才判斷**）
     if (totalVotes === total) {
         if (agreeCount > total / 2) {
