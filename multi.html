@@ -518,12 +518,7 @@
 .selected-mode-tag:empty {
   display: none;
 }
-#resultArea canvas {
-  max-width: 100%;
-  height: auto !important;
-  display: block;
-  margin: auto;
-}
+
 </style>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -629,7 +624,6 @@ async function createRoom() {
             });
             const participantRef = roomRef.child('participants/' + userId);
             await participantRef.set({ name: userName, lastActive: Date.now() });
-            participantRef.onDisconnect().remove();
             logDebug(`createRoom: Added user ${userId} (${userName})`);
 
             document.getElementById('setupPage').classList.remove('active');
@@ -728,12 +722,12 @@ function loadRoomData(roomId) {
         const now = Date.now();
         const users = snap.val() || {};
         Object.entries(users).forEach(([uid, obj]) => {
-          if (obj.lastActive && now - obj.lastActive > 1*90*1000) { // 2分鐘
+          if (obj.lastActive && now - obj.lastActive > 1*30*1000) { // 2分鐘
             db.ref(`rooms/${roomId}/participants/${uid}`).remove();
           }
         });
       });
-    }, 30000);
+    }, 15000);
 
     window.addEventListener('beforeunload', () => {
       clearInterval(window.inactiveCleanupTimer);
@@ -1042,7 +1036,7 @@ function shareRoom() {
                 }
             },
             {
-                text: '⨉',
+                text: '✖',
                 class: 'btn-confirm',
                 onClick: () => {
                     logDebug("shareRoom: Cancel button clicked");
@@ -2251,7 +2245,7 @@ function chooseImportType() {
       onClick: () => showLocalListForImport()
     },
     {
-      text: '⨉',
+      text: '✖',
       class: 'btn-confirm',
       onClick: () => {}
     }
@@ -2474,7 +2468,7 @@ function renderCertificateCanvas(data) {
     // 4. 參與者區塊（自動行分割＆自動縮字）
     ctx.textAlign = 'center';
     ctx.fillStyle = '#111';
-    let membersText = `參與者：${data.membersArr.join('、')}`;
+    let membersText = `本次參與者：${data.membersArr.join('、')}`;
     let memberFontSize = 23, minFont = 13;
     // 參與者長度自動縮字
     ctx.font = `${memberFontSize}px ${fontFamily}`;
@@ -2487,10 +2481,10 @@ function renderCertificateCanvas(data) {
     let maxLineW = W - 80;
     let names = data.membersArr;
     ctx.font = `${memberFontSize}px ${fontFamily}`;
-    let current = "參與者：";
+    let current = "本次參與者：";
     for (let i = 0; i < names.length; i++) {
       let next = (current.endsWith('：') ? current : current + '、') + names[i];
-      if (ctx.measureText(next).width > maxLineW && current !== "參與者：") {
+      if (ctx.measureText(next).width > maxLineW && current !== "本次參與者：") {
         lines.push(current);
         current = names[i];
       } else {
@@ -2509,7 +2503,7 @@ function renderCertificateCanvas(data) {
     ctx.font = `bold 32px ${fontFamily}`;
     ctx.textAlign = 'center';
     ctx.fillStyle = "#b15906";
-    ctx.fillText(`🎉 決議結果：`, W / 2, resultBlockY);
+    ctx.fillText(`🎉 本次決議結果：`, W / 2, resultBlockY);
 
     // 決議結果大紅字（微白光，無粗描邊）
     ctx.font = `bold 54px ${fontFamily}`;
@@ -2546,13 +2540,7 @@ function renderCertificateCanvas(data) {
   <input type="text" id="roomNameInput" placeholder="房間名稱" />
   <input type="text" id="verificationCodeInput" placeholder="驗證碼（新房間免填）" />
   <input type="text" id="userNameInput" placeholder="你的名稱" />
-  <div style="margin-top: 30px; text-align:center;">
-  <button class="btn-primary"
-    style="font-size:1.3em; padding:18px 55px; border-radius:18px; letter-spacing:3px; box-shadow:0 8px 28px #3db8c433;"
-    onclick="createRoom()">
-    建立 / 加入
-  </button>
-</div>
+  <button class="btn-primary" onclick="createRoom()">建立 / 加入</button>
 </div>
 <div class="page" id="multiPage">
 <div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
@@ -2618,4 +2606,6 @@ function renderCertificateCanvas(data) {
 </div>
 </body>
 </html>
+
+
 
