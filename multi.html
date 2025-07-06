@@ -629,6 +629,7 @@ async function createRoom() {
             });
             const participantRef = roomRef.child('participants/' + userId);
             await participantRef.set({ name: userName, lastActive: Date.now() });
+            participantRef.onDisconnect().remove();
             logDebug(`createRoom: Added user ${userId} (${userName})`);
 
             document.getElementById('setupPage').classList.remove('active');
@@ -727,12 +728,12 @@ function loadRoomData(roomId) {
         const now = Date.now();
         const users = snap.val() || {};
         Object.entries(users).forEach(([uid, obj]) => {
-          if (obj.lastActive && now - obj.lastActive > 1*30*1000) { // 2分鐘
+          if (obj.lastActive && now - obj.lastActive > 1*90*1000) { // 2分鐘
             db.ref(`rooms/${roomId}/participants/${uid}`).remove();
           }
         });
       });
-    }, 15000);
+    }, 30000);
 
     window.addEventListener('beforeunload', () => {
       clearInterval(window.inactiveCleanupTimer);
