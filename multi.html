@@ -2473,7 +2473,7 @@ function renderCertificateCanvas(data) {
     // 4. 參與者區塊（自動行分割＆自動縮字）
     ctx.textAlign = 'center';
     ctx.fillStyle = '#111';
-    let membersText = `本次參與者：${data.membersArr.join('、')}`;
+    let membersText = `參與者：${data.membersArr.join('、')}`;
     let memberFontSize = 23, minFont = 13;
     // 參與者長度自動縮字
     ctx.font = `${memberFontSize}px ${fontFamily}`;
@@ -2486,10 +2486,10 @@ function renderCertificateCanvas(data) {
     let maxLineW = W - 80;
     let names = data.membersArr;
     ctx.font = `${memberFontSize}px ${fontFamily}`;
-    let current = "本次參與者：";
+    let current = "參與者：";
     for (let i = 0; i < names.length; i++) {
       let next = (current.endsWith('：') ? current : current + '、') + names[i];
-      if (ctx.measureText(next).width > maxLineW && current !== "本次參與者：") {
+      if (ctx.measureText(next).width > maxLineW && current !== "參與者：") {
         lines.push(current);
         current = names[i];
       } else {
@@ -2508,7 +2508,7 @@ function renderCertificateCanvas(data) {
     ctx.font = `bold 32px ${fontFamily}`;
     ctx.textAlign = 'center';
     ctx.fillStyle = "#b15906";
-    ctx.fillText(`🎉 本次決議結果：`, W / 2, resultBlockY);
+    ctx.fillText(`🎉 決議結果：`, W / 2, resultBlockY);
 
     // 決議結果大紅字（微白光，無粗描邊）
     ctx.font = `bold 54px ${fontFamily}`;
