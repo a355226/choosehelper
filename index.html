@@ -760,6 +760,7 @@ body.dark-mode .btn-primary::after {
   <option value="video003">可愛貓咪</option>
   <option value="video004">外星生物</option>
   <option value="video005">尾牙抽獎</option>
+  <option value="video006">日本武士</option>
   <option value="random">隨機</option>
 </select>
 </div>
@@ -1004,7 +1005,7 @@ window._resultShown = false; // ✅ 每次抽選前重置
   let effect = document.getElementById('effectSelect')?.value || 'default';
 // 如果是隨機，從 default 與 5 個影片隨機選一個
 if (effect === 'random') {
-    const options = ['default', 'video001', 'video002', 'video003', 'video004', 'video005'];
+    const options = ['default', 'video001', 'video002', 'video003', 'video004', 'video005', 'video006'];
     effect = options[Math.floor(Math.random() * options.length)];
 }
   if (!isAppeal) appealCount = 3;
@@ -1211,6 +1212,8 @@ function playVideoEffect(resultCard, effect) {
     'video003': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video003.mp4',
     'video004': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video004.mp4',
     'video005': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video005.mp4',
+    'video006': 'https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/video006.mp4',
+
 };
 video.src = videoMap[effect] || videoMap['video001'];
     video.autoplay = true;
