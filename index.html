@@ -1145,7 +1145,7 @@ setTimeout(() => {
         const btn = document.createElement('button');
         btn.textContent = `上訴！（剩餘${appealCount}次）`;
         btn.className = 'btn-pink';
-        btn.style.marginTop = '20px';
+        btn.style.marginTop = '48px';
         btn.style.backgroundColor = ['#ffe6e6', '#ffb3b3', '#ff6666'][3 - appealCount] || '#ff6666';
         btn.style.color = '#800000';
         btn.onclick = () => {
@@ -1156,7 +1156,7 @@ setTimeout(() => {
     } else {
         const finalText = document.createElement('div');
         finalText.textContent = '認命吧，這就是最好的選擇！';
-        finalText.style.marginTop = '20px';
+        finalText.style.marginTop = '48px';
         finalText.style.fontWeight = 'bold';
         finalText.style.color = '#b34400';
         appealArea.appendChild(finalText);
