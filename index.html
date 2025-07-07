@@ -204,23 +204,51 @@ width: 85%;
       border: 1px solid #aaa;
     }
     .btn-pink {
-      background-color: #fcebeb;
-      color: #333;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 16px;
-      font-size: 14px;
-      cursor: pointer;
-    }
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #ff7b98;
+  color: #fff;
+  box-shadow: 0 2px 7px 0 #ffd6e3;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.09s;
+}
+.btn-pink:hover {
+  background: #e95b7d;
+  box-shadow: 0 3px 10px 0 #ffd6e370;
+  transform: translateY(-1.5px) scale(1.03);
+}
+.btn-pink:active {
+  background: #c53d5c;
+  box-shadow: 0 1.5px 5px #ffd6e37e;
+  transform: scale(0.97);
+}
+
     .btn-lightblue {
-      background-color: #e0f4ff;
-      color: #333;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 16px;
-      font-size: 14px;
-      cursor: pointer;
-    }
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #3db8c4;
+  color: #fff;
+  box-shadow: 0 2px 7px 0 #b1eaf642;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.09s;
+}
+.btn-lightblue:hover {
+  background: #3199a8;
+  box-shadow: 0 3px 10px 0 #9cdbe633;
+  transform: translateY(-1.5px) scale(1.03);
+}
+.btn-lightblue:active {
+  background: #237d8c;
+  box-shadow: 0 1.5px 5px #b1eaf646;
+  transform: scale(0.97);
+}
+
 .slot-machine {
   display: none; /* ← 初始不顯示 */
   height: 60px;
@@ -537,6 +565,110 @@ body.dark-mode #sortModal li:hover {
   background: #4a4a4a !important; /* 滑過時加亮 */
 }
 
+.btn-primary, .btn-confirm {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow:
+    0 3px 12px -4px #3db8c455,
+    0 1.5px 0 #fff5,
+    0 0.5px 4px #35a4af18;
+  transition: background 0.18s, transform 0.09s, box-shadow 0.19s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary {
+  background: linear-gradient(120deg, #3db8c4 60%, #35a4af 100%);
+  color: #fff;
+}
+.btn-primary::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 46%;
+  background: linear-gradient(120deg, #fff3 5%, #fff1 100%);
+  border-radius: 10px 10px 50% 50% / 38% 38% 55% 55%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.68;
+}
+.btn-primary:hover {
+  background: linear-gradient(120deg, #35a4af 0%, #3db8c4 80%);
+  box-shadow:
+    0 5px 20px -6px #3db8c488,
+    0 2.5px 0 #fff6,
+    0 2px 12px #3db8c42e;
+  transform: translateY(-1px) scale(1.04);
+}
+.btn-primary:active {
+  background: linear-gradient(120deg, #33a7b3 0%, #43d0e1 100%);
+  box-shadow:
+    0 1px 6px #3db8c466;
+  transform: scale(0.98);
+}
+.btn-confirm {
+  background: linear-gradient(120deg, #fc806d 65%, #ff9a7c 100%);
+  color: #fff;
+}
+.btn-confirm::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 44%;
+  background: linear-gradient(120deg, #fff2 10%, #fff1 100%);
+  border-radius: 10px 10px 40% 40% / 36% 36% 60% 60%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.61;
+}
+.btn-confirm:hover {
+  background: linear-gradient(120deg, #ff9a7c 0%, #fc806d 90%);
+  box-shadow:
+    0 5px 22px -6px #fc806d99,
+    0 2.5px 0 #fff6,
+    0 2px 12px #ff9a7c26;
+  transform: translateY(-1px) scale(1.045);
+}
+.btn-confirm:active {
+  background: linear-gradient(120deg, #fb674a 0%, #fc806d 100%);
+  box-shadow:
+    0 1px 6px #fc806d55;
+  transform: scale(0.97);
+}
+
+.btn-yelloworange {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: bold;
+  background: linear-gradient(100deg, #ffe9a6 60%, #ffd267 100%);
+  color: #fff;
+  box-shadow: 0 2px 7px 0 #fff6d28e;
+  text-shadow: 0 1.5px 4px #c8852d88, 0 1px 1px #fff8;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.09s;
+}
+.btn-yelloworange:hover {
+  background: linear-gradient(100deg, #ffd267 70%, #ffc14c 100%);
+  box-shadow: 0 3px 10px 0 #ffe1ac66;
+  transform: translateY(-1.5px) scale(1.03);
+}
+.btn-yelloworange:active {
+  background: #ffae2d;
+  box-shadow: 0 1.5px 5px #ffe1ac8e;
+  transform: scale(0.97);
+}
+.btn-sm {
+  font-size: 13px !important;
+  padding: 6px 13px !important;
+  min-width: 64px !important;
+  min-height: 32px !important;
+  border-radius: 7px !important;
+}
+
   </style>
 </head>
 <body>
@@ -615,18 +747,18 @@ body.dark-mode #sortModal li:hover {
   <select id="memorySelect" onchange="loadMemoryList()">
     <option value="">-- 請選擇 --</option>
   </select>
-<button class="btn-lightblue" onclick="openSortModal()">🔃排序</button>
-  <button class="btn-pink" onclick="deleteMemoryList()">🗑 刪除清單</button>
+<button class="btn-lightblue btn-sm" onclick="openSortModal()">🔃排序</button>
+  <button class="btn-pink btn-sm" onclick="deleteMemoryList()">🗑 刪除清單</button>
   <div class="section-title">🖊 輸入項目：</div>
   <input type="text" id="foodInput" placeholder="請輸入" />
   <button class="btn-primary" onclick="addFood()">加入</button>
-  <button class="btn-lightblue" onclick="saveCurrentList()">建立</button>
-  <button class="btn-lightblue" onclick="updateCurrentList()">更新</button>
-  <button class="btn-pink"  onclick="clearAllItems()">全部清除</button>
+  <button class="btn-lightblue btn-sm" onclick="saveCurrentList()">建立</button>
+  <button class="btn-lightblue btn-sm" onclick="updateCurrentList()">更新</button>
+  <button class="btn-pink btn-sm"  onclick="clearAllItems()">全部清除</button>
   <div class="section-title">📃 目前清單：</div>
   <ul id="foodList"></ul>
   <div style="margin-top: 70px;">
-<button class="btn-lightblue" onclick="openExportImportModal()">匯出 / 匯入</button>
+<button class="btn-lightblue btn-sm" onclick="openExportImportModal()">匯出 / 匯入</button>
 
   </div>
 </div>
@@ -1352,8 +1484,8 @@ function multiImport() {
       <button class="btn-lightblue" style="flex: 1;" onclick="multiExport()">多筆匯出</button>
     </div>
     <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-      <button style="flex: 1; background-color: #e9fce6; color: #333; border: none; border-radius: 5px; padding: 10px 16px; font-size: 14px; cursor: pointer;" onclick="singleImport()">單筆匯入</button>
-      <button style="flex: 1; background-color: #e9fce6; color: #333; border: none; border-radius: 5px; padding: 10px 16px; font-size: 14px; cursor: pointer;" onclick="multiImport()">多筆匯入</button>
+      <button class="btn-lightblue" style="flex: 1" onclick="singleImport()">單筆匯入</button>
+      <button class="btn-lightblue" style="flex: 1" onclick="multiImport()">多筆匯入</button>
     </div>
     <button class="btn-pink" style="margin-top: 10px;" onclick="closeExportImportModal()">關閉</button>
   </div>
