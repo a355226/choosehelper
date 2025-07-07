@@ -1314,12 +1314,43 @@ async function startDraw() {
     logDebug("startDraw: Starting draw process");
     const drawBtn = document.querySelector('#decidePage .btn-draw');
     drawBtn.disabled = true;
-    drawBtn.innerHTML = '<span class="spin-animation">⏳</span> 抽籤中...';
+    drawBtn.innerHTML = '<span class="spin-animation">⏳</span> 檢查中...';
     const roomId = localStorage.getItem('currentRoomId');
     const roomRef = db.ref(`rooms/${roomId}`);
 
     try {
-        // 1. 用 transaction 搶鎖，isDrawing 填 userId（誰先搶到誰抽）
+        // ★★★ 1. 防呆多重流程狀態檢查
+        // 只要有任一流程（finalResult、vote、confirm、editConfirm）還沒結束就不能抽
+        const [finalResultSnap, voteSnap, confirmSnap, editConfirmSnap, isDecidingSnap] = await Promise.all([
+            roomRef.child('finalResult').once('value'),
+            roomRef.child('vote').once('value'),
+            roomRef.child('confirm').once('value'),
+            roomRef.child('editConfirm').once('value'),
+            roomRef.child('isDeciding').once('value')
+        ]);
+        const hasFinalResult = !!finalResultSnap.val();
+        const hasActiveVote = !!(voteSnap.val() && voteSnap.val().active);
+        const hasActiveConfirm = !!(confirmSnap.val() && confirmSnap.val().active);
+        const hasActiveEdit = !!(editConfirmSnap.val() && editConfirmSnap.val().active);
+        const isDeciding = !!isDecidingSnap.val();
+
+        if (hasFinalResult || hasActiveVote || hasActiveConfirm || hasActiveEdit || !isDeciding) {
+            let reason = '';
+            if (hasFinalResult) reason = '本次結果已經產生，請重新編輯清單以進行新一輪抽籤！';
+            else if (hasActiveVote) reason = '尚有一輪投票正在進行，請先完成投票或等待流程結束。';
+            else if (hasActiveConfirm) reason = '清單確認流程尚未結束，請先全部同意或等待流程結束。';
+            else if (hasActiveEdit) reason = '有編輯確認流程尚未結束，請先全部同意或等待流程結束。';
+            else reason = '目前不在抽籤流程狀態，請重新確認！';
+
+            showModal(reason, [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
+            drawBtn.disabled = false;
+            drawBtn.innerHTML = '🎲 開始抽籤';
+            return;
+        }
+
+        // ★★★ 2. 取得抽籤鎖
         const txResult = await roomRef.child('isDrawing').transaction(current => {
             if (current) return; // 有人正在抽籤，不動
             return userId;       // 把 userId 當抽籤鎖
@@ -1334,29 +1365,7 @@ async function startDraw() {
             return;
         }
 
-        // 2. 基本狀態檢查
-        const [finalResultSnap, isDecidingSnap] = await Promise.all([
-            roomRef.child('finalResult').once('value'),
-            roomRef.child('isDeciding').once('value')
-        ]);
-        if (finalResultSnap.val() || !isDecidingSnap.val()) {
-            logDebug(`startDraw: Invalid state - finalResult: ${finalResultSnap.val()}, isDeciding: ${isDecidingSnap.val()}`);
-            showModal(
-                finalResultSnap.val()
-                    ? `本次結果出爐[${finalResultSnap.val()}]<br>，請重新編輯清單以開始新抽籤！`
-                    : '房間狀態無效，請重新確認清單！',
-                [
-                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
-                ],
-                'error'
-            );
-            await roomRef.child('isDrawing').set(null); // 還原鎖
-            drawBtn.disabled = false;
-            drawBtn.innerHTML = '🎲 開始抽籤';
-            return;
-        }
-
-        // 3. 產生項目
+        // ★★★ 3. 項目檢查與抽籤
         const [listSnap, modeSnap] = await Promise.all([
             roomRef.child('list').once('value'),
             roomRef.child('decisionMode').once('value')
@@ -1376,7 +1385,7 @@ async function startDraw() {
             return;
         }
 
-        // 4. 抽選流程
+        // 產生項目
         const finalItem = items[Math.floor(Math.random() * items.length)];
         const spinList = [];
         for (let i = 0; i < 35; i++) {
@@ -1385,7 +1394,7 @@ async function startDraw() {
         spinList.push(finalItem);
         logDebug(`startDraw: Generated spinList, finalItem: ${finalItem}`);
 
-        // 5. 記錄結果
+        // 記錄結果
         await roomRef.update({
             isDrawing: userId,
             drawResult: finalItem,
@@ -1405,6 +1414,7 @@ async function startDraw() {
         drawBtn.innerHTML = '🎲 開始抽籤';
     }
 }
+
 
 function chooseDecisionMode() {
     logDebug("chooseDecisionMode: Opening decision mode modal");
@@ -1768,6 +1778,35 @@ closeAllModals();
         }
     }, 500));
 }
+async function getDrawData(roomRef, retry = 0) {
+  const [spinListSnap, resultSnap] = await Promise.all([
+    roomRef.child('drawAnimation').once('value'),
+    roomRef.child('drawResult').once('value')
+  ]);
+  const spinList = spinListSnap.val() || [];
+  const finalItem = resultSnap.val();
+  // 如未抓到，最多 retry 5 次（0.12s*5=0.6秒）
+  if ((!spinList.length || !finalItem) && retry < 5) {
+    await new Promise(r => setTimeout(r, 120));
+    return await getDrawData(roomRef, retry + 1);
+  }
+  return { spinList, finalItem };
+}
+
+// 這個 util 請貼在 script 內一次即可
+async function getDrawData(roomRef, retry = 0) {
+  const [spinListSnap, resultSnap] = await Promise.all([
+    roomRef.child('drawAnimation').once('value'),
+    roomRef.child('drawResult').once('value')
+  ]);
+  const spinList = spinListSnap.val() || [];
+  const finalItem = resultSnap.val();
+  if ((!spinList.length || !finalItem) && retry < 5) {
+    await new Promise(r => setTimeout(r, 120));
+    return await getDrawData(roomRef, retry + 1);
+  }
+  return { spinList, finalItem };
+}
 
 async function playDrawAnimation(roomId) {
   logDebug("playDrawAnimation: Starting draw animation");
@@ -1781,22 +1820,18 @@ async function playDrawAnimation(roomId) {
           return;
       }
 
-      const [spinListSnap, resultSnap, modeSnap] = await Promise.all([
-          roomRef.child('drawAnimation').once('value'),
-          roomRef.child('drawResult').once('value'),
-          roomRef.child('decisionMode').once('value')
-      ]);
-      const spinList = spinListSnap.val() || [];
-      const finalItem = resultSnap.val();
+      // ★ 用 getDrawData，避免抓到空的動畫資料
+      const modeSnap = await roomRef.child('decisionMode').once('value');
       const mode = modeSnap.val() || '一抽入魂';
+      const { spinList, finalItem } = await getDrawData(roomRef);
 
       if (!spinList.length || !finalItem) {
-closeAllModals();
-          showModal('清單無項目，請重新確認！', [
-              { text: '好的', class: 'btn-confirm', onClick: () => {} }
-          ], 'error');
-          roomRef.update({ isDrawing: null, drawAnimation: null });
-          return;
+        closeAllModals();
+        showModal('清單無項目，請重新確認！', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+        roomRef.update({ isDrawing: null, drawAnimation: null });
+        return;
       }
 
       // 新動畫模組
@@ -1840,30 +1875,45 @@ closeAllModals();
         if (index >= total) {
           // 最後一格定格大字+閃光
           resultArea.className = 'lottery-animate-text lottery-final-blue';
-frame.classList.add('lottery-final-bg-blue');
-resultArea.textContent = finalItem;
+          frame.classList.add('lottery-final-bg-blue');
+          resultArea.textContent = finalItem;
 
-// 讓使用者讀4秒再慢慢消失
-setTimeout(() => {
-  resultArea.style.transition = 'opacity 0.8s';
-  resultArea.style.opacity = 0;
-  setTimeout(() => {
-    modal.remove();
-    // 接下來處理資料庫狀態和流程
-    roomRef.update({
-      isDrawing: null,
-      drawAnimation: null
-    }).then(() => {
-      if (mode === '一抽入魂') {
-        roomRef.update({ finalResult: finalItem });
-      } else {
-        initiateVoting(mode, finalItem).then(() => {
-          listenVote(roomId); // Reattach vote listener
-        });
-      }
-    });
-  }, 800);  // 這裡是 0.8 秒（淡出時長）
-}, 2500);   // 這裡是顯示 4 秒
+          // 讓使用者讀 2.5 秒再慢慢消失
+          setTimeout(async () => {
+            resultArea.style.transition = 'opacity 0.8s';
+            resultArea.style.opacity = 0;
+            setTimeout(async () => {
+              modal.remove();
+
+              // === ★★★★★★★★ 核心同步寫法 ★★★★★★★★ ===
+              // 1. 登記「我」已經看過動畫
+              await roomRef.child('drawAnimationSeen').child(userId).set(true);
+
+              // 2. 檢查所有參與者是否都看過
+              const participantsSnap = await roomRef.child('participants').once('value');
+              const participants = Object.keys(participantsSnap.val() || {});
+              const seenSnap = await roomRef.child('drawAnimationSeen').once('value');
+              const seenUsers = Object.keys(seenSnap.val() || {});
+
+              if (participants.every(uid => seenUsers.includes(uid))) {
+                // 3. 最後一人清資料
+                await roomRef.update({
+                  isDrawing: null,
+                  drawAnimation: null,
+                  drawAnimationSeen: null,
+                  drawResult: null
+                });
+              }
+              // ★★★ 後續流程
+              if (mode === '一抽入魂') {
+                roomRef.update({ finalResult: finalItem });
+              } else {
+                initiateVoting(mode, finalItem).then(() => {
+                  listenVote(roomId); // Reattach vote listener
+                });
+              }
+            }, 800); // 淡出動畫
+          }, 2500); // 給人時間看結果
 
           return;
         }
@@ -1895,6 +1945,7 @@ setTimeout(() => {
       roomRef.update({ isDrawing: null, drawAnimation: null });
   }
 }
+
 
 async function importItems() {
     logDebug("importItems: Starting item import");
@@ -2546,7 +2597,8 @@ function renderCertificateCanvas(data) {
   <input type="text" id="roomNameInput" placeholder="房間名稱" />
   <input type="text" id="verificationCodeInput" placeholder="驗證碼（新房間免填）" />
   <input type="text" id="userNameInput" placeholder="你的名稱" />
-  <button class="btn-primary" onclick="createRoom()">建立 / 加入</button>
+  <button class="btn-primary" onclick="createRoom()" style="margin-top: 26px;">建立 / 加入</button>
+
 </div>
 <div class="page" id="multiPage">
 <div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
@@ -2612,3 +2664,5 @@ function renderCertificateCanvas(data) {
 </div>
 </body>
 </html>
+
+
