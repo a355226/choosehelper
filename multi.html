@@ -1692,17 +1692,21 @@ closeAllModals();
 
             // 只要有人不同意，就彈窗，不動任何狀態，不切頁
             if (disagreeCount > 0) {
-                logDebug("listenReedit: Someone disagreed, cancelling");
-                await reeditRef.update({ status: 'cancelled', active: false });
-                closeAllModals();
-                showModal(
-                    `❅ 有人不同意重新編輯（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`,
-                    [{ text: '好的', class: 'btn-confirm', onClick: () => {} }],
-                    'error'
-                );
-                // 不切頁、不動 isDeciding
-                return;
-            }
+    logDebug("listenVote: Someone disagreed, cancelling");
+    await voteRef.update({ status: 'cancelled', active: false });
+    closeAllModals();
+    const updatedProgressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+    showModal(
+        `❌ 有人不同意清單<br>${updatedProgressText}，流程已取消。`,
+        [{ text: '好的', class: 'btn-confirm', onClick: () => {} }],
+        'error'
+    );
+    await voteRef.remove();
+    voteRef.off('value');
+    modalOpened = false;
+    hideVoteCountdown();
+    return;
+}
 
             // 只有全同意，才切頁還原所有狀態
             if (agreeCount === total && total > 0) {
@@ -2163,7 +2167,8 @@ if (progressEl) {
                 modalOpened = false;
                 hideVoteCountdown();
                 logDebug(`listenVote: User ${userId} has voted, showing waiting modal`);
-                showWaitingModal(voteRef, userId, `已投票，等待其他人投票中... <br>${progressText}`, modalId);
+                const updatedProgressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+showWaitingModal(voteRef, userId, `已投票，等待其他人投票中... <br>${updatedProgressText}`, modalId);
             }
 
             // 判斷票數
