@@ -675,7 +675,7 @@ window.addEventListener('beforeunload', () => {
     }
 }
 
-function showModal(content, buttons, modalId = 'generic') {
+function showModal(content, buttons, modalId = 'generic', minDisplayTime = 0, autoClose = false) {
     if (document.querySelector(`.modal[data-modalId="${modalId}"]`)) {
         logDebug(`showModal: Modal ${modalId} already exists, skipping`);
         return;
@@ -687,20 +687,43 @@ function showModal(content, buttons, modalId = 'generic') {
     const modalContent = document.createElement('div');
     modalContent.className = 'modal-content';
     modalContent.innerHTML = `<p style="font-size:18px;">${content}</p>`;
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'modal-buttons';
+
     buttons.forEach(btn => {
         const button = document.createElement('button');
         button.className = btn.class || 'btn-primary';
         button.textContent = btn.text;
+        button.disabled = minDisplayTime > 0; // 如果有最小顯示時間，初始禁用按鈕
         button.onclick = () => {
             logDebug(`showModal: Button clicked - ${btn.text} for modal ${modalId}`);
             modal.remove();
             btn.onClick();
         };
-        modalContent.appendChild(button);
+        buttonContainer.appendChild(button);
     });
+    modalContent.appendChild(buttonContainer);
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
     logDebug(`showModal: Displayed modal ${modalId} with content: ${content}`);
+
+    // 設置最小顯示時間
+    if (minDisplayTime > 0) {
+        setTimeout(() => {
+            const buttons = modalContent.querySelectorAll('.modal-buttons button');
+            buttons.forEach(btn => (btn.disabled = false)); // 啟用按鈕
+            logDebug(`showModal: Buttons enabled for modal ${modalId} after ${minDisplayTime}ms`);
+            // 如果 autoClose 打開，顯示時間到自動關閉
+            if (autoClose) {
+                closeModalById(modalId);
+            }
+        }, minDisplayTime);
+    } else if (autoClose) {
+        // 沒設置 minDisplayTime，autoClose 立刻關
+        setTimeout(() => closeModalById(modalId), 2000); // 給個預設2秒
+    }
+
+    return modal;
 }
 
 function closeModalById(modalId) {
@@ -711,8 +734,11 @@ function closeModalById(modalId) {
     }
 }
 
-function closeAllModals() {
+function closeAllModals(exceptModalId = null) {
     document.querySelectorAll('.modal').forEach(modal => {
+        if (exceptModalId && modal.dataset.modalId === exceptModalId) {
+            return; // 跳過指定 ID 的模態框
+        }
         logDebug(`closeAllModals: Closing modal ${modal.dataset.modalId}`);
         modal.remove();
     });
@@ -1057,6 +1083,15 @@ function listenConfirmation(roomId) {
     const confirmRef = db.ref(`rooms/${roomId}/confirm`);
     const modalId = 'confirm';
     let lastProcessedData = null;
+    let confirmTimeout = null;
+
+    function clearConfirmTimer() {
+        if (confirmTimeout) {
+            clearTimeout(confirmTimeout);
+            confirmTimeout = null;
+            logDebug("listenConfirmation: Confirm timer cleared");
+        }
+    }
 
     confirmRef.on('value', debounce(async snapshot => {
         const data = snapshot.val();
@@ -1065,7 +1100,6 @@ function listenConfirmation(roomId) {
             logDebug("listenConfirmation: Data unchanged, skipping");
             return;
         }
-        closeModalById(modalId); // 提前關閉模態框
         lastProcessedData = dataString;
         logDebug(`listenConfirmation: Received data: ${dataString}, User: ${userId}`);
 
@@ -1079,35 +1113,27 @@ function listenConfirmation(roomId) {
             if (isDeciding || hasFinalResult) {
                 logDebug("listenConfirmation: Terminating due to isDeciding or finalResult");
                 closeAllModals();
+                hideVoteCountdown();
+                clearConfirmTimer();
                 await confirmRef.remove();
                 confirmRef.off('value');
-                window._confirmCountdownStartTime = null;
                 return;
             }
 
             if (!data) {
                 logDebug("listenConfirmation: No data, skip showing cancel modal");
                 closeAllModals();
-                window._confirmCountdownStartTime = null;
+                hideVoteCountdown();
+                clearConfirmTimer();
                 return;
             }
 
-            if (!data.active || data.status === 'cancelled') {
-                logDebug("listenConfirmation: Confirmation cancelled or inactive");
-                closeAllModals();
-                window._confirmCountdownStartTime = null;
-                const cancelledByName = data.cancelledBy ? (await db.ref(`rooms/${roomId}/participants/${data.cancelledBy}`).once('value')).val()?.name || '未知用戶' : '未知用戶';
-                showModal(`❌ 確認流程已被 ${cancelledByName} 取消。`, [
-                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
-                ], 'error');
-                await confirmRef.remove();
-                return;
-            }
-
+           
             if (data.status !== 'pending') {
                 logDebug("listenConfirmation: Not pending, cleaning up");
                 closeModalById(modalId);
-                window._confirmCountdownStartTime = null;
+                hideVoteCountdown();
+                clearConfirmTimer();
                 return;
             }
 
@@ -1115,10 +1141,11 @@ function listenConfirmation(roomId) {
                 logDebug("listenConfirmation: Invalid initiator data, ignoring");
                 await confirmRef.remove();
                 closeModalById(modalId);
-                window._confirmCountdownStartTime = null;
+                hideVoteCountdown();
+                clearConfirmTimer();
                 showModal('❌ 確認流程無效，已取消。', [
                     { text: '好的', class: 'btn-confirm', onClick: () => {} }
-                ], 'error');
+                ], 'error', 3000); // 至少保留 3 秒
                 return;
             }
 
@@ -1141,19 +1168,26 @@ function listenConfirmation(roomId) {
                 logDebug("listenConfirmation: Someone disagreed, cancelling");
                 await confirmRef.update({ status: 'cancelled', active: false });
                 closeAllModals();
-                window._confirmCountdownStartTime = null;
+                hideVoteCountdown();
+                clearConfirmTimer();
                 showModal(`❌ 有人不同意清單<br>（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`, [
                     { text: '好的', class: 'btn-confirm', onClick: () => {} }
-                ], 'error');
-                await confirmRef.remove();
-                return;
-            }
+                ], 'error', 3000); // 至少保留 3 秒
+                // 這裡加延遲再 remove
+    setTimeout(async () => {
+      await confirmRef.remove();
+    }, 3000); // 跟 showModal 的 3000 對齊
+
+    return;
+}
 
             if (agreeCount === total && total > 0) {
                 logDebug("listenConfirmation: All agreed, switching to decidePage");
                 await confirmRef.update({ status: 'completed', active: false });
                 await db.ref(`rooms/${roomId}/isDeciding`).set(true);
-                window._confirmCountdownStartTime = null;
+                closeAllModals();
+                hideVoteCountdown();
+                clearConfirmTimer();
                 const multiPage = document.getElementById('multiPage');
                 const decidePage = document.getElementById('decidePage');
                 if (!decidePage.classList.contains('active')) {
@@ -1162,73 +1196,88 @@ function listenConfirmation(roomId) {
                     decidePage.classList.add('active');
                     showModal('✅ 所有人同意，進入抽籤頁面！', [
                         { text: '好的', class: 'btn-confirm', onClick: () => {} }
-                    ], 'success');
+                    ], 'success', 3000); // 至少保留 3 秒
                 }
                 return;
             }
 
             if (responses[userId] === true) {
                 logDebug("listenConfirmation: User has agreed, showing waiting modal");
+                closeAllModals();
                 showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
                 hideVoteCountdown();
-                window._confirmCountdownStartTime = null;
+                clearConfirmTimer();
                 return;
             }
 
-            logDebug("listenConfirmation: Showing confirmation modal for user");
+            // 計算剩餘時間
+            const voteStartTime = data.timestamp || Date.now();
+            const elapsed = Date.now() - voteStartTime;
+            const remainingTime = Math.max(0, 25000 - elapsed);
+            const remainingSeconds = Math.ceil(remainingTime / 1000);
+
             closeAllModals();
             showModal(`已發起清單確認，是否同意？<br>${progressText}`, [
                 {
                     text: '同意',
                     class: 'btn-confirm',
                     onClick: async () => {
-                        clearTimeout(window._confirmTimeout);
-                        hideVoteCountdown();
-                        window._confirmCountdownStartTime = null;
                         logDebug("listenConfirmation: User agrees");
+                        clearConfirmTimer();
+                        hideVoteCountdown();
                         await confirmRef.child('responses').child(userId).set(true);
-                        showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中...<br> ${progressText}`, modalId);
+                        showWaitingModal(confirmRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
                     }
                 },
                 {
                     text: '不同意',
                     class: 'btn-primary',
                     onClick: async () => {
-                        clearTimeout(window._confirmTimeout);
-                        hideVoteCountdown();
-                        window._confirmCountdownStartTime = null;
                         logDebug("listenConfirmation: User disagrees");
+                        clearConfirmTimer();
+                        hideVoteCountdown();
                         await confirmRef.child('responses').child(userId).set(false);
                     }
                 }
             ], modalId);
 
-            // ===== 倒數動畫 + 自動同意，**第一次彈窗才設 startTime** =====
-            if (!window._confirmCountdownStartTime) {
-                window._confirmCountdownStartTime = Date.now();
+            if (remainingTime > 0) {
+                showVoteCountdown(remainingSeconds);
+                clearConfirmTimer();
+                confirmTimeout = setTimeout(async () => {
+                    clearConfirmTimer();
+                    const responsesSnap = await confirmRef.child('responses').once('value');
+                    const responses = responsesSnap.val() || {};
+                    if (userId in responses) {
+                        logDebug(`listenConfirmation: User ${userId} has already responded, skipping auto-agree`);
+                        return;
+                    }
+                    closeAllModals();
+                    hideVoteCountdown();
+                    await confirmRef.child('responses').child(userId).set(true);
+                    showWaitingModal(confirmRef, userId, `（已自動同意）等待其他人同意中... <br>${progressText}`, modalId);
+                }, remainingTime);
+            } else {
+                const responsesSnap = await confirmRef.child('responses').once('value');
+                const responses = responsesSnap.val() || {};
+                if (!(userId in responses)) {
+                    clearConfirmTimer();
+                    closeAllModals();
+                    hideVoteCountdown();
+                    await confirmRef.child('responses').child(userId).set(true);
+                    showWaitingModal(confirmRef, userId, `（已自動同意）等待其他人同意中... <br>${progressText}`, modalId);
+                }
             }
-            showVoteCountdown(25, window._confirmCountdownStartTime);
-            clearTimeout(window._confirmTimeout);
-            let remain = 25 - Math.floor((Date.now() - window._confirmCountdownStartTime) / 1000);
-            if (remain < 0) remain = 0;
-            window._confirmTimeout = setTimeout(async () => {
-                closeModalById(modalId);
-                hideVoteCountdown();
-                window._confirmCountdownStartTime = null;
-                await confirmRef.child('responses').child(userId).set(true);
-                showWaitingModal(confirmRef, userId, `（已自動同意）等待其他人同意中... <br>${progressText}`, modalId);
-            }, remain * 1000);
-
         } catch (error) {
             logDebug(`listenConfirmation: Error: ${error.message}`);
-            window._confirmCountdownStartTime = null;
+            hideVoteCountdown();
+            clearConfirmTimer();
             showModal('處理確認流程失敗，請稍後再試！', [
                 { text: '好的', class: 'btn-confirm', onClick: () => {} }
-            ], 'error');
+            ], 'error', 3000); // 至少保留 3 秒
         }
     }, 500));
 }
-
 
 async function requestConfirmation() {
     logDebug("requestConfirmation: Starting confirmation request");
@@ -1637,6 +1686,15 @@ function listenReedit(roomId) {
     const reeditRef = db.ref(`rooms/${roomId}/editConfirm`);
     const modalId = 'reedit';
     let lastProcessedData = null;
+    let reeditTimeout = null;
+
+    function clearReeditTimer() {
+        if (reeditTimeout) {
+            clearTimeout(reeditTimeout);
+            reeditTimeout = null;
+            logDebug("listenReedit: Reedit timer cleared");
+        }
+    }
 
     reeditRef.on('value', debounce(async snap => {
         const data = snap.val();
@@ -1658,45 +1716,26 @@ function listenReedit(roomId) {
                 logDebug("listenReedit: Not in deciding phase, clearing reedit data");
                 await reeditRef.remove();
                 closeModalById(modalId);
-                window._reeditCountdownStartTime = null;
+                hideVoteCountdown();
+                clearReeditTimer();
                 return;
             }
 
             if (!data) {
                 logDebug("listenReedit: editConfirm is null, closing modal");
                 closeModalById(modalId);
-                window._reeditCountdownStartTime = null;
+                hideVoteCountdown();
+                clearReeditTimer();
                 return;
             }
 
-            if (data.status === 'cancelled') {
-                logDebug("listenReedit: Reedit process cancelled!");
-                closeAllModals();
-                window._reeditCountdownStartTime = null;
-                // 找出反對者名稱（或未知用戶）
-                let cancelledByName = '未知用戶';
-                if (data.responses) {
-                    const refusers = Object.entries(data.responses).filter(([uid, v]) => v === false);
-                    if (refusers.length > 0) {
-                        const [refuseId] = refusers[0];
-                        const snap = await db.ref(`rooms/${roomId}/participants/${refuseId}`).once('value');
-                        cancelledByName = snap.val() && snap.val().name ? snap.val().name : '未知用戶';
-                    }
-                }
-                showModal(
-                    `❅ 重新編輯流程已被 ${cancelledByName} 取消！`,
-                    [{ text: '好的', class: 'btn-confirm', onClick: () => {} }],
-                    'error'
-                );
-                // 不切頁！只顯示訊息
-                return;
-            }
-
-            if (!data.active || data.status !== 'pending') {
-                logDebug("listenReedit: No active reedit or not pending, cleaning up");
+           
+            if (data.status !== 'pending') {
+                logDebug("listenReedit: Not pending, cleaning up");
                 await reeditRef.remove();
                 closeModalById(modalId);
-                window._reeditCountdownStartTime = null;
+                hideVoteCountdown();
+                clearReeditTimer();
                 return;
             }
 
@@ -1704,7 +1743,11 @@ function listenReedit(roomId) {
                 logDebug("listenReedit: Invalid initiator data, ignoring");
                 await reeditRef.remove();
                 closeModalById(modalId);
-                window._reeditCountdownStartTime = null;
+                hideVoteCountdown();
+                clearReeditTimer();
+                showModal('❅ 重新編輯流程無效，已取消。', [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error', 3000); // 至少保留 3 秒
                 return;
             }
 
@@ -1716,7 +1759,6 @@ function listenReedit(roomId) {
             const disagreeCount = Object.values(responses).filter(v => v === false).length;
             logDebug(`listenReedit: Total participants: ${total}, Agree: ${agreeCount}, Disagree: ${disagreeCount}, User: ${userId}`);
 
-            // 更新票數
             await reeditRef.update({
                 agreeCount: agreeCount,
                 disagreeCount: disagreeCount
@@ -1725,22 +1767,26 @@ function listenReedit(roomId) {
 
             const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
 
-            // 只要有人不同意，就彈窗，不動任何狀態，不切頁
             if (disagreeCount > 0) {
-                logDebug("listenReedit: Someone disagreed, cancelling");
-                await reeditRef.update({ status: 'cancelled', active: false });
-                closeAllModals();
-                window._reeditCountdownStartTime = null;
-                showModal(
-                    `❅ 有人不同意重新編輯（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`,
-                    [{ text: '好的', class: 'btn-confirm', onClick: () => {} }],
-                    'error'
-                );
-                // 不切頁、不動 isDeciding
-                return;
-            }
+    logDebug("listenReedit: Someone disagreed, cancelling");
+    await reeditRef.update({ status: 'cancelled', active: false });
+    closeAllModals();
+    hideVoteCountdown();
+    clearReeditTimer();
+    showModal(
+        `❅ 有人不同意重新編輯，流程已取消。`, [
+                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
+                ], 'error', 3000); // 至少保留 3 秒
+                // 這裡加延遲再 remove
+    setTimeout(async () => {
+      await reeditRef.remove();
+    }, 3000); // 跟 showModal 的 3000 對齊
 
-            // 只有全同意，才切頁還原所有狀態
+    return;
+}
+
+
+
             if (agreeCount === total && total > 0) {
                 logDebug("listenReedit: All agreed, returning to multiPage");
                 await reeditRef.update({ status: 'completed', active: false });
@@ -1754,7 +1800,8 @@ function listenReedit(roomId) {
                     editConfirm: null
                 });
                 closeAllModals();
-                window._reeditCountdownStartTime = null;
+                hideVoteCountdown();
+                clearReeditTimer();
                 showModal('✅ 所有人同意，返回編輯清單！', [
                     {
                         text: '好的',
@@ -1769,18 +1816,23 @@ function listenReedit(roomId) {
                             }
                         }
                     }
-                ], 'success');
+                ], 'success', 3000); // 至少保留 3 秒
                 return;
             }
 
-            // 已同意的用戶，顯示等待
             if (responses[userId] === true) {
+                closeAllModals();
                 showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
                 hideVoteCountdown();
-                clearTimeout(window._reeditTimeout);
-                window._reeditCountdownStartTime = null;
+                clearReeditTimer();
                 return;
             }
+
+            // 計算剩餘時間
+            const voteStartTime = data.timestamp || Date.now();
+            const elapsed = Date.now() - voteStartTime;
+            const remainingTime = Math.max(0, 25000 - elapsed);
+            const remainingSeconds = Math.ceil(remainingTime / 1000);
 
             closeAllModals();
             showModal(`已發起重新編輯，是否同意？<br>${progressText}`, [
@@ -1788,9 +1840,9 @@ function listenReedit(roomId) {
                     text: '同意',
                     class: 'btn-confirm',
                     onClick: async () => {
-                        clearTimeout(window._reeditTimeout);
+                        logDebug("listenReedit: User agrees");
+                        clearReeditTimer();
                         hideVoteCountdown();
-                        window._reeditCountdownStartTime = null;
                         await reeditRef.child('responses').child(userId).set(true);
                         showWaitingModal(reeditRef, userId, `已同意，等待其他人同意中... <br>${progressText}`, modalId);
                     }
@@ -1799,40 +1851,51 @@ function listenReedit(roomId) {
                     text: '不同意',
                     class: 'btn-primary',
                     onClick: async () => {
-                        clearTimeout(window._reeditTimeout);
+                        logDebug("listenReedit: User disagrees");
+                        clearReeditTimer();
                         hideVoteCountdown();
-                        window._reeditCountdownStartTime = null;
                         await reeditRef.child('responses').child(userId).set(false);
                     }
                 }
             ], modalId);
 
-            // ====== 倒數動畫 + 自動同意 ======
-            if (!window._reeditCountdownStartTime) {
-                window._reeditCountdownStartTime = Date.now();
+            if (remainingTime > 0) {
+                showVoteCountdown(remainingSeconds);
+                clearReeditTimer();
+                reeditTimeout = setTimeout(async () => {
+                    clearReeditTimer();
+                    const responsesSnap = await reeditRef.child('responses').once('value');
+                    const responses = responsesSnap.val() || {};
+                    if (userId in responses) {
+                        logDebug(`listenReedit: User ${userId} has already responded, skipping auto-agree`);
+                        return;
+                    }
+                    closeAllModals();
+                    hideVoteCountdown();
+                    await reeditRef.child('responses').child(userId).set(true);
+                    showWaitingModal(reeditRef, userId, `（已自動同意）等待其他人同意中... <br>${progressText}`, modalId);
+                }, remainingTime);
+            } else {
+                const responsesSnap = await reeditRef.child('responses').once('value');
+                const responses = responsesSnap.val() || {};
+                if (!(userId in responses)) {
+                    clearReeditTimer();
+                    closeAllModals();
+                    hideVoteCountdown();
+                    await reeditRef.child('responses').child(userId).set(true);
+                    showWaitingModal(reeditRef, userId, `（已自動同意）等待其他人同意中... <br>${progressText}`, modalId);
+                }
             }
-            showVoteCountdown(25, window._reeditCountdownStartTime);
-            clearTimeout(window._reeditTimeout);
-            let remain = 25 - Math.floor((Date.now() - window._reeditCountdownStartTime) / 1000);
-            if (remain < 0) remain = 0;
-            window._reeditTimeout = setTimeout(async () => {
-                closeModalById(modalId);
-                hideVoteCountdown();
-                window._reeditCountdownStartTime = null;
-                await reeditRef.child('responses').child(userId).set(true);
-                showWaitingModal(reeditRef, userId, `（已自動同意）等待其他人同意中... <br>${progressText}`, modalId);
-            }, remain * 1000);
-
         } catch (error) {
             logDebug(`listenReedit: Error: ${error.message}`);
-            window._reeditCountdownStartTime = null;
+            hideVoteCountdown();
+            clearReeditTimer();
             showModal('重新編輯處理失敗，請稍後再試！', [
                 { text: '好的', class: 'btn-confirm', onClick: () => {} }
-            ], 'error');
+            ], 'error', 3000); // 至少保留 3 秒
         }
     }, 500));
 }
-
 async function getDrawData(roomRef, retry = 0) {
   const [spinListSnap, resultSnap] = await Promise.all([
     roomRef.child('drawAnimation').once('value'),
@@ -2089,10 +2152,21 @@ function listenVote(roomId) {
     const modalId = 'vote';
     let lastProcessedData = null;
     let voteTimeout = null;
-    let modalOpened = false;
 
     function clearVoteTimer() {
-        if (voteTimeout) { clearTimeout(voteTimeout); voteTimeout = null; }
+        if (voteTimeout) {
+            clearTimeout(voteTimeout);
+            voteTimeout = null;
+            logDebug("listenVote: Vote timer cleared");
+        }
+    }
+
+    // 驗證投票資料是否與參與者一致
+    async function validateVotes(votes, total) {
+        const participantSnap = await db.ref(`rooms/${roomId}/participants`).once('value');
+        const participants = Object.keys(participantSnap.val() || {});
+        const voteKeys = Object.keys(votes);
+        return voteKeys.length === total && participants.every(pid => voteKeys.includes(pid));
     }
 
     voteRef.on('value', debounce(async snap => {
@@ -2105,36 +2179,36 @@ function listenVote(roomId) {
         lastProcessedData = dataString;
         logDebug(`listenVote: Received data: ${dataString}`);
 
-        clearVoteTimer();
-
         try {
+            // 檢查最終結果是否存在
             const finalResultSnap = await db.ref(`rooms/${roomId}/finalResult`).once('value');
             if (finalResultSnap.val()) {
                 logDebug("listenVote: Final result exists, terminating vote listener");
                 await voteRef.remove();
                 voteRef.off('value');
-                closeModalById(modalId);
-                modalOpened = false;
+                closeAllModals();
+                clearVoteTimer();
                 hideVoteCountdown();
-                window._voteCountdownStartTime = null;
                 return;
             }
 
+            // 檢查投票是否有效
             if (!data || !data.active || !data.item || data.status === 'cancelled') {
                 logDebug("listenVote: No active vote or invalid item, removing listener and clearing vote");
-                closeModalById(modalId);
+                closeAllModals();
                 await voteRef.remove();
                 voteRef.off('value');
-                modalOpened = false;
+                clearVoteTimer();
                 hideVoteCountdown();
-                window._voteCountdownStartTime = null;
                 return;
             }
 
             const item = data.item;
             const mode = data.mode;
             const votes = data.votes || {};
+            const voteStartTime = data.timestamp || Date.now(); // 使用伺服器時間戳記
 
+            // 計算投票數
             const participantSnap = await db.ref(`rooms/${roomId}/participants`).once('value');
             const participants = participantSnap.val() || {};
             const total = Object.keys(participants).length;
@@ -2143,96 +2217,155 @@ function listenVote(roomId) {
             const totalVotes = Object.keys(votes).length;
             logDebug(`listenVote: Total participants: ${total}, Agree: ${agreeCount}, Disagree: ${disagreeCount}, Total votes: ${totalVotes}`);
 
-            await voteRef.update({
-                agreeCount: agreeCount,
-                disagreeCount: disagreeCount
-            });
-            logDebug(`listenVote: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
-
             const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
 
-            // ======= 投票 modal & 倒數條 =======
+            // 共識決模式下，若有不同意票，立即終止
+            if (mode === '共識決' && disagreeCount > 0) {
+                logDebug("listenVote: Consensus failed due to disagreement");
+                closeAllModals();
+                showModal(
+                    `❌ 未達成共識（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+                    [{
+                        text: '好的',
+                        class: 'btn-confirm',
+                        onClick: async () => {
+                            await db.ref(`rooms/${roomId}`).update({
+                                vote: null,
+                                isDrawing: null,
+                                drawAnimation: null,
+                                drawResult: null
+                            });
+                            safeEnableDrawBtn();
+                        }
+                    }],
+                    'error'
+                );
+                voteRef.off('value');
+                await voteRef.remove();
+                clearVoteTimer();
+                hideVoteCountdown();
+                return;
+            }
+
+            // 處理用戶投票介面
             if (!(userId in votes)) {
                 logDebug(`listenVote: User ${userId} has not voted, showing vote modal`);
-                if (!modalOpened) {
-                    closeAllModals();
-                    showModal(
-                        `是否同意將「${item}」作為最終結果？<br><span id="vote-progress-text">${progressText}</span>`,
-                        [
-                            {
-                                text: '同意',
-                                class: 'btn-confirm',
-                                onClick: async () => {
-                                    clearVoteTimer();
-                                    closeModalById(modalId);
-                                    modalOpened = false;
-                                    hideVoteCountdown();
-                                    window._voteCountdownStartTime = null; // 這裡清除
-                                    await voteRef.child('votes/' + userId).set(true);
-                                    showWaitingModal(voteRef, userId, `已同意，等待其他人投票中... <br>${progressText}`, modalId);
-                                    lastProcessedData = null;
-                                }
-                            },
-                            {
-                                text: '不同意',
-                                class: 'btn-primary',
-                                onClick: async () => {
-                                    clearVoteTimer();
-                                    closeAllModals();
-                                    modalOpened = false;
-                                    hideVoteCountdown();
-                                    window._voteCountdownStartTime = null; // 這裡清除
-                                    await voteRef.child('votes/' + userId).set(false);
-                                    lastProcessedData = null;
-                                }
+                const elapsed = Date.now() - voteStartTime;
+                const remainingTime = Math.max(0, 25000 - elapsed);
+                const remainingSeconds = Math.ceil(remainingTime / 1000);
+
+                // 顯示投票視窗前關閉所有現有視窗
+                closeAllModals();
+
+                showModal(
+                    `是否同意將「${item}」作為最終結果？<br><span id="vote-progress-text">${progressText}</span>`,
+                    [
+                        {
+                            text: '同意',
+                            class: 'btn-confirm',
+                            onClick: async () => {
+                                logDebug('你按了同意！userId=' + userId);
+                                clearVoteTimer();
+                                closeAllModals();
+                                await voteRef.child('votes').transaction(votes => {
+                                    votes = votes || {};
+                                    if (!(userId in votes)) { // 防止重複投票
+                                        votes[userId] = true;
+                                    }
+                                    return votes;
+                                }).then(() => logDebug('set(true) 寫入成功！'))
+                                  .catch(e => logDebug('set(true) 失敗：' + e.message));
+                                showWaitingModal(voteRef, userId, `已同意，等待其他人投票中... <br><span id="vote-progress-text">${progressText}</span>`, modalId);
+                                hideVoteCountdown();
+                                lastProcessedData = null;
                             }
-                        ],
-                        modalId
-                    );
-                    modalOpened = true;
+                        },
+                        {
+                            text: '不同意',
+                            class: 'btn-primary',
+                            onClick: async () => {
+                                logDebug('你按了不同意！userId=' + userId);
+                                clearVoteTimer();
+                                closeAllModals();
+                                await voteRef.child('votes').transaction(votes => {
+                                    votes = votes || {};
+                                    if (!(userId in votes)) { // 防止重複投票
+                                        votes[userId] = false;
+                                    }
+                                    return votes;
+                                }).then(() => logDebug('set(false) 寫入成功！'))
+                                  .catch(e => logDebug('set(false) 失敗：' + e.message));
+                                showWaitingModal(voteRef, userId, `已不同意，等待其他人投票中... <br><span id="vote-progress-text">${progressText}</span>`, modalId);
+                                hideVoteCountdown();
+                                lastProcessedData = null;
+                            }
+                        }
+                    ],
+                    modalId
+                );
 
-                    // 🟢 只在第一次彈窗設定 startTime
-                    if (!window._voteCountdownStartTime) {
-                        window._voteCountdownStartTime = Date.now();
-                    }
-                    hideVoteCountdown();
-                    showVoteCountdown(25, window._voteCountdownStartTime);
-
-                    // 25秒後自動同意
+                // 僅在用戶尚未投票且投票未結束時設置計時器
+                if (remainingTime > 0) {
+                    showVoteCountdown(remainingSeconds);
                     voteTimeout = setTimeout(() => {
                         clearVoteTimer();
-                        closeModalById(modalId);
-                        modalOpened = false;
-                        hideVoteCountdown();
-                        window._voteCountdownStartTime = null; // 這裡清除
-                        voteRef.child('votes/' + userId).set(true);
-                        showWaitingModal(voteRef, userId, `（已自動同意）等待其他人投票中... <br>${progressText}`, modalId);
-                        lastProcessedData = null;
-                    }, 25000);
-
+                        // 再次檢查是否已投票
+                        voteRef.child('votes').once('value', async snap => {
+                            const votes = snap.val() || {};
+                            if (userId in votes) {
+                                logDebug(`listenVote: User ${userId} has already voted, skipping auto-vote`);
+                                return;
+                            }
+                            closeAllModals();
+                            await voteRef.child('votes').transaction(votes => {
+                                votes = votes || {};
+                                if (!(userId in votes)) {
+                                    votes[userId] = true;
+                                }
+                                return votes;
+                            }).then(() => logDebug('自動同意 寫入成功！'))
+                              .catch(e => logDebug('自動同意 失敗：' + e.message));
+                            showWaitingModal(voteRef, userId, `（已自動同意）等待其他人投票中... <br><span id="vote-progress-text">${progressText}</span>`, modalId);
+                            hideVoteCountdown();
+                            lastProcessedData = null;
+                        });
+                    }, remainingTime);
                 } else {
-                    // 只更新投票進度文字
-                    const progressEl = document.getElementById('vote-progress-text');
-                    if (progressEl) progressEl.textContent = progressText;
-                    // 🟢 資料刷新時也重繪倒數條（不重設 startTime）
-                    hideVoteCountdown();
-                    if (window._voteCountdownStartTime) {
-                        showVoteCountdown(25, window._voteCountdownStartTime);
+                    // 時間已過，檢查是否已投票
+                    const votesSnap = await voteRef.child('votes').once('value');
+                    const votes = votesSnap.val() || {};
+                    if (!(userId in votes)) {
+                        clearVoteTimer();
+                        closeAllModals();
+                        await voteRef.child('votes').transaction(votes => {
+                            votes = votes || {};
+                            if (!(userId in votes)) {
+                                votes[userId] = true;
+                            }
+                            return votes;
+                        }).then(() => logDebug('自動同意 寫入成功！'))
+                          .catch(e => logDebug('自動同意 失敗：' + e.message));
+                        showWaitingModal(voteRef, userId, `（已自動同意）等待其他人投票中... <br><span id="vote-progress-text">${progressText}</span>`, modalId);
+                        hideVoteCountdown();
+                        lastProcessedData = null;
                     }
                 }
             } else {
-                clearVoteTimer();
-                modalOpened = false;
-                hideVoteCountdown();
-                window._voteCountdownStartTime = null; // 投過就清除
                 logDebug(`listenVote: User ${userId} has voted, showing waiting modal`);
-                showWaitingModal(voteRef, userId, `已投票，等待其他人投票中... <br>${progressText}`, modalId);
+                closeAllModals();
+                showWaitingModal(voteRef, userId, `已投票，等待其他人投票中... <br><span id="vote-progress-text">${progressText}</span>`, modalId);
+                hideVoteCountdown();
             }
 
-            // 判斷票數
-            if (mode === '共識決') {
-                if (totalVotes === total) {
-                    window._voteCountdownStartTime = null;
+            // 檢查投票是否結束
+            if (totalVotes === total) {
+                const isValid = await validateVotes(votes, total);
+                if (!isValid) {
+                    logDebug("listenVote: Invalid vote data, ignoring");
+                    return;
+                }
+
+                if (mode === '共識決') {
                     if (agreeCount === total) {
                         await db.ref(`rooms/${roomId}`).update({
                             finalResult: item,
@@ -2240,14 +2373,11 @@ function listenVote(roomId) {
                         });
                         closeAllModals();
                         voteRef.off('value');
-                        modalOpened = false;
                         hideVoteCountdown();
                     } else {
                         closeAllModals();
-                        modalOpened = false;
-                        hideVoteCountdown();
                         showModal(
-                            `❌ 未達成條件<br>（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+                            `❌ 未達成共識（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
                             [{
                                 text: '好的',
                                 class: 'btn-confirm',
@@ -2263,11 +2393,9 @@ function listenVote(roomId) {
                             }],
                             'error'
                         );
+                        hideVoteCountdown();
                     }
-                }
-            } else if (mode === '多數決') {
-                if (totalVotes === total) {
-                    window._voteCountdownStartTime = null;
+                } else if (mode === '多數決') {
                     if (agreeCount > total / 2) {
                         await db.ref(`rooms/${roomId}`).update({
                             finalResult: item,
@@ -2275,14 +2403,11 @@ function listenVote(roomId) {
                         });
                         closeAllModals();
                         voteRef.off('value');
-                        modalOpened = false;
                         hideVoteCountdown();
                     } else {
                         closeAllModals();
-                        modalOpened = false;
-                        hideVoteCountdown();
                         showModal(
-                            `❌ 未達成條件（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+                            `❌ 未達成多數（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
                             [{
                                 text: '好的',
                                 class: 'btn-confirm',
@@ -2293,20 +2418,24 @@ function listenVote(roomId) {
                                         drawAnimation: null,
                                         drawResult: null
                                     });
-                                    const drawBtn = document.querySelector('#decidePage .btn-draw');
-                                    if (drawBtn) drawBtn.disabled = false;
+                                    safeEnableDrawBtn();
                                 }
                             }],
                             'error'
                         );
+                        hideVoteCountdown();
                     }
                 }
+                // 投票結束後清理
+                await voteRef.remove();
+                voteRef.off('value');
+                clearVoteTimer();
             }
 
         } catch (error) {
             logDebug(`listenVote: Error: ${error.message}`);
             hideVoteCountdown();
-            window._voteCountdownStartTime = null;
+            closeAllModals();
             showModal('投票處理失敗，請稍後再試！', [
                 { text: '好的', class: 'btn-confirm', onClick: () => {} }
             ], 'error');
@@ -2314,6 +2443,12 @@ function listenVote(roomId) {
     }, 500));
 }
 
+async function validateVotes(roomId, votes, total) {
+    const participantSnap = await db.ref(`rooms/${roomId}/participants`).once('value');
+    const participants = Object.keys(participantSnap.val() || {});
+    const voteKeys = Object.keys(votes);
+    return voteKeys.length === total && participants.every(pid => voteKeys.includes(pid));
+}
 
 function leaveRoom() {
     logDebug && logDebug("leaveRoom: Initiating room exit");
@@ -2703,59 +2838,46 @@ function renderCertificateCanvas(data) {
   targetDiv.appendChild(canvas);
 }
 
-function showVoteCountdown(duration = 25, startTime = Date.now()) {
-    hideVoteCountdown();
-    let remain = duration - Math.floor((Date.now() - startTime) / 1000);
-    if (remain < 0) remain = 0;
+function showVoteCountdown(duration = 25) {
+hideVoteCountdown();
+  let remain = duration;
+  // 先清掉舊的
+  let old = document.getElementById('global-vote-countdown');
+  if (old) old.remove();
 
-    let el = document.getElementById('global-vote-countdown');
-    if (!el) {
-        el = document.createElement('div');
-        el.id = 'global-vote-countdown';
-        el.style.position = 'fixed';
-        el.style.top = '18px';
-        el.style.left = '50%';
-        el.style.transform = 'translateX(-50%)';
-        el.style.width = '270px';
-        el.style.zIndex = 99999;
-        el.style.background = 'rgba(255,255,255,0.96)';
-        el.style.borderRadius = '15px';
-        el.style.boxShadow = '0 2px 18px #3db8c422';
-        el.style.display = 'flex';
-        el.style.alignItems = 'center';
-        el.style.justifyContent = 'center';
-        el.style.padding = '7px 14px';
-        el.innerHTML = `
-            <div style="flex:1;display:flex;align-items:center;">
-              <div style="flex:1;background:#e0f4ff;height:10px;border-radius:8px;overflow:hidden;position:relative;">
-                <div id="vote-countdown-bar" style="height:100%;background:linear-gradient(90deg,#3db8c4 60%,#fc806d 100%);border-radius:8px;width:100%;transition:width 0.25s;"></div>
-              </div>
-            </div>
-            <div style="margin-left:12px;font-size:1.12em;font-weight:bold;color:#fc806d;">
-                <span id="vote-countdown-num">${remain}</span>
-                <span style="font-size:0.85em;color:#999;font-weight:500;">秒</span>
-            </div>
-        `;
-        document.body.appendChild(el);
-        setTimeout(() => { el.style.opacity = 1; }, 0);
+  // 新增倒數條
+  let el = document.createElement('div');
+  el.id = 'global-vote-countdown';
+  el.style = `
+    position:fixed;top:0;left:0;width:100vw;z-index:99999;
+    background:rgba(255,255,255,0.95);text-align:center;
+    font-size:22px;padding:13px 0 6px 0;box-shadow:0 3px 12px #aaa;
+    transition:opacity 0.3s;
+  `;
+  el.innerHTML = `
+    <span style="font-weight:bold;color:#cf2d3a;">⏳ <span id="vote-countdown-num">${remain}</span> 秒</span>
+    <div style="margin:4px auto 0;width:92%;background:linear-gradient(90deg,#FF7577 70%,#FFB85C 100%);border-radius:8px;height:13px;overflow:hidden;">
+      <div id="vote-countdown-bar" style="height:100%;background:#fff7bb;transition:width 0.2s;width:100%;"></div>
+    </div>
+  `;
+  document.body.appendChild(el);
+
+  // 動畫
+  let interval = setInterval(() => {
+    remain--;
+    let n = document.getElementById('vote-countdown-num');
+    let bar = document.getElementById('vote-countdown-bar');
+    if (n) n.textContent = remain;
+    if (bar) bar.style.width = (remain/duration*100) + '%';
+    if (remain < 0) {
+      clearInterval(interval);
+      hideVoteCountdown();
     }
+  }, 1000);
 
-    let interval = setInterval(() => {
-        remain = duration - Math.floor((Date.now() - startTime) / 1000);
-        if (remain < 0) remain = 0;
-        let n = document.getElementById('vote-countdown-num');
-        let bar = document.getElementById('vote-countdown-bar');
-        if (n) n.textContent = remain;
-        if (bar) bar.style.width = (remain / duration * 100) + '%';
-        if (remain <= 0) {
-            clearInterval(interval);
-            hideVoteCountdown();
-        }
-    }, 300);
-    window._voteCountdownInterval = interval;
+  // 關掉用
+  window._voteCountdownInterval = interval;
 }
-
-
 function hideVoteCountdown() {
   let el = document.getElementById('global-vote-countdown');
   if (el) {
