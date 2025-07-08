@@ -2096,6 +2096,11 @@ function listenVote(roomId) {
             logDebug(`listenVote: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
 
             const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+            // 🔹 加這段確保同步票數顯示
+const progressEl = document.getElementById('vote-progress-text');
+if (progressEl) {
+    progressEl.textContent = progressText;
+}
 
             // ======= 投票 modal & 全域倒數條 =======
             if (!(userId in votes)) {
