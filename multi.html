@@ -728,7 +728,7 @@ function loadRoomData(roomId) {
         const now = Date.now();
         const users = snap.val() || {};
         Object.entries(users).forEach(([uid, obj]) => {
-          if (obj.lastActive && now - obj.lastActive > 2*60*1000) { // 2分鐘
+          if (obj.lastActive && now - obj.lastActive > 5*60*1000) { // 2分鐘
             db.ref(`rooms/${roomId}/participants/${uid}`).remove();
           }
         });
@@ -2028,12 +2028,18 @@ async function importItems() {
 }
 
 
-
 function listenVote(roomId) {
     logDebug("listenVote: Starting vote listener");
     const voteRef = db.ref(`rooms/${roomId}/vote`);
     const modalId = 'vote';
     let lastProcessedData = null;
+    let voteTimeout = null;
+    let modalOpened = false; // ← 標記彈窗狀態
+
+    function clearVoteTimer() {
+        if (voteTimeout) { clearTimeout(voteTimeout); voteTimeout = null; }
+        // 全局倒數動畫由 showVoteCountdown 控制
+    }
 
     voteRef.on('value', debounce(async snap => {
         const data = snap.val();
@@ -2045,6 +2051,9 @@ function listenVote(roomId) {
         lastProcessedData = dataString;
         logDebug(`listenVote: Received data: ${dataString}`);
 
+        // 關掉現有倒數
+        clearVoteTimer();
+
         try {
             const finalResultSnap = await db.ref(`rooms/${roomId}/finalResult`).once('value');
             if (finalResultSnap.val()) {
@@ -2052,16 +2061,20 @@ function listenVote(roomId) {
                 await voteRef.remove();
                 voteRef.off('value');
                 closeModalById(modalId);
+                modalOpened = false;
+                hideVoteCountdown();
                 return;
             }
 
-if (!data || !data.active || !data.item || data.status === 'cancelled') {
-    logDebug("listenVote: No active vote or invalid item, removing listener and clearing vote");
-    closeModalById(modalId);
-    await voteRef.remove();
-    voteRef.off('value');
-    return;
-}
+            if (!data || !data.active || !data.item || data.status === 'cancelled') {
+                logDebug("listenVote: No active vote or invalid item, removing listener and clearing vote");
+                closeModalById(modalId);
+                await voteRef.remove();
+                voteRef.off('value');
+                modalOpened = false;
+                hideVoteCountdown();
+                return;
+            }
 
             const item = data.item;
             const mode = data.mode;
@@ -2084,118 +2097,153 @@ if (!data || !data.active || !data.item || data.status === 'cancelled') {
 
             const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
 
+            // ======= 投票 modal & 全域倒數條 =======
             if (!(userId in votes)) {
                 logDebug(`listenVote: User ${userId} has not voted, showing vote modal`);
-                closeAllModals();
-                showModal(`是否同意將「${item}」作為最終結果？<br>${progressText}`, [
-    {
-        text: '同意',
-        class: 'btn-confirm',
-        onClick: async () => {
-            logDebug('你按了同意！userId=' + userId);
-            closeModalById(modalId);
-            await voteRef.child('votes/' + userId).set(true)
-                .then(() => logDebug('set(true) 寫入成功！'))
-                .catch(e => logDebug('set(true) 失敗：' + e.message));
-            showWaitingModal(voteRef, userId, `已同意，等待其他人投票中... <br>${progressText}`, modalId);
-            lastProcessedData = null; // Reset to ensure updates
-        }
-    },
-    {
-        text: '不同意',
-        class: 'btn-primary',
-        onClick: async () => {
-            logDebug('你按了不同意！userId=' + userId);
-            closeAllModals();
-            await voteRef.child('votes/' + userId).set(false)
-                .then(() => logDebug('set(false) 寫入成功！'))
-                .catch(e => logDebug('set(false) 失敗：' + e.message));
-            lastProcessedData = null; // Reset to ensure updates
-        }
-    }
-], modalId);
+                if (!modalOpened) {
+                    closeAllModals();
+                    showModal(
+                        `是否同意將「${item}」作為最終結果？<br><span id="vote-progress-text">${progressText}</span>`,
+                        [
+                            {
+                                text: '同意',
+                                class: 'btn-confirm',
+                                onClick: async () => {
+                                    clearVoteTimer();
+                                    closeModalById(modalId);
+                                    modalOpened = false;
+                                    hideVoteCountdown();
+                                    await voteRef.child('votes/' + userId).set(true);
+                                    showWaitingModal(voteRef, userId, `已同意，等待其他人投票中... <br>${progressText}`, modalId);
+                                    lastProcessedData = null;
+                                }
+                            },
+                            {
+                                text: '不同意',
+                                class: 'btn-primary',
+                                onClick: async () => {
+                                    clearVoteTimer();
+                                    closeAllModals();
+                                    modalOpened = false;
+                                    hideVoteCountdown();
+                                    await voteRef.child('votes/' + userId).set(false);
+                                    lastProcessedData = null;
+                                }
+                            }
+                        ],
+                        modalId
+                    );
+                    modalOpened = true;
 
+                    // 全域倒數動畫（25秒）
+                    showVoteCountdown(25);
+
+                    // 25秒後自動同意
+                    voteTimeout = setTimeout(() => {
+                        clearVoteTimer();
+                        closeModalById(modalId);
+                        modalOpened = false;
+                        hideVoteCountdown();
+                        voteRef.child('votes/' + userId).set(true);
+                        showWaitingModal(voteRef, userId, `（已自動同意）等待其他人投票中... <br>${progressText}`, modalId);
+                        lastProcessedData = null;
+                    }, 25000);
+                } else {
+                    // 只更新投票進度文字
+                    const progressEl = document.getElementById('vote-progress-text');
+                    if (progressEl) progressEl.textContent = progressText;
+                }
             } else {
+                clearVoteTimer();
+                modalOpened = false;
+                hideVoteCountdown();
                 logDebug(`listenVote: User ${userId} has voted, showing waiting modal`);
                 showWaitingModal(voteRef, userId, `已投票，等待其他人投票中... <br>${progressText}`, modalId);
             }
 
-            let passed = false;
-            if (mode === '共識決' && agreeCount === total && totalVotes === total) passed = true;
-            if (mode === '多數決' && agreeCount > total / 2) passed = true;
-
-            // 多數決與共識決分開判斷
-if (mode === '共識決') {
-    // 共識決：全員同意才通過
-    if (totalVotes === total) {
-        if (agreeCount === total) {
-            await db.ref(`rooms/${roomId}`).update({
-                finalResult: item,
-                isDrawing: null
-            });
-            closeAllModals();
-            voteRef.off('value');
-        } else {
-            closeAllModals();
-            showModal(
-    `❌ 未達成條件<br>（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
-    [{ 
-        text: '好的', 
-        class: 'btn-confirm', 
-        onClick: async () => {
-            await db.ref(`rooms/${roomId}`).update({
-                vote: null,
-                isDrawing: null,
-                drawAnimation: null,
-                drawResult: null
-            });
-            safeEnableDrawBtn(); // ← 這裡改用冷卻機制
-        }
-    }],
-    'error'
-);
-        }
-    }
-} else if (mode === '多數決') {
-    // 多數決：只要過半就通過（**要等全員投完才判斷**）
-    if (totalVotes === total) {
-        if (agreeCount > total / 2) {
-            await db.ref(`rooms/${roomId}`).update({
-                finalResult: item,
-                isDrawing: null
-            });
-            closeAllModals();
-            voteRef.off('value');
-        } else {
-            closeAllModals();
-            showModal(
-                `❌ 未達成條件（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
-                [{ text: '好的', class: 'btn-confirm', onClick: async () => {
-                    await db.ref(`rooms/${roomId}`).update({
-                        vote: null,
-                        isDrawing: null,
-                        drawAnimation: null,
-                        drawResult: null
-                    });
-                    const drawBtn = document.querySelector('#decidePage .btn-draw');
-                    if (drawBtn) drawBtn.disabled = false;
-                }}],
-                'error'
-            );
-        }
-    }
-}
-
-
+            // 判斷票數
+            if (mode === '共識決') {
+                if (totalVotes === total) {
+                    if (agreeCount === total) {
+                        await db.ref(`rooms/${roomId}`).update({
+                            finalResult: item,
+                            isDrawing: null
+                        });
+                        closeAllModals();
+                        voteRef.off('value');
+                        modalOpened = false;
+                        hideVoteCountdown();
+                    } else {
+                        closeAllModals();
+                        modalOpened = false;
+                        hideVoteCountdown();
+                        showModal(
+                            `❌ 未達成條件<br>（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+                            [{
+                                text: '好的',
+                                class: 'btn-confirm',
+                                onClick: async () => {
+                                    await db.ref(`rooms/${roomId}`).update({
+                                        vote: null,
+                                        isDrawing: null,
+                                        drawAnimation: null,
+                                        drawResult: null
+                                    });
+                                    safeEnableDrawBtn();
+                                }
+                            }],
+                            'error'
+                        );
+                    }
+                }
+            } else if (mode === '多數決') {
+                if (totalVotes === total) {
+                    if (agreeCount > total / 2) {
+                        await db.ref(`rooms/${roomId}`).update({
+                            finalResult: item,
+                            isDrawing: null
+                        });
+                        closeAllModals();
+                        voteRef.off('value');
+                        modalOpened = false;
+                        hideVoteCountdown();
+                    } else {
+                        closeAllModals();
+                        modalOpened = false;
+                        hideVoteCountdown();
+                        showModal(
+                            `❌ 未達成條件（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+                            [{
+                                text: '好的',
+                                class: 'btn-confirm',
+                                onClick: async () => {
+                                    await db.ref(`rooms/${roomId}`).update({
+                                        vote: null,
+                                        isDrawing: null,
+                                        drawAnimation: null,
+                                        drawResult: null
+                                    });
+                                    const drawBtn = document.querySelector('#decidePage .btn-draw');
+                                    if (drawBtn) drawBtn.disabled = false;
+                                }
+                            }],
+                            'error'
+                        );
+                    }
+                }
+            }
 
         } catch (error) {
             logDebug(`listenVote: Error: ${error.message}`);
+            hideVoteCountdown();
             showModal('投票處理失敗，請稍後再試！', [
                 { text: '好的', class: 'btn-confirm', onClick: () => {} }
             ], 'error');
         }
     }, 500));
 }
+
+
 function leaveRoom() {
     logDebug && logDebug("leaveRoom: Initiating room exit");
     // 判斷目前是不是 setupPage
@@ -2584,6 +2632,57 @@ function renderCertificateCanvas(data) {
   targetDiv.appendChild(canvas);
 }
 
+function showVoteCountdown(duration = 25) {
+  let remain = duration;
+  // 先清掉舊的
+  let old = document.getElementById('global-vote-countdown');
+  if (old) old.remove();
+
+  // 新增倒數條
+  let el = document.createElement('div');
+  el.id = 'global-vote-countdown';
+  el.style = `
+    position:fixed;top:0;left:0;width:100vw;z-index:99999;
+    background:rgba(255,255,255,0.95);text-align:center;
+    font-size:22px;padding:13px 0 6px 0;box-shadow:0 3px 12px #aaa;
+    transition:opacity 0.3s;
+  `;
+  el.innerHTML = `
+    <span style="font-weight:bold;color:#cf2d3a;">⏳ <span id="vote-countdown-num">${remain}</span> 秒</span>
+    <div style="margin:4px auto 0;width:92%;background:linear-gradient(90deg,#FF7577 70%,#FFB85C 100%);border-radius:8px;height:13px;overflow:hidden;">
+      <div id="vote-countdown-bar" style="height:100%;background:#fff7bb;transition:width 0.2s;width:100%;"></div>
+    </div>
+  `;
+  document.body.appendChild(el);
+
+  // 動畫
+  let interval = setInterval(() => {
+    remain--;
+    let n = document.getElementById('vote-countdown-num');
+    let bar = document.getElementById('vote-countdown-bar');
+    if (n) n.textContent = remain;
+    if (bar) bar.style.width = (remain/duration*100) + '%';
+    if (remain <= 0) {
+      clearInterval(interval);
+      hideVoteCountdown();
+    }
+  }, 1000);
+
+  // 關掉用
+  window._voteCountdownInterval = interval;
+}
+function hideVoteCountdown() {
+  let el = document.getElementById('global-vote-countdown');
+  if (el) {
+    el.style.opacity = 0;
+    setTimeout(() => el.remove(), 350);
+  }
+  if (window._voteCountdownInterval) {
+    clearInterval(window._voteCountdownInterval);
+    window._voteCountdownInterval = null;
+  }
+}
+
 
 </script>
 </head>
@@ -2664,5 +2763,7 @@ function renderCertificateCanvas(data) {
 </div>
 </body>
 </html>
+
+
 
 
