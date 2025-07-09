@@ -789,10 +789,7 @@ roomRef.child('isDrawing').on('value', snap => {
     const drawBtn = document.querySelector('#decidePage .btn-draw');
     if (drawBtn) drawBtn.disabled = !!isDrawing;
 
-    if (isDrawing) {
-        playDrawAnimation(roomId);
-    }
-});
+   });
 
 // 你的原本監聽 finalResult
 roomRef.child('finalResult').on('value', snap => {
@@ -1399,6 +1396,9 @@ async function startDraw() {
     drawBtn.innerHTML = '<span class="spin-animation">⏳</span> 檢查中...';
     const roomId = localStorage.getItem('currentRoomId');
     const roomRef = db.ref(`rooms/${roomId}`);
+
+// 這裡放進來
+  await cleanupDrawLock(roomRef);
 
     try {
         // ★★★ 1. 防呆多重流程狀態檢查
@@ -2821,6 +2821,36 @@ function renderCertificateCanvas(data) {
   };
 
   targetDiv.appendChild(canvas);
+// 新增分享按鈕
+const shareBtn = document.createElement('button');
+shareBtn.className = 'btn-primary';
+shareBtn.textContent = '分享';
+shareBtn.style.marginTop = '16px';
+shareBtn.onclick = async () => {
+    try {
+        if (navigator.canShare && navigator.canShare({ files: [] })) {
+            canvas.toBlob(async blob => {
+                const file = new File([blob], 'certificate.png', { type: 'image/png' });
+                await navigator.share({
+                    title: '抽籤決議證書',
+                    text: '這是剛出爐的抽籤結果哦！',
+                    files: [file]
+                });
+            });
+        } else {
+            showModal('此裝置不支援直接分享圖片，請截圖分享。', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'info');
+        }
+    } catch (err) {
+        console.error(err);
+        showModal('分享失敗，請截圖後手動分享。', [
+            { text: '好的', class: 'btn-confirm', onClick: () => {} }
+        ], 'error');
+    }
+};
+targetDiv.appendChild(shareBtn);
+
 }
 
 function showVoteCountdown(duration = 25) {
@@ -2875,6 +2905,26 @@ function hideVoteCountdown() {
   }
 }
 
+async function cleanupDrawLock(roomRef) {
+  const snap = await roomRef.child('isDrawing').once('value');
+  const isDrawing = snap.val();
+  if (isDrawing) {
+    // 檢查 lock 保留時間，超過 6 秒就自動清除
+    const timeSnap = await roomRef.child('drawLockTime').once('value');
+    const lockTime = timeSnap.val() || 0;
+    if (Date.now() - lockTime > 6000) {
+      await roomRef.update({
+        isDrawing: null,
+        drawAnimation: null,
+        drawAnimationSeen: null,
+        drawLockTime: null,
+        drawResult: null
+      });
+      return true; // 表示剛剛有清掉
+    }
+  }
+  return false;
+}
 
 </script>
 </head>
@@ -2964,5 +3014,12 @@ function hideVoteCountdown() {
 </div>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
