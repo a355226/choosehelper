@@ -564,6 +564,15 @@
   background: linear-gradient(90deg, #b7d8fb 0%, #e1eefd 100%);
   box-shadow: none;
 }
+#vote-cells .vote-cell {
+  cursor: pointer;
+  border:1.2px solid rgba(100,100,100,0.08);
+  box-sizing: border-box;
+}
+#vote-cells .vote-cell:hover {
+  box-shadow:0 0 7px #3cc28833,0 0 0 2px #3cc28822;
+  border-color:#3CC28899;
+}
 
 </style>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1156,6 +1165,7 @@ function listenConfirmation(roomId) {
                 logDebug("listenConfirmation: Terminating due to isDeciding or finalResult");
                 closeAllModals();
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearConfirmTimer();
                 await confirmRef.remove();
                 confirmRef.off('value');
@@ -1166,6 +1176,7 @@ function listenConfirmation(roomId) {
                 logDebug("listenConfirmation: No data, skip showing cancel modal");
                 closeAllModals();
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearConfirmTimer();
                 return;
             }
@@ -1175,6 +1186,7 @@ function listenConfirmation(roomId) {
                 logDebug("listenConfirmation: Not pending, cleaning up");
                 closeModalById(modalId);
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearConfirmTimer();
                 return;
             }
@@ -1184,6 +1196,7 @@ function listenConfirmation(roomId) {
                 await confirmRef.remove();
                 closeModalById(modalId);
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearConfirmTimer();
                 showModal('❌ 確認流程無效，已取消。', [
                     { text: '好的', class: 'btn-confirm', onClick: () => {} }
@@ -1205,12 +1218,14 @@ function listenConfirmation(roomId) {
             logDebug(`listenConfirmation: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
 
             const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+showVoteVisualization(agreeCount, disagreeCount, total); // <--- 新增
 
             if (disagreeCount > 0) {
                 logDebug("listenConfirmation: Someone disagreed, cancelling");
                 await confirmRef.update({ status: 'cancelled', active: false });
                 closeAllModals();
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearConfirmTimer();
                 showModal(`❌ 有人不同意清單，流程已取消。`, [], 'error', 2500); // 至少保留 3 秒
                 // 這裡加延遲再 remove
@@ -1227,6 +1242,7 @@ function listenConfirmation(roomId) {
                 await db.ref(`rooms/${roomId}/isDeciding`).set(true);
                 closeAllModals();
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearConfirmTimer();
                 const multiPage = document.getElementById('multiPage');
                 const decidePage = document.getElementById('decidePage');
@@ -1640,12 +1656,10 @@ async function initiateVoting(mode, finalItem) {
             ], 'error');
             return;
         }
-        // 先檢查是否已經有投票資料，沒有再寫
-        const voteSnap = await voteRef.once('value');
-        if (voteSnap.exists()) {
-            logDebug("initiateVoting: Voting already initialized, skip.");
-            return;
-        }
+        // 清除舊投票資料
+        await voteRef.remove();
+        logDebug("initiateVoting: Cleared previous vote data");
+        // 設置新投票
         await voteRef.set({
             active: true,
             item: finalItem,
@@ -1661,7 +1675,6 @@ async function initiateVoting(mode, finalItem) {
         ], 'error');
     }
 }
-
 
 async function requestReedit() {
     logDebug("requestReedit: Starting reedit request");
@@ -1758,6 +1771,7 @@ function listenReedit(roomId) {
                 await reeditRef.remove();
                 closeModalById(modalId);
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearReeditTimer();
                 return;
             }
@@ -1766,6 +1780,7 @@ function listenReedit(roomId) {
                 logDebug("listenReedit: editConfirm is null, closing modal");
                 closeModalById(modalId);
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearReeditTimer();
                 return;
             }
@@ -1776,6 +1791,7 @@ function listenReedit(roomId) {
                 await reeditRef.remove();
                 closeModalById(modalId);
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearReeditTimer();
                 return;
             }
@@ -1785,6 +1801,7 @@ function listenReedit(roomId) {
                 await reeditRef.remove();
                 closeModalById(modalId);
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearReeditTimer();
                 showModal('❅ 重新編輯流程無效，已取消。', [
                     { text: '好的', class: 'btn-confirm', onClick: () => {} }
@@ -1807,12 +1824,14 @@ function listenReedit(roomId) {
             logDebug(`listenReedit: Updated counts - Agree: ${agreeCount}, Disagree: ${disagreeCount}`);
 
             const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+showVoteVisualization(agreeCount, disagreeCount, total); // <--- 新增
 
             if (disagreeCount > 0) {
     logDebug("listenReedit: Someone disagreed, cancelling");
     await reeditRef.update({ status: 'cancelled', active: false });
     closeAllModals();
     hideVoteCountdown();
+hideVoteVisualization();
     clearReeditTimer();
     showModal(
   `❌ 有人不同意重新編輯，流程已取消。`,
@@ -1840,6 +1859,7 @@ function listenReedit(roomId) {
                 });
                 closeAllModals();
                 hideVoteCountdown();
+hideVoteVisualization();
                 clearReeditTimer();
                 showModal('✅ 所有人同意，返回編輯清單！', [
                     {
@@ -1928,6 +1948,7 @@ function listenReedit(roomId) {
         } catch (error) {
             logDebug(`listenReedit: Error: ${error.message}`);
             hideVoteCountdown();
+hideVoteVisualization();
             clearReeditTimer();
             showModal('重新編輯處理失敗，請稍後再試！', [
                 { text: '好的', class: 'btn-confirm', onClick: () => {} }
@@ -2192,14 +2213,18 @@ function listenVote(roomId) {
     const modalId = 'vote';
     let lastProcessedData = null;
     let voteTimeout = null;
+// 清除舊狀態
+    clearVoteTimer();
+    hideVoteCountdown();
+    closeAllModals(modalId);
 
     function clearVoteTimer() {
-        if (voteTimeout) {
-            clearTimeout(voteTimeout);
-            voteTimeout = null;
-            logDebug("listenVote: Vote timer cleared");
-        }
+    if (window._voteTimeout) { // 使用全局變數儲存計時器
+        clearTimeout(window._voteTimeout);
+        window._voteTimeout = null;
+        logDebug("clearVoteTimer: Cleared global vote timer");
     }
+}
 
     // 驗證投票資料是否與參與者一致
     async function validateVotes(votes, total) {
@@ -2229,6 +2254,7 @@ function listenVote(roomId) {
                 closeAllModals();
                 clearVoteTimer();
                 hideVoteCountdown();
+hideVoteVisualization();
                 return;
             }
 
@@ -2240,6 +2266,7 @@ function listenVote(roomId) {
                 voteRef.off('value');
                 clearVoteTimer();
                 hideVoteCountdown();
+hideVoteVisualization();
                 return;
             }
 
@@ -2258,6 +2285,8 @@ function listenVote(roomId) {
             logDebug(`listenVote: Total participants: ${total}, Agree: ${agreeCount}, Disagree: ${disagreeCount}, Total votes: ${totalVotes}`);
 
             const progressText = `（目前 ${agreeCount} 人同意，${disagreeCount} 人不同意）`;
+showVoteVisualization(agreeCount, disagreeCount, total); // <--- 新增
+
 
             // 共識決模式下，若有不同意票，立即終止
             if (mode === '共識決' && disagreeCount > 0) {
@@ -2271,6 +2300,7 @@ function listenVote(roomId) {
             true  // autoClose
         );
         hideVoteCountdown();
+hideVoteVisualization();
         // 只在未達多數時用setTimeout，且外面不要再移除vote
         setTimeout(async () => {
             await voteRef.remove();
@@ -2340,30 +2370,25 @@ function listenVote(roomId) {
 
                 // 僅在用戶尚未投票且投票未結束時設置計時器
                 if (remainingTime > 0) {
-                    showVoteCountdown(remainingSeconds);
-                    voteTimeout = setTimeout(() => {
-                        clearVoteTimer();
-                        // 再次檢查是否已投票
-                        voteRef.child('votes').once('value', async snap => {
-                            const votes = snap.val() || {};
-                            if (userId in votes) {
-                                logDebug(`listenVote: User ${userId} has already voted, skipping auto-vote`);
-                                return;
-                            }
-                            closeAllModals();
-                            await voteRef.child('votes').transaction(votes => {
-                                votes = votes || {};
-                                if (!(userId in votes)) {
-                                    votes[userId] = true;
-                                }
-                                return votes;
-                            }).then(() => logDebug('自動同意 寫入成功！'))
-                              .catch(e => logDebug('自動同意 失敗：' + e.message));
-                            showWaitingModal(voteRef, userId, `（已自動同意）等待其他人投票中... <br><span id="vote-progress-text">${progressText}</span>`, modalId);
-                            hideVoteCountdown();
-                            lastProcessedData = null;
-                        });
-                    }, remainingTime);
+    showVoteCountdown(remainingSeconds);
+    clearVoteTimer(); // 設置新計時器前清除舊計時器
+    window._voteTimeout = setTimeout(() => {
+        clearVoteTimer();
+        voteRef.child('votes').once('value', async snap => {
+            const votes = snap.val() || {};
+            if (userId in votes) return;
+            closeAllModals();
+            await voteRef.child('votes').transaction(votes => {
+                votes = votes || {};
+                if (!(userId in votes)) votes[userId] = true;
+                return votes;
+            });
+            showWaitingModal(voteRef, userId, `（已自動同意）等待其他人投票中... <br><span id="vote-progress-text">${progressText}</span>`, modalId);
+            hideVoteCountdown();
+            lastProcessedData = null;
+        });
+    }, remainingTime);
+
                 } else {
                     // 時間已過，檢查是否已投票
                     const votesSnap = await voteRef.child('votes').once('value');
@@ -2408,6 +2433,7 @@ function listenVote(roomId) {
                         closeAllModals();
                         voteRef.off('value');
                         hideVoteCountdown();
+hideVoteVisualization();
                     } else {
                         closeAllModals();
                         showModal(
@@ -2418,6 +2444,7 @@ function listenVote(roomId) {
             true  // autoClose
         );
         hideVoteCountdown();
+hideVoteVisualization();
         // 只在未達多數時用setTimeout，且外面不要再移除vote
         setTimeout(async () => {
             await voteRef.remove();
@@ -2434,6 +2461,8 @@ function listenVote(roomId) {
                         closeAllModals();
                         voteRef.off('value');
                         hideVoteCountdown();
+hideVoteVisualization(); // <--- 新增
+
                     } else {
                         closeAllModals();
                         showModal(
@@ -2444,6 +2473,7 @@ function listenVote(roomId) {
             true  // autoClose
         );
         hideVoteCountdown();
+hideVoteVisualization();
         // 只在未達多數時用setTimeout，且外面不要再移除vote
         setTimeout(async () => {
             await voteRef.remove();
@@ -2461,6 +2491,7 @@ function listenVote(roomId) {
         } catch (error) {
             logDebug(`listenVote: Error: ${error.message}`);
             hideVoteCountdown();
+hideVoteVisualization();
             closeAllModals();
             showModal('投票處理失敗，請稍後再試！', [
                 { text: '好的', class: 'btn-confirm', onClick: () => {} }
@@ -2953,15 +2984,17 @@ hideVoteCountdown();
   window._voteCountdownInterval = interval;
 }
 function hideVoteCountdown() {
-  let el = document.getElementById('global-vote-countdown');
-  if (el) {
-    el.style.opacity = 0;
-    setTimeout(() => el.remove(), 350);
-  }
-  if (window._voteCountdownInterval) {
-    clearInterval(window._voteCountdownInterval);
-    window._voteCountdownInterval = null;
-  }
+    let el = document.getElementById('global-vote-countdown');
+    if (el) {
+        el.style.opacity = 0;
+        setTimeout(() => el.remove(), 350);
+        logDebug("hideVoteCountdown: Removed countdown element");
+    }
+    if (window._voteCountdownInterval) {
+        clearInterval(window._voteCountdownInterval);
+        window._voteCountdownInterval = null;
+        logDebug("hideVoteCountdown: Cleared countdown interval");
+    }
 }
 
 async function cleanupDrawLock(roomRef) {
@@ -2984,6 +3017,206 @@ async function cleanupDrawLock(roomRef) {
   }
   return false;
 }
+function showVoteVisualization(agreeCount, disagreeCount, total) {
+  // 檢查是否已有 vote-cells
+  let container = document.getElementById('vote-cells');
+  let isNew = false;
+
+  // 沒參與者不顯示，且移除現有 vote-cells
+  if (!total || total < 0) {
+    if (container) {
+      container.style.opacity = '0';
+      setTimeout(() => container.remove(), 300);
+    }
+    return;
+  }
+
+  // 如果不存在，創建新元素
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'vote-cells';
+    isNew = true;
+
+    // 定義樣式
+    const defaultStyle = `
+      position: fixed;
+      width: 90vw;
+      max-width: 600px;
+      display: flex;
+      align-items: center;
+      height: 44px;
+      z-index: 100001;
+      font-size: 1.05em;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 3px 12px #aaa;
+      padding: 8px 12px;
+      border-radius: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    `;
+    container.style = defaultStyle;
+
+    // 左側
+    const left = document.createElement('div');
+    left.textContent = '同意';
+    left.style = 'min-width: 40px; text-align: right; color: #3CC288; font-weight: bold; letter-spacing: 2px;';
+
+    // 右側
+    const right = document.createElement('div');
+    right.textContent = '不同意';
+    right.style = 'min-width: 50px; text-align: left; color: #FF7577; font-weight: bold; letter-spacing: 2px;';
+
+    // 格子容器
+    const cellsBox = document.createElement('div');
+    cellsBox.id = 'vote-cells-box';
+    cellsBox.style = `
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 10px;
+      gap: 4px;
+    `;
+
+    container.appendChild(left);
+    container.appendChild(cellsBox);
+    container.appendChild(right);
+    document.body.appendChild(container);
+  }
+
+  // 更新格子內容
+  const cellsBox = container.querySelector('#vote-cells-box');
+  if (cellsBox) {
+    // 清空舊格子
+    cellsBox.innerHTML = '';
+
+    // 動態塞格子
+    for (let i = 0; i < total; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'vote-cell';
+      cell.style = `
+        flex: 1 1 0;
+        height: 24px;
+        min-width: 0;
+        background: rgba(0,0,0,0.07);
+        border-radius: 7px;
+        transition: background 0.42s cubic-bezier(.68,.1,.3,1.19);
+        margin: 0;
+        box-shadow: 0 0 3px #bbb4 inset;
+      `;
+      cellsBox.appendChild(cell);
+    }
+
+    // 填綠色
+    let filled = 0;
+    [...cellsBox.children].forEach((cell, idx) => {
+      if (idx < agreeCount) {
+        setTimeout(() => {
+          cell.style.background = 'linear-gradient(90deg,#6be99a,#3CC288 88%)';
+        }, idx * 55);
+        filled++;
+      }
+    });
+
+    // 填紅色
+    [...cellsBox.children].reverse().forEach((cell, ridx) => {
+      if (ridx < disagreeCount) {
+        setTimeout(() => {
+          cell.style.background = 'linear-gradient(90deg,#FFA7A7,#FF7577 90%)';
+        }, ridx * 55);
+      }
+    });
+  }
+
+  // 函數：更新 vote-cells 位置
+  let lastPosition = container.lastPosition || null;
+  function updatePosition() {
+    const modal = document.querySelector('div.modal[data-modal-id]');
+    if (modal) {
+      // 獲取 modal-content 的尺寸和位置
+      const modalContent = modal.querySelector('.modal-content') || modal;
+      const modalRect = modalContent.getBoundingClientRect();
+      const containerWidth = Math.min(modalRect.width * 0.95, 600);
+      const topPosition = modalRect.top - 44 - 35; // modal 上方 35px
+
+      lastPosition = { top: topPosition, width: containerWidth };
+      container.lastPosition = lastPosition;
+
+      container.style = `
+        position: fixed;
+        top: ${topPosition}px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: ${containerWidth}px;
+        display: flex;
+        align-items: center;
+        height: 44px;
+        z-index: 100001;
+        font-size: 1.05em;
+        justify-content: space-between;
+        background: rgba(255,255,255,0.95);
+        box-shadow: 0 3px 12px #aaa;
+        padding: 8px 12px;
+        border-radius: 12px;
+        pointer-events: none;
+        opacity: 1;
+      `;
+    } else if (lastPosition) {
+      // modal 消失時，保持最後位置並淡出
+      container.style = `
+        position: fixed;
+        top: ${lastPosition.top}px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: ${lastPosition.width}px;
+        display: flex;
+        align-items: center;
+        height: 44px;
+        z-index: 100001;
+        font-size: 1.05em;
+        justify-content: space-between;
+        background: rgba(255,255,255,0.95);
+        box-shadow: 0 3px 12px #aaa;
+        padding: 8px 12px;
+        border-radius: 12px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+      `;
+      setTimeout(() => container.remove(), 300);
+    }
+  }
+
+  // 僅在新建時附加到 body
+  if (isNew) {
+    document.body.appendChild(container);
+  }
+
+  // 使用單次 requestAnimationFrame 確保即時顯示
+  requestAnimationFrame(updatePosition);
+
+  // 監聽 modal 變化
+  const observer = new MutationObserver(() => {
+    requestAnimationFrame(updatePosition);
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // 3秒後停止監聽並檢查是否移除
+  setTimeout(() => {
+    observer.disconnect();
+    if (!document.querySelector('div.modal[data-modal-id]') && container) {
+      container.style.opacity = '0';
+      setTimeout(() => container.remove(), 300);
+    }
+  }, 3000);
+}
+function hideVoteVisualization() {
+  let old = document.getElementById('vote-cells');
+  if (old) old.remove();
+}
+
 
 </script>
 </head>
@@ -3073,12 +3306,5 @@ async function cleanupDrawLock(roomRef) {
 </div>
 </body>
 </html>
-
-
-
-
-
-
-
 
 
