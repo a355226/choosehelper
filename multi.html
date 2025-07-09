@@ -2820,36 +2820,54 @@ function renderCertificateCanvas(data) {
     }
   };
 
-  targetDiv.appendChild(canvas);
-// 新增分享按鈕
+targetDiv.appendChild(canvas);
+
 const shareBtn = document.createElement('button');
 shareBtn.className = 'btn-primary';
 shareBtn.textContent = '分享';
 shareBtn.style.marginTop = '16px';
+
 shareBtn.onclick = async () => {
-    try {
-        if (navigator.canShare && navigator.canShare({ files: [] })) {
-            canvas.toBlob(async blob => {
-                const file = new File([blob], 'certificate.png', { type: 'image/png' });
+    canvas.toBlob(async blob => {
+        const file = new File([blob], 'certificate.png', { type: 'image/png' });
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        // 嘗試原生分享（僅手機支援）
+        if (navigator.canShare && isMobile && navigator.canShare({ files: [file] })) {
+            try {
                 await navigator.share({
                     title: '抽籤決議證書',
                     text: '這是剛出爐的抽籤結果哦！',
                     files: [file]
                 });
-            });
-        } else {
-            showModal('此裝置不支援直接分享圖片，請截圖分享。', [
+                return; // 分享成功直接結束
+            } catch (err) {
+                // 分享被取消/失敗，繼續 fallback
+            }
+        }
+
+        // 不支援分享就自動下載
+        try {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'certificate.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showModal('此裝置不支援直接分享，已自動下載圖片。', [
                 { text: '好的', class: 'btn-confirm', onClick: () => {} }
             ], 'info');
+        } catch (err) {
+            showModal('分享與下載皆失敗，請截圖後手動分享。', [
+                { text: '好的', class: 'btn-confirm', onClick: () => {} }
+            ], 'error');
         }
-    } catch (err) {
-        console.error(err);
-        showModal('分享失敗，請截圖後手動分享。', [
-            { text: '好的', class: 'btn-confirm', onClick: () => {} }
-        ], 'error');
-    }
+    });
 };
 targetDiv.appendChild(shareBtn);
+
 
 }
 
