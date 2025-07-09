@@ -683,7 +683,8 @@ function showModal(content, buttons, modalId = 'generic', minDisplayTime = 0, au
     closeModalById(modalId);
     const modal = document.createElement('div');
     modal.className = 'modal';
-    modal.dataset.modalId = modalId;
+    modal.setAttribute('data-modal-id', modalId);
+
     const modalContent = document.createElement('div');
     modalContent.className = 'modal-content';
     modalContent.innerHTML = `<p style="font-size:18px;">${content}</p>`;
@@ -707,31 +708,34 @@ function showModal(content, buttons, modalId = 'generic', minDisplayTime = 0, au
     document.body.appendChild(modal);
     logDebug(`showModal: Displayed modal ${modalId} with content: ${content}`);
 
-    // 設置最小顯示時間
-    if (minDisplayTime > 0) {
+    // 新增：這裡加 log
+    if (minDisplayTime > 0 && autoClose) {
+        console.log('setTimeout run?', minDisplayTime, autoClose, modalId);
+        setTimeout(() => {
+            console.log('closing modal auto', modalId);
+            closeModalById(modalId);
+        }, minDisplayTime);
+    } else if (minDisplayTime > 0) {
         setTimeout(() => {
             const buttons = modalContent.querySelectorAll('.modal-buttons button');
-            buttons.forEach(btn => (btn.disabled = false)); // 啟用按鈕
-            logDebug(`showModal: Buttons enabled for modal ${modalId} after ${minDisplayTime}ms`);
-            // 如果 autoClose 打開，顯示時間到自動關閉
-            if (autoClose) {
-                closeModalById(modalId);
-            }
+            buttons.forEach(btn => (btn.disabled = false));
         }, minDisplayTime);
     } else if (autoClose) {
-        // 沒設置 minDisplayTime，autoClose 立刻關
-        setTimeout(() => closeModalById(modalId), 2000); // 給個預設2秒
+        setTimeout(() => closeModalById(modalId), 2000);
     }
 
     return modal;
 }
 
+
 function closeModalById(modalId) {
-    const modal = document.querySelector(`.modal[data-modalId="${modalId}"]`);
+     const modal = document.querySelector(`.modal[data-modal-id="${modalId}"]`);
     if (modal) {
         modal.remove();
         logDebug(`closeModalById: Closed modal ${modalId}`);
     }
+// 一併移除相關遮罩層
+    document.querySelectorAll('.modal-backdrop, .modal-overlay, .modal-bg').forEach(e => e.remove());
 }
 
 function closeAllModals(exceptModalId = null) {
@@ -1170,13 +1174,11 @@ function listenConfirmation(roomId) {
                 closeAllModals();
                 hideVoteCountdown();
                 clearConfirmTimer();
-                showModal(`❌ 有人不同意清單<br>（${agreeCount} 同意，${disagreeCount} 不同意），流程已取消。`, [
-                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
-                ], 'error', 3000); // 至少保留 3 秒
+                showModal(`❌ 有人不同意清單，流程已取消。`, [], 'error', 2500); // 至少保留 3 秒
                 // 這裡加延遲再 remove
     setTimeout(async () => {
       await confirmRef.remove();
-    }, 3000); // 跟 showModal 的 3000 對齊
+    }, 2500); // 跟 showModal 的 3000 對齊
 
     return;
 }
@@ -1456,9 +1458,7 @@ async function startDraw() {
 
         if (items.length === 0) {
             logDebug("startDraw: No items to draw");
-            showModal('⚠️ 目前沒有可抽籤的項目', [
-                { text: '好的', class: 'btn-confirm', onClick: () => {} }
-            ], 'error');
+            showModal('⚠️ 目前沒有可抽籤的項目', [], 'error');
             await roomRef.child('isDrawing').set(null); // 還原鎖
             drawBtn.disabled = false;
             drawBtn.innerHTML = '🎲 開始抽籤';
@@ -1774,13 +1774,11 @@ function listenReedit(roomId) {
     hideVoteCountdown();
     clearReeditTimer();
     showModal(
-        `❅ 有人不同意重新編輯，流程已取消。`, [
-                    { text: '好的', class: 'btn-confirm', onClick: () => {} }
-                ], 'error', 3000); // 至少保留 3 秒
-                // 這裡加延遲再 remove
-    setTimeout(async () => {
-      await reeditRef.remove();
-    }, 3000); // 跟 showModal 的 3000 對齊
+  `❌ 有人不同意重新編輯，流程已取消。`,
+  [  ],
+  'error', 3000, true // ← 這個 true 非常關鍵
+);
+
 
     return;
 }
@@ -1943,14 +1941,15 @@ async function playDrawAnimation(roomId) {
       const mode = modeSnap.val() || '一抽入魂';
       const { spinList, finalItem } = await getDrawData(roomRef);
 
-      if (!spinList.length || !finalItem) {
-        closeAllModals();
-        showModal('清單無項目，請重新確認！', [
-            { text: '好的', class: 'btn-confirm', onClick: () => {} }
-        ], 'error');
-        roomRef.update({ isDrawing: null, drawAnimation: null });
-        return;
-      }
+     if (!spinList.length || !finalItem) {
+  closeAllModals();
+  // showModal('清單無項目，請重新確認！', [
+  //     { text: '好的', class: 'btn-confirm', onClick: () => {} }
+  // ], 'error');
+  roomRef.update({ isDrawing: null, drawAnimation: null });
+  return;
+}
+
 
       // 新動畫模組
       closeModalById('drawAnimation');
@@ -2225,25 +2224,19 @@ function listenVote(roomId) {
                 closeAllModals();
                 showModal(
                     `❌ 未達成共識（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
-                    [{
-                        text: '好的',
-                        class: 'btn-confirm',
-                        onClick: async () => {
-                            await db.ref(`rooms/${roomId}`).update({
-                                vote: null,
-                                isDrawing: null,
-                                drawAnimation: null,
-                                drawResult: null
-                            });
-                            safeEnableDrawBtn();
-                        }
-                    }],
-                    'error'
-                );
-                voteRef.off('value');
-                await voteRef.remove();
-                clearVoteTimer();
-                hideVoteCountdown();
+                    [],
+                    'error',
+            2000, // 2秒
+            true  // autoClose
+        );
+        hideVoteCountdown();
+        // 只在未達多數時用setTimeout，且外面不要再移除vote
+        setTimeout(async () => {
+            await voteRef.remove();
+            voteRef.off('value');
+            clearVoteTimer();
+        }, 2000);
+
                 return;
             }
 
@@ -2378,24 +2371,20 @@ function listenVote(roomId) {
                         closeAllModals();
                         showModal(
                             `❌ 未達成共識（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
-                            [{
-                                text: '好的',
-                                class: 'btn-confirm',
-                                onClick: async () => {
-                                    await db.ref(`rooms/${roomId}`).update({
-                                        vote: null,
-                                        isDrawing: null,
-                                        drawAnimation: null,
-                                        drawResult: null
-                                    });
-                                    safeEnableDrawBtn();
-                                }
-                            }],
-                            'error'
-                        );
-                        hideVoteCountdown();
-                    }
-                } else if (mode === '多數決') {
+                            [],
+                            'error',
+            2000, // 2秒
+            true  // autoClose
+        );
+        hideVoteCountdown();
+        // 只在未達多數時用setTimeout，且外面不要再移除vote
+        setTimeout(async () => {
+            await voteRef.remove();
+            voteRef.off('value');
+            clearVoteTimer();
+        }, 2000);
+    }
+} else if (mode === '多數決') {
                     if (agreeCount > total / 2) {
                         await db.ref(`rooms/${roomId}`).update({
                             finalResult: item,
@@ -2407,27 +2396,23 @@ function listenVote(roomId) {
                     } else {
                         closeAllModals();
                         showModal(
-                            `❌ 未達成多數（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
-                            [{
-                                text: '好的',
-                                class: 'btn-confirm',
-                                onClick: async () => {
-                                    await db.ref(`rooms/${roomId}`).update({
-                                        vote: null,
-                                        isDrawing: null,
-                                        drawAnimation: null,
-                                        drawResult: null
-                                    });
-                                    safeEnableDrawBtn();
-                                }
-                            }],
-                            'error'
-                        );
-                        hideVoteCountdown();
-                    }
-                }
-                // 投票結束後清理
-                await voteRef.remove();
+            `❌ 未達成多數（${agreeCount} 同意，${disagreeCount} 不同意），請再抽一次！`,
+            [],
+            'error',
+            2000, // 2秒
+            true  // autoClose
+        );
+        hideVoteCountdown();
+        // 只在未達多數時用setTimeout，且外面不要再移除vote
+        setTimeout(async () => {
+            await voteRef.remove();
+            voteRef.off('value');
+            clearVoteTimer();
+        }, 2000);
+    }
+}
+
+                              
                 voteRef.off('value');
                 clearVoteTimer();
             }
@@ -2894,7 +2879,16 @@ function hideVoteCountdown() {
 </script>
 </head>
 <body>
-<h1><img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/icon.png" alt="icon" width="32"> 決策小幫手</h1>
+<h1 style="font-size:1.6em;font-weight:700;letter-spacing:2px;display:flex;justify-content:center;align-items:center;gap:6px;margin:0 0 6px 0;">
+  <img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/icon.png"
+       alt="icon"
+       width="38"
+       height="38"
+       style="vertical-align:middle;display:inline-block;margin-bottom:2px;box-shadow:0 2px 8px #e0f9ff9a;border-radius:13px;">
+  決策小幫手
+</h1>
+
+
 <div class="page active" id="setupPage">
 <div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
   <div class="header-row" style="justify-content: flex-end;">
@@ -2970,3 +2964,5 @@ function hideVoteCountdown() {
 </div>
 </body>
 </html>
+
+
