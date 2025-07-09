@@ -524,6 +524,47 @@
   display: block;
   margin: auto;
 }
+
+.btn-share {
+  display: inline-block;
+  min-width: 72px;
+  padding: 0.44em 1.25em;
+  font-size: 0.5em;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(90deg, #2894FF 0%, #156edc 100%);
+  border: none;
+  border-radius: 1.6em;
+  box-shadow: 0 2px 7px 0 rgba(40,148,255,0.12), 0 2px 2px 0 rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition:
+    background 0.17s,
+    box-shadow 0.16s,
+    transform 0.12s;
+  outline: none;
+  letter-spacing: 0.03em;
+  position: relative;
+}
+
+.btn-share:hover,
+.btn-share:focus {
+  background: linear-gradient(90deg, #41aaff 0%, #2894FF 80%);
+  box-shadow: 0 4px 14px 0 rgba(40,148,255,0.20), 0 2px 5px 0 rgba(0,0,0,0.09);
+}
+
+.btn-share:active {
+  background: linear-gradient(90deg, #1871bb 0%, #2179c8 100%);
+  box-shadow: 0 1px 2px 0 rgba(40,148,255,0.06), 0 1px 1px 0 rgba(0,0,0,0.10);
+  transform: translateY(2px) scale(0.97);
+}
+
+.btn-share:disabled {
+  opacity: 0.54;
+  cursor: not-allowed;
+  background: linear-gradient(90deg, #b7d8fb 0%, #e1eefd 100%);
+  box-shadow: none;
+}
+
 </style>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -1814,7 +1855,7 @@ function listenReedit(roomId) {
                             }
                         }
                     }
-                ], 'success', 3000); // 至少保留 3 秒
+                ], 'success', 1500,true); // 至少保留 1.5 秒
                 return;
             }
 
@@ -2823,7 +2864,7 @@ function renderCertificateCanvas(data) {
 targetDiv.appendChild(canvas);
 
 const shareBtn = document.createElement('button');
-shareBtn.className = 'btn-primary';
+shareBtn.className = 'btn-share';
 shareBtn.textContent = '分享';
 shareBtn.style.marginTop = '45px';
 
@@ -3032,3 +3073,12 @@ async function cleanupDrawLock(roomRef) {
 </div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
