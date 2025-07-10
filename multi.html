@@ -2946,14 +2946,13 @@ targetDiv.appendChild(shareBtn);
 
 }
 
-function showVoteCountdown(duration = 25) {
-hideVoteCountdown();
+function showVoteCountdown(duration = 25, onFinish) {
+  hideVoteCountdown();
   let remain = duration;
-  // 先清掉舊的
+
   let old = document.getElementById('global-vote-countdown');
   if (old) old.remove();
 
-  // 新增倒數條
   let el = document.createElement('div');
   el.id = 'global-vote-countdown';
   el.style = `
@@ -2970,22 +2969,35 @@ hideVoteCountdown();
   `;
   document.body.appendChild(el);
 
-  // 動畫
-  let interval = setInterval(() => {
-    remain--;
+  // 初始就先顯示
+  function updateBar(val) {
     let n = document.getElementById('vote-countdown-num');
     let bar = document.getElementById('vote-countdown-bar');
-    if (n) n.textContent = remain;
-    if (bar) bar.style.width = (remain/duration*100) + '%';
-    if (remain < 0) {
-      clearInterval(interval);
-      hideVoteCountdown();
-    }
-  }, 1000);
+    if (n) n.textContent = val;
+    if (bar) bar.style.width = (val/duration*100) + '%';
+  }
+  updateBar(remain);
 
-  // 關掉用
-  window._voteCountdownInterval = interval;
+  window._voteCountdownInterval && clearInterval(window._voteCountdownInterval);
+
+  window._voteCountdownInterval = setInterval(() => {
+    if (remain <= 0) {
+      // 已經到0
+      updateBar(0); // 確保顯示0和條
+      clearInterval(window._voteCountdownInterval);
+      // 多停0.5秒
+      setTimeout(() => {
+        hideVoteCountdown();
+        if (typeof onFinish === 'function') onFinish();
+      }, 500);
+      return;
+    }
+    remain--;
+    updateBar(remain);
+  }, 1000);
 }
+
+
 function hideVoteCountdown() {
     let el = document.getElementById('global-vote-countdown');
     if (el) {
