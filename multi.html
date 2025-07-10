@@ -2912,13 +2912,15 @@ shareBtn.onclick = async () => {
                     text: '這是剛出爐的抽籤結果哦！',
                     files: [file]
                 });
-                return; // 分享成功直接結束
+                // 不管分享被取消還是成功，都直接結束，什麼都不做
+                return;
             } catch (err) {
-                // 分享被取消/失敗，繼續 fallback
+                // 只要進來這區也是直接結束，完全不 fallback
+                return;
             }
         }
 
-        // 不支援分享就自動下載
+        // 不支援才進 fallback
         try {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2938,6 +2940,7 @@ shareBtn.onclick = async () => {
         }
     });
 };
+
 targetDiv.appendChild(shareBtn);
 
 
