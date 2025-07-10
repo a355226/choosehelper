@@ -721,7 +721,11 @@ body.dark-mode .btn-primary::after {
   background: linear-gradient(120deg, #4fa2e324 5%, #3d60791c 100%);
   opacity: 0.28;
 }
-
+body.dark-mode #foodList li {
+  background: #444 !important;      /* ✅ 改為較亮的深灰色，提升辨識度 */
+  color: #eee !important;           /* ✅ 字體更亮 */
+  border: 1px solid #555;           /* ✅ 增加邊框，讓格子邊界更清晰 */
+}
   </style>
 </head>
 <body>
