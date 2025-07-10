@@ -142,6 +142,38 @@ width: 85%;
       margin-left: 10px;
       flex-shrink: 0;
     }
+
+
+#foodList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+  padding: 0;
+  list-style: none;
+}
+
+#foodList li {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: #f0fdf4;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  white-space: nowrap;
+  width: auto !important;         /* ✅ 關鍵：解除 85% 寬度限制 */
+  max-width: 240px;               /* ✅ 可依需求調整，防止爆版 */
+  flex: none !important;          /* ✅ 防止拉寬 flex 空間 */
+}
+
+#foodList li span {
+  flex-grow: 0;
+  min-width: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
     .random-container {
       text-align: center;
       margin-top: 20px;
