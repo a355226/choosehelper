@@ -530,14 +530,22 @@ function hideModal() {
   function showShareModal(roomCode) {
     const url = location.origin + location.pathname + '?code=' + encodeURIComponent(roomCode);
     showModal(`
-      <div style="font-size:1.08em;font-weight:bold;">分享房間</div>
-      <div style="color:#1677FF;font-size:1.13em;margin:12px 0 12px 0;">驗證碼：<span style="font-family:monospace;font-weight:900;font-size:1.15em;">${roomCode}</span></div>
-      <input type="text" value="${url}" readonly style="width:98%;background:#f9fcff;color:#1677FF;font-size:1.08em;">
-      <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;">
-        <button onclick="copyShareUrl()">複製網址</button>
-        <button onclick="nativeShareUrl()">分享</button>
-      </div>
-    `);
+  <div style="position:relative;">
+    <div onclick="hideModal()" style="position:absolute;top:-6px;right:-6px;width:28px;height:28px;
+      background:#ccc;border-radius:50%;font-weight:bold;color:#333;text-align:center;
+      line-height:28px;cursor:pointer;font-size:1.2em;">❌</div>
+
+    <div style="font-size:1.08em;font-weight:bold;">分享房間</div>
+    <div style="color:#1677FF;font-size:1.13em;margin:12px 0 12px 0;">
+      驗證碼：<span style="font-family:monospace;font-weight:900;font-size:1.15em;">${roomCode}</span>
+    </div>
+    <input type="text" value="${url}" readonly style="width:98%;background:#f9fcff;color:#1677FF;font-size:1.08em;">
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;">
+      <button onclick="copyShareUrl()">複製</button>
+      <button onclick="nativeShareUrl()">分享</button>
+    </div>
+  </div>
+`);
     window.copyShareUrl = () => {
       const inp = document.querySelector('.modal-content input[type="text"]');
       inp.select(); inp.setSelectionRange(0,999);
