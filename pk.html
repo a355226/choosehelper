@@ -582,38 +582,63 @@ function hideModal() {
     };
   }
   document.getElementById('pk-enter-btn').addEventListener('click', async () => {
-    let name = document.getElementById('pk-name').value.trim();
-    let code = document.getElementById('pk-code').value.trim();
-    if (!name) { alert('請輸入名稱'); return; }
-    if (!code) {
-      code = generateVerificationCode();
-      document.getElementById('pk-code').value = code;
-    }
-    const roomRef = db.ref(`rooms/${code}`);
+  let name = document.getElementById('pk-name').value.trim();
+  let code = document.getElementById('pk-code').value.trim();
+  if (!name) { alert('請輸入名稱'); return; }
+  if (!code) {
+    code = generateVerificationCode();
+    document.getElementById('pk-code').value = code;
+  }
+  const roomRef = db.ref(`rooms/${code}`);
+  try {
     const snap = await roomRef.once('value');
-    if (!snap.exists()) {
+    if (snap.exists()) {
+      const roomData = snap.val();
+      const lastActivity = roomData.lastActivity || roomData.createdAt || Date.now();
+      // 檢查參與者數量
+      const participantCount = roomData.participants ? Object.keys(roomData.participants).length : 0;
+      if (participantCount >= 2) {
+        alert('該房間已滿（已有兩人），請輸入新的驗證碼');
+        document.getElementById('pk-code').value = ''; // 清空驗證碼
+        return;
+      }
+      // 檢查房間是否過期
+      if (Date.now() - lastActivity > 600000) { // 10 分鐘
+        await roomRef.remove(); // 刪除過期房間
+        alert('該房間已過期，將創建新房間');
+        // 創建新房間
+        await roomRef.set({
+          createdAt: firebase.database.ServerValue.TIMESTAMP,
+          lastActivity: firebase.database.ServerValue.TIMESTAMP,
+          pkHelper: { status: 'pending', games: [], results: [] }
+        });
+      }
+    } else {
       await roomRef.set({
         createdAt: firebase.database.ServerValue.TIMESTAMP,
-      lastActivity: firebase.database.ServerValue.TIMESTAMP,
+        lastActivity: firebase.database.ServerValue.TIMESTAMP,
         pkHelper: { status: 'pending', games: [], results: [] }
       });
     }
     const uid = 'uid-' + Math.random().toString(36).substring(2, 10);
     await roomRef.child(`participants/${uid}`).set({
-      name, joinedAt: Date.now()
+      name,
+      joinedAt: firebase.database.ServerValue.TIMESTAMP
     });
-await updateRoomActivity(roomRef);
+    await roomRef.update({ lastActivity: firebase.database.ServerValue.TIMESTAMP }); // 更新時間戳
     localStorage.setItem('pkRoomId', code);
     localStorage.setItem('pkUserName', name);
     localStorage.setItem('pkUserUid', uid);
     switchPage('page-pk-goal');
     initGoalPage(roomRef, uid, name, code);
-  });
-  window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(location.search);
-    const code = params.get('code');
-    if (code) document.getElementById('pk-code').value = code;
-  });
+  } catch (error) {
+    console.error('錯誤:', error);
+    if (error.code === 'PERMISSION_DENIED') {
+      alert('房間無效或已過期，請嘗試新驗證碼');
+      document.getElementById('pk-code').value = ''; // 清空驗證碼
+    }
+  }
+});
   function initGoalPage(roomRef, uid, myName, roomCode) {
     const goalContainer = document.getElementById('goal-content');
     goalContainer.innerHTML = `
@@ -2250,7 +2275,7 @@ function renderBombGame(roomRef, myUid, playerNames) {
 
   // ===== 遊戲參數 =====
    const totalTime = 10.0;
-  const tickInterval = 10;
+  const tickInterval = 1;
   let playersArr = Object.keys(playerNames).sort();
   let myIdx = playersArr.indexOf(myUid);
 
@@ -2420,14 +2445,40 @@ function triggerBomb(roomRef, myUid, playersArr, log, turn, remain, playerNames,
       resultModalShown: false // 交由 renderBombGame 控制顯示
     });
 
-    // 房主加分
-    if (myUid === playersArr[0]) {
-      roomRef.child('participants/' + winnerUid + '/totalWin').transaction(x => (x || 0) + 1);
-      roomRef.child('bombGame/winCounted').set(true);
-      console.log('[🏆 房主加分]', winnerUid);
-    }
+    // 確保加分邏輯只執行一次
+    roomRef.child('bombGame').once('value', snap => {
+      const data = snap.val();
+      if (!data.winCounted) {
+        // 房主加分
+        if (myUid === playersArr[0]) {
+          roomRef.child('participants/' + winnerUid + '/totalWin').transaction(x => (x || 0) + 1);
+          roomRef.child('bombGame').update({ winCounted: true }); // 設置 winCounted 為 true
+          console.log('[🏆 房主加分]', winnerUid);
+        }
+      }
+    });
   });
 }
+
+// 在按鈕釋放的邏輯中，確保時間不會小於 0.001
+btn.onmouseup = btn.onmouseleave = btn.ontouchend = function(e) {
+  if (!holding) return;
+  holding = false;
+  clearInterval(tickTimer);
+
+  let useSec = (Date.now() - startTs) / 1000;
+  let left = Math.max(remain - useSec, 0.001); // 確保時間不小於 0.001
+
+  if (remain - left < 0.001) {
+    $status.innerHTML = `<span style="color:#ff7979;">至少要推進 0.001 秒！</span>`;
+    return;
+  }
+
+  log.push({ uid: myUid, use: (remain - left).toFixed(3), remain: left.toFixed(3) });
+  roomRef.child('bombGame').update({ remain: left, turn: turn + 1, log });
+};
+
+
 
 // 炸彈canvas動畫（你原本的即可）
 function drawBombCanvas($wrap, remain, total, ended) {
@@ -2673,7 +2724,7 @@ cb();
     const nowTime = getNowDatetimeStr();
 
     // emoji 判斷
-    let goalEmoji = "🎯";
+    let goalEmoji = "✨";
     const goalText = (p[winnerUid].goal || "");
     if (goalText.includes("壽司") || goalText.includes("吃")) goalEmoji = "🍣";
     else if (goalText.includes("電影")) goalEmoji = "🎬";
