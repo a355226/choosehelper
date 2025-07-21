@@ -591,6 +591,7 @@ function hideModal() {
     if (!snap.exists()) {
       await roomRef.set({
         createdAt: Date.now(),
+lastActivity: firebase.database.ServerValue.TIMESTAMP,
         pkHelper: { status: 'pending', games: [], results: [] }
       });
     }
@@ -2877,8 +2878,10 @@ function leaveRoom() {
   ]);
 }
 
-
-
+//自動刪
+async function updateRoomActivity(roomRef) {
+  await roomRef.update({ lastActivity: firebase.database.ServerValue.TIMESTAMP });
+}
 
 </script>
 </body>
