@@ -361,7 +361,7 @@ position: relative;       /* ✅ 讓 fixed 相對畫面，不會被父層干擾 
 <!-- 頁1：建立/加入房間 -->
 <div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
 <div class="page active" id="page-pk-home">
-  <h1>PK小幫手</h1>
+  <h1>⚔️ PK小幫手</h1>
   <div class="container">
     <label for="pk-name">你的名稱：</label>
     <input type="text" id="pk-name" placeholder="請輸入名稱">
@@ -388,7 +388,7 @@ position: relative;       /* ✅ 讓 fixed 相對畫面，不會被父層干擾 
 
 <!-- 頁2：輸入願望 -->
 <div class="page" id="page-pk-goal">
-  <h1>PK小幫手</h1>
+  <h1>⚔️ PK小幫手</h1>
   <div class="room-info-bar" id="room-info-bar" style="display:none;">
     <span>驗證碼：<b id="room-code"></b></span>
     <button id="share-btn" class="share-btn">分享</button>
@@ -399,7 +399,7 @@ position: relative;       /* ✅ 讓 fixed 相對畫面，不會被父層干擾 
 </div>
 <!-- 頁3：主頁 -->
 <div class="page" id="page-pk-main">
-  <h1>PK小幫手</h1>
+  <h1>⚔️ PK小幫手</h1>
   <div class="container" id="main-content"></div>
 </div>
 <!-- 空白遊戲頁 -->
@@ -547,7 +547,7 @@ function hideModal() {
     };
     window.nativeShareUrl = () => {
       const shareData = {
-        title: "PK小幫手｜房間驗證碼：" + roomCode,
+        title: "⚔️ PK小幫手｜房間驗證碼：" + roomCode,
         text: "一起來PK遊戲！點我直接加入：",
         url
       };
@@ -735,7 +735,7 @@ roomRef.child('participants').off('value');
       const shareUrl = location.origin + location.pathname + '?code=' + roomId;
       if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
         navigator.share({
-          title: 'PK小幫手｜房間邀請',
+          title: '⚔️ PK小幫手｜房間邀請',
           text: '快加入我的PK房間！驗證碼：' + roomId,
           url: shareUrl
         }).catch(() => {});
