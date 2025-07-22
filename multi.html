@@ -2518,53 +2518,54 @@ async function validateVotes(roomId, votes, total) {
 }
 
 function leaveRoom() {
-    logDebug && logDebug("leaveRoom: Initiating room exit");
-    // 判斷目前是不是 setupPage
-    if (document.getElementById('setupPage').classList.contains('active')) {
-        window.location.href = 'index.html';
-        return;
-    }
-    showModal('確定要離開此房間嗎？', [
-        {
-            text: '確定',
-            class: 'btn-confirm',
-            onClick: () => {
-                logDebug && logDebug("leaveRoom: Confirm leave clicked");
-                const roomId = localStorage.getItem('currentRoomId');
-                const userId = localStorage.getItem(`currentUserId_${roomId}`);
-                const roomRef = db.ref(`rooms/${roomId}`);
+  logDebug && logDebug("leaveRoom: Initiating room exit");
 
-                roomRef.child('participants').transaction(participants => {
-                    if (!participants) return;
-                    delete participants[userId];
-                    const participantCount = Object.keys(participants).length;
-                    roomRef.child('participants/' + userId).remove();
+  // 改：不論頁面，統一詢問是否離開
+  showModal('確定要離開此房間嗎？', [
+    {
+      text: '確定',
+      class: 'btn-confirm',
+      onClick: () => {
+        logDebug && logDebug("leaveRoom: Confirm leave clicked");
+        const roomId = localStorage.getItem('currentRoomId');
+        const userId = localStorage.getItem(`currentUserId_${roomId}`);
+        const roomRef = db.ref(`rooms/${roomId}`);
 
-                    if (participantCount === 0) {
-                        roomRef.update({
-                            drawResult: null,
-                            finalResult: null,
-                            isDrawing: null,
-                            vote: null,
-                            confirm: null,
-                            editConfirm: null
-                        });
-                    }
-                    localStorage.removeItem('currentRoomId');
-                    localStorage.removeItem(`currentUserId_${roomId}`);
-                    window.location.href = 'index.html';
-                });
+        if (roomId && userId) {
+          roomRef.child('participants').transaction(participants => {
+            if (!participants) return;
+            delete participants[userId];
+            const participantCount = Object.keys(participants).length;
+            roomRef.child('participants/' + userId).remove();
+
+            if (participantCount === 0) {
+              roomRef.update({
+                drawResult: null,
+                finalResult: null,
+                isDrawing: null,
+                vote: null,
+                confirm: null,
+                editConfirm: null
+              });
             }
-        },
-        {
-            text: '取消',
-            class: 'btn-primary',
-            onClick: () => {
-                logDebug && logDebug("leaveRoom: Cancel leave clicked");
-            }
+          });
+          localStorage.removeItem('currentRoomId');
+          localStorage.removeItem(`currentUserId_${roomId}`);
         }
-    ], 'leave');
+
+        window.location.href = 'index.html';
+      }
+    },
+    {
+      text: '取消',
+      class: 'btn-primary',
+      onClick: () => {
+        logDebug && logDebug("leaveRoom: Cancel leave clicked");
+      }
+    }
+  ], 'leave');
 }
+
 
 function generateVerificationCode() {
     const digits = Math.floor(Math.random() * 90 + 10).toString();
@@ -3332,4 +3333,5 @@ function hideVoteVisualization() {
 <div class="footer-note">Designed by KJ&nbsp;&nbsp;</div>
 </body>
 </html>
+
 
