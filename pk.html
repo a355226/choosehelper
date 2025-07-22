@@ -361,7 +361,23 @@ position: relative;       /* ✅ 讓 fixed 相對畫面，不會被父層干擾 
 <!-- 頁1：建立/加入房間 -->
 <div class="exit-btn" onclick="leaveRoom()" title="離開"></div>
 <div class="page active" id="page-pk-home">
-  <h1>⚔️ PK小幫手</h1>
+ <h1 style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+  <img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/pk.png" alt="icon" width="64">
+  <span style="
+    background: linear-gradient(to right, #4da6ff, #1a75ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    text-shadow: 0 0 2px rgba(0,0,0,0.12);
+  ">
+    PK小幫手
+  </span>
+</h1>
+
+
+
+
+
   <div class="container">
     <label for="pk-name">你的名稱：</label>
     <input type="text" id="pk-name" placeholder="請輸入名稱">
@@ -388,7 +404,20 @@ position: relative;       /* ✅ 讓 fixed 相對畫面，不會被父層干擾 
 
 <!-- 頁2：輸入願望 -->
 <div class="page" id="page-pk-goal">
-  <h1>⚔️ PK小幫手</h1>
+<h1 style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+  <img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/pk.png" alt="icon" width="64">
+  <span style="
+    background: linear-gradient(to right, #4da6ff, #1a75ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    text-shadow: 0 0 2px rgba(0,0,0,0.12);
+  ">
+    PK小幫手
+  </span>
+</h1>
+
+
   <div class="room-info-bar" id="room-info-bar" style="display:none;">
     <span>驗證碼：<b id="room-code"></b></span>
     <button id="share-btn" class="share-btn">分享</button>
@@ -399,7 +428,20 @@ position: relative;       /* ✅ 讓 fixed 相對畫面，不會被父層干擾 
 </div>
 <!-- 頁3：主頁 -->
 <div class="page" id="page-pk-main">
-  <h1>⚔️ PK小幫手</h1>
+<h1 style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+  <img src="https://cdn.jsdelivr.net/gh/a355226/choosehelper@main/pk.png" alt="icon" width="64">
+  <span style="
+    background: linear-gradient(to right, #4da6ff, #1a75ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    text-shadow: 0 0 2px rgba(0,0,0,0.12);
+  ">
+    PK小幫手
+  </span>
+</h1>
+
+
   <div class="container" id="main-content"></div>
 </div>
 <!-- 空白遊戲頁 -->
@@ -2924,6 +2966,8 @@ async function updateRoomActivity(roomRef) {
 </script>
 </body>
 </html>
+
+
 
 
 
