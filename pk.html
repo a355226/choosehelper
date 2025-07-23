@@ -610,6 +610,13 @@ function hideModal() {
       }
     };
   }
+// ✅ 頁面一載入就自動填上 localStorage 的資料
+window.addEventListener('DOMContentLoaded', () => {
+  const code = localStorage.getItem('roomCode');
+  const name = localStorage.getItem('userName');
+  if (code) document.getElementById('pk-code').value = code;
+  if (name) document.getElementById('pk-name').value = name;
+});
   document.getElementById('pk-enter-btn').addEventListener('click', async () => {
   let name = document.getElementById('pk-name').value.trim();
   let code = document.getElementById('pk-code').value.trim();
@@ -2864,12 +2871,22 @@ cb();
       }
 
       if (values.length >= 2 && values.every(v => v === true)) {
-        showModal('重新開局中...');
-        setTimeout(() => {
-          const newCode = 'room-' + Date.now();
-          location.href = location.origin + location.pathname + '?code=' + encodeURIComponent(newCode);
-        }, 1200);
-      }
+  const newCode = Math.floor(Math.random() * 90 + 10).toString() +
+                  String.fromCharCode(Math.floor(Math.random() * 26) + 97) +
+                  String.fromCharCode(Math.floor(Math.random() * 26) + 97);
+  const myName = document.querySelector('#player1-name')?.textContent === localStorage.getItem('pkUserName')
+    ? document.querySelector('#player1-name')?.textContent
+    : document.querySelector('#player2-name')?.textContent;
+
+  localStorage.setItem('roomCode', newCode);      // ✅ 儲存驗證碼
+  localStorage.setItem('userName', myName);       // ✅ 儲存名稱
+
+  showModal('重新開局中...');
+  setTimeout(() => {
+    location.href = location.origin + location.pathname + '?code=' + encodeURIComponent(newCode);
+  }, 1200);
+}
+
     });
   });
 }
@@ -2932,8 +2949,4 @@ async function updateRoomActivity(roomRef) {
 </script>
 </body>
 </html>
-
-
-
-
 
