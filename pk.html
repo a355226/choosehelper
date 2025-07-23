@@ -612,11 +612,16 @@ function hideModal() {
   }
 // ✅ 頁面一載入就自動填上 localStorage 的資料
 window.addEventListener('DOMContentLoaded', () => {
-  const code = localStorage.getItem('roomCode');
-  const name = localStorage.getItem('userName');
-  if (code) document.getElementById('pk-code').value = code;
-  if (name) document.getElementById('pk-name').value = name;
+  const fromRematch = localStorage.getItem('fromRematch');
+  if (fromRematch === '1') {
+    const code = localStorage.getItem('roomCode');
+    const name = localStorage.getItem('userName');
+    if (code) document.getElementById('pk-code').value = code;
+    if (name) document.getElementById('pk-name').value = name;
+    localStorage.removeItem('fromRematch'); // ✅ 用完即清除，避免影響下次手動輸入
+  }
 });
+
   document.getElementById('pk-enter-btn').addEventListener('click', async () => {
   let name = document.getElementById('pk-name').value.trim();
   let code = document.getElementById('pk-code').value.trim();
@@ -2893,6 +2898,7 @@ if (values.length >= 2 && values.every(v => v === true)) {
     const myUid = localStorage.getItem('pkUserUid');
     const myName = (myUid === winnerUid) ? p[winnerUid].name : p[loserUid].name;
     localStorage.setItem('userName', myName);
+localStorage.setItem('fromRematch', '1'); // ✅ 新增這行
 
     // 跳轉
     setTimeout(() => {
