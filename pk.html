@@ -2788,56 +2788,138 @@ if (isWinner) {
 
     document.body.innerHTML = `
       <style>
-        body { margin: 0; padding: 0; font-family: "Segoe UI", "Noto Sans TC", sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0eaff 100%); color: #263849; }
-        .container { max-width: 460px; margin: 40px auto; background: white; border-radius: 16px; box-shadow: 0 2px 16px #d0e7f1; padding: 32px 24px; text-align: center; position: relative; }
-        .bubble { position: absolute; width: 80px; height: 80px; border-radius: 50%; background: #d7f3ff; opacity: 0.35; animation: float 6s ease-in-out infinite; z-index: 0; }
-        .bubble1 { top: -20px; left: -20px; animation-delay: 0s; }
-        .bubble2 { top: 20px; right: -30px; animation-delay: 1s; }
-        .bubble3 { bottom: -20px; left: 40%; animation-delay: 2s; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-25px); } }
-        .result-title { font-size: 1.8em; font-weight: 900; margin-bottom: 15px; color: #1578e2; z-index: 1; position: relative; }
-        .time-row { font-size: 0.9em; color: #555; margin-bottom: 15px; }
-        .score-row { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 18px 0; }
-        .score-box { font-size: 2.2em; font-weight: 900; color: #1578e2; background: linear-gradient(90deg, #d9f6ff, #ffffff); padding: 12px 20px; border-radius: 14px; box-shadow: 0 2px 10px #d9f6ff; }
-        .score-vs { font-size: 1.6em; font-weight: bold; color: #888; }
-        .winner-name { color: #ff3c00; }
-             .winner-goal-box { background: #fff8e8; margin: 20px 0; border-radius: 12px; padding: 12px 18px; font-weight: 900; letter-spacing: 1.5px; color: #ff871c; font-size: 1.1em; }
-.rematch-btn {
-  background: linear-gradient(90deg, #c4f6dc, #a0eed1); /* 淡綠漸層 */
-  color: #105b38;
-  font-weight: 700;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 28px;
-  font-size: 1.15em;
-  box-shadow: 0 0 10px rgba(255, 230, 120, 0.4); /* 黃光效果 */
-  animation: glow 1.8s ease-in-out infinite; /* 閃爍動畫 */
-  cursor: pointer;
-  transition: transform 0.25s ease-in-out;
-  margin-top: 25px;
-  margin-bottom: 16px;
-  margin-right: 10px;
-}
+          body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0eaff 100%);
+    color: #263849;
+  }
 
-.rematch-btn:hover {
-  transform: scale(1.05);
-  background: linear-gradient(90deg, #b2f1ce, #8ce8c1); /* hover 用稍深綠 */
-}
+  .container {
+    max-width: 460px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px #d0e7f1;
+    padding: 32px 24px;
+    text-align: center;
+    position: relative;
+  }
 
-@keyframes glow {
-  0% {
-    box-shadow: 0 0 6px rgba(255, 230, 120, 0.3);
+  .bubble { position:absolute; width:80px; height:80px; border-radius:50%; background:#d7f3ff; opacity:0.35; animation:float 6s ease-in-out infinite; z-index:0; }
+  .bubble1{top:-20px;left:-20px;animation-delay:0s;}
+  .bubble2{top:20px;right:-30px;animation-delay:1s;}
+  .bubble3{bottom:-20px;left:40%;animation-delay:2s;}
+
+  @keyframes float {
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-25px)}
   }
-  50% {
-    box-shadow: 0 0 16px rgba(255, 230, 120, 0.65);
+
+  .result-title {
+    font-size:1.8em;
+    font-weight:900;
+    margin-bottom:15px;
+    color:#1578e2;
+    position:relative;
+    z-index:1;
   }
-  100% {
-    box-shadow: 0 0 6px rgba(255, 230, 120, 0.3);
+
+  .time-row {font-size:0.9em;color:#555;margin-bottom:15px;}
+
+  .score-row {display:flex;justify-content:center;align-items:center;gap:18px;margin:18px 0;}
+  .score-box {
+    font-size:2.2em;
+    font-weight:900;
+    color:#1578e2;
+    background:linear-gradient(90deg,#d9f6ff,#ffffff);
+    padding:12px 20px;
+    border-radius:14px;
+    box-shadow:0 2px 10px #d9f6ff;
   }
+  .score-vs{font-size:1.6em;font-weight:bold;color:#888;}
+  .score-box.loser {
+    background:linear-gradient(90deg,#ffe8d8,#ffffff);
+    color:#ff7a3c;
+  }
+
+  .winner-name{color:#ff3c00;}
+
+  /* === 願望清單卡片（修正版） === */
+  .winner-goal-box {
+  background: #fff8e8;
+  margin: 20px 0;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #ff871c;
+  font-size: 1.1em;
 }
-   .restart-btn { font-size: 1.1em; padding: 10px 24px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; margin-top: 25px; }
-        .restart-btn { background: linear-gradient(90deg, #1677ff, #3dc7ff); color: white; box-shadow: 0 2px 10px #1677ff40; }
-        .restart-btn:hover { transform: scale(1.03); background: linear-gradient(90deg, #146de2, #30b2e5); }
+  .winner-goal-title{
+    font-size:1.05em;
+    margin-bottom:6px;
+  }
+  .winner-goal-text{
+    font-size:1.35em;
+    font-weight:900;
+    color:#ff871c;
+  }
+
+  /* Rematch / Restart buttons -------------------- */
+  .rematch-btn{
+    background:linear-gradient(90deg,#c4f6dc,#a0eed1);
+    color:#105b38;
+    font-weight:700;
+    border:none;
+    border-radius:8px;
+    padding:12px 28px;
+    font-size:1.15em;
+    box-shadow:0 0 10px rgba(255,230,120,.4);
+    animation:rematchGlow 1.8s ease-in-out infinite;
+    cursor:pointer;
+    transition:transform .25s ease-in-out;
+    margin-top:25px;
+    margin-bottom:16px; /* 與底下 restart 分隔 */
+    display:block;
+    width:100%;
+    max-width:260px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .rematch-btn:hover{
+    transform:scale(1.05);
+    background:linear-gradient(90deg,#b2f1ce,#8ce8c1);
+  }
+  @keyframes rematchGlow{
+    0%{box-shadow:0 0 6px rgba(255,230,120,.3);}
+    50%{box-shadow:0 0 16px rgba(255,230,120,.65);}
+    100%{box-shadow:0 0 6px rgba(255,230,120,.3);}
+  }
+
+  .restart-btn{
+    font-size:1.1em;
+    padding:10px 24px;
+    border-radius:8px;
+    border:none;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:0;            /* 已有 rematch 的 margin-bottom，因此這裡不需要再加 */
+    display:block;
+    width:100%;
+    max-width:260px;
+    margin-left:auto;
+    margin-right:auto;
+    background:linear-gradient(90deg,#1677ff,#3dc7ff);
+    color:#fff;
+    box-shadow:0 2px 10px #1677ff40;
+    transition:transform .2s ease-in-out, background .2s ease-in-out;
+  }
+  .restart-btn:hover{
+    transform:scale(1.03);
+    background:linear-gradient(90deg,#146de2,#30b2e5);
+  }
 
       </style>
 
