@@ -613,12 +613,18 @@ function hideModal() {
 // ✅ 頁面一載入就自動填上 localStorage 的資料
 window.addEventListener('DOMContentLoaded', () => {
   const fromRematch = localStorage.getItem('fromRematch');
+  const urlParams = new URLSearchParams(window.location.search);
+  const codeFromUrl = urlParams.get('code');
+
   if (fromRematch === '1') {
     const code = localStorage.getItem('roomCode');
     const name = localStorage.getItem('userName');
     if (code) document.getElementById('pk-code').value = code;
     if (name) document.getElementById('pk-name').value = name;
-    localStorage.removeItem('fromRematch'); // ✅ 用完即清除，避免影響下次手動輸入
+    localStorage.removeItem('fromRematch'); // ✅ 清除再一場旗標
+  } else if (codeFromUrl) {
+    // ✅ 若網址上有 code，也帶入驗證碼（但不干涉名稱）
+    document.getElementById('pk-code').value = codeFromUrl;
   }
 });
 
