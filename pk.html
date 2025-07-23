@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -2737,17 +2739,9 @@ cb();
       return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
-function showResultPage(roomRef, playerNames) {
+   function showResultPage(roomRef, playerNames) {
   roomRef.child('participants').once('value').then(snap => {
     const p = snap.val() || {};
-    const myUid = getMyUid();
-    const myData = p[myUid];
-
-    if (!myData) {
-      console.warn('[⚠️ 無法從參與者清單取得我的資料]', myUid, p);
-      return;
-    }
-
     let winnerUid = null, maxWin = -1;
     Object.entries(p).forEach(([uid, u]) => {
       if ((u.totalWin || 0) > maxWin) {
@@ -2757,20 +2751,15 @@ function showResultPage(roomRef, playerNames) {
     });
     const loserUid = Object.keys(p).find(uid => uid !== winnerUid);
     const nowTime = getNowDatetimeStr();
-    const goalText = (p[winnerUid].goal || "");
+
     let goalEmoji = "✨";
+    const goalText = (p[winnerUid]?.goal || "");
     if (goalText.includes("壽司") || goalText.includes("吃")) goalEmoji = "🍣";
     else if (goalText.includes("電影")) goalEmoji = "🎬";
     else if (goalText.includes("旅遊") || goalText.includes("旅行")) goalEmoji = "🌏";
     else if (goalText.includes("運動")) goalEmoji = "🏆";
     else if (goalText.includes("唱歌")) goalEmoji = "🎤";
     else if (goalText.includes("玩")) goalEmoji = "🎲";
-
-    const myName = myData.name;
-    const roomCode = localStorage.getItem('pkRoomId');
-    const myWindowId = localStorage.getItem('pkWindowId') || Math.random().toString(36).substring(2, 12);
-    localStorage.setItem('pkWindowId', myWindowId);
-    localStorage.setItem('pkUserName', myName);
 
     document.body.innerHTML = `
       <style>
@@ -2834,22 +2823,10 @@ function showResultPage(roomRef, playerNames) {
     };
 
     // 雙方監聽 rematchRequest → 都跳視窗
-     let alreadyResponded = false;
-
-    setTimeout(() => {
-      document.getElementById('rematch-btn').onclick = () => {
-        roomRef.child('rematchRequest').set({
-          requesterWindowId: myWindowId,
-          requesterUid: myUid,
-          timestamp: Date.now()
-        });
-      };
-    }, 0);
-
-    // 監聽 rematchRequest → 若非自己發起，跳彈窗
+    let alreadyResponded = false;
     roomRef.child('rematchRequest').on('value', snap => {
       const val = snap.val();
-      if (!val || val.requesterUid === myUid || alreadyResponded) return;
+      if (!val || alreadyResponded) return;
       alreadyResponded = true;
 
       showModal('對方想再比一場，你願意嗎？', [
@@ -2857,7 +2834,7 @@ function showResultPage(roomRef, playerNames) {
           text: '好啊！',
           class: 'btn-confirm',
           onClick: () => {
-            roomRef.child('rematchResponse/' + myUid).set(true);
+            roomRef.child('rematchResponse/' + Math.random().toString(36).substring(2, 10)).set(true);
             showModal('等待對方決定中...');
           }
         },
@@ -2865,38 +2842,32 @@ function showResultPage(roomRef, playerNames) {
           text: '不要',
           class: 'btn-cancel',
           onClick: () => {
-            roomRef.child('rematchResponse/' + myUid).set(false);
+            roomRef.child('rematchResponse').set({ all: false });
           }
         }
       ]);
     });
 
-    // 監聽雙方是否同意
+    // 判斷是否雙方都按同意
     roomRef.child('rematchResponse').on('value', snap => {
       const data = snap.val();
       if (!data) return;
+
       const values = Object.values(data);
       if (values.includes(false)) {
         showModal('下次再比吧！');
         setTimeout(() => {
           roomRef.child('rematchRequest').remove();
           roomRef.child('rematchResponse').remove();
-          alreadyResponded = false;
         }, 2000);
         return;
       }
 
-      if (values.length === 2 && values.every(v => v === true)) {
+      if (values.length >= 2 && values.every(v => v === true)) {
         showModal('重新開局中...');
         setTimeout(() => {
-          // 清除前一場資料
-          roomRef.child('rematchRequest').remove();
-          roomRef.child('rematchResponse').remove();
-
-          // 自動輸入驗證碼與名稱，進入願望頁
-          document.getElementById('roomNameInput').value = roomCode;
-          document.getElementById('userNameInput').value = myName;
-          goToPage('page-pk-goal');
+          const newCode = 'room-' + Date.now();
+          location.href = location.origin + location.pathname + '?code=' + encodeURIComponent(newCode);
         }, 1200);
       }
     });
