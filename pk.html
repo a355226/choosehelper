@@ -2880,26 +2880,23 @@ if (isWinner) {
   if (values.length >= 2 && values.every(v => v === true)) {
   showModal('重新開局中...');
 
-  roomRef.child('nextRoomCode').once('value').then(snap => {
-    const newCode = snap.val();
-    if (!newCode) {
-      alert('⚠️ 驗證碼同步失敗，請重新整理');
-      return;
-    }
+  const myUid = localStorage.getItem('pkUserUid');
+  const myName = myUid === winnerUid ? p[winnerUid]?.name : p[loserUid]?.name;
 
-    // 將驗證碼與玩家名稱一起記到 localStorage
-    localStorage.setItem('roomCode', newCode);
+  // ✅ 固定由贏家決定驗證碼（確保兩人一致）
+  const sharedCode = 'pk' + Math.floor(Math.random() * 90 + 10) +
+                     String.fromCharCode(Math.floor(Math.random() * 26) + 97) +
+                     String.fromCharCode(Math.floor(Math.random() * 26) + 97);
 
-    const myUid = localStorage.getItem('pkUserUid');
-    const myName = (myUid === winnerUid) ? p[winnerUid].name : p[loserUid].name;
-    localStorage.setItem('userName', myName);
+  sessionStorage.setItem('roomCode', sharedCode);
+  sessionStorage.setItem('userName', myName);
 
-    // 跳轉
-    setTimeout(() => {
-      location.href = location.origin + location.pathname + '?code=' + encodeURIComponent(newCode);
-    }, 800);
-  });
+  setTimeout(() => {
+    const url = location.origin + location.pathname + '?code=' + encodeURIComponent(sharedCode);
+    location.href = url;
+  }, 1000);
 }
+
 
 
 
