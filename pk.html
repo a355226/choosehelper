@@ -612,8 +612,8 @@ function hideModal() {
   }
 // ✅ 頁面一載入就自動填上 localStorage 的資料
 window.addEventListener('DOMContentLoaded', () => {
-  const code = localStorage.getItem('roomCode');
-  const name = localStorage.getItem('userName');
+const code = sessionStorage.getItem('roomCode');
+const name = sessionStorage.getItem('userName');
   if (code) document.getElementById('pk-code').value = code;
   if (name) document.getElementById('pk-name').value = name;
 });
