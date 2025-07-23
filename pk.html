@@ -2737,9 +2737,17 @@ cb();
       return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
-    function showResultPage(roomRef, playerNames) {
+function showResultPage(roomRef, playerNames) {
   roomRef.child('participants').once('value').then(snap => {
     const p = snap.val() || {};
+    const myUid = getMyUid();
+    const myData = p[myUid];
+
+    if (!myData) {
+      console.warn('[⚠️ 無法從參與者清單取得我的資料]', myUid, p);
+      return;
+    }
+
     let winnerUid = null, maxWin = -1;
     Object.entries(p).forEach(([uid, u]) => {
       if ((u.totalWin || 0) > maxWin) {
@@ -2749,10 +2757,8 @@ cb();
     });
     const loserUid = Object.keys(p).find(uid => uid !== winnerUid);
     const nowTime = getNowDatetimeStr();
-
-    // emoji 判斷
-    let goalEmoji = "✨";
     const goalText = (p[winnerUid].goal || "");
+    let goalEmoji = "✨";
     if (goalText.includes("壽司") || goalText.includes("吃")) goalEmoji = "🍣";
     else if (goalText.includes("電影")) goalEmoji = "🎬";
     else if (goalText.includes("旅遊") || goalText.includes("旅行")) goalEmoji = "🌏";
@@ -2760,115 +2766,32 @@ cb();
     else if (goalText.includes("唱歌")) goalEmoji = "🎤";
     else if (goalText.includes("玩")) goalEmoji = "🎲";
 
-    // ✅ 整頁覆寫結果畫面（包含 style）
+    const myName = myData.name;
+    const roomCode = localStorage.getItem('pkRoomId');
+    const myWindowId = localStorage.getItem('pkWindowId') || Math.random().toString(36).substring(2, 12);
+    localStorage.setItem('pkWindowId', myWindowId);
+    localStorage.setItem('pkUserName', myName);
+
     document.body.innerHTML = `
       <style>
-        body {
-          margin: 0;
-          padding: 0;
-          font-family: "Segoe UI", "Noto Sans TC", sans-serif;
-          background: linear-gradient(135deg, #f0f9ff 0%, #e0eaff 100%);
-          color: #263849;
-        }
-        .container {
-          max-width: 460px;
-          margin: 40px auto;
-          background: white;
-          border-radius: 16px;
-          box-shadow: 0 2px 16px #d0e7f1;
-          padding: 32px 24px;
-          text-align: center;
-          position: relative;
-        }
-        .bubble {
-          position: absolute;
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          background: #d7f3ff;
-          opacity: 0.35;
-          animation: float 6s ease-in-out infinite;
-          z-index: 0;
-        }
+        body { margin: 0; padding: 0; font-family: "Segoe UI", "Noto Sans TC", sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0eaff 100%); color: #263849; }
+        .container { max-width: 460px; margin: 40px auto; background: white; border-radius: 16px; box-shadow: 0 2px 16px #d0e7f1; padding: 32px 24px; text-align: center; position: relative; }
+        .bubble { position: absolute; width: 80px; height: 80px; border-radius: 50%; background: #d7f3ff; opacity: 0.35; animation: float 6s ease-in-out infinite; z-index: 0; }
         .bubble1 { top: -20px; left: -20px; animation-delay: 0s; }
         .bubble2 { top: 20px; right: -30px; animation-delay: 1s; }
         .bubble3 { bottom: -20px; left: 40%; animation-delay: 2s; }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-25px); }
-        }
-
-        .result-title {
-          font-size: 1.8em;
-          font-weight: 900;
-          margin-bottom: 15px;
-          color: #1578e2;
-          z-index: 1;
-          position: relative;
-        }
-
-        .time-row {
-          font-size: 0.9em;
-          color: #555;
-          margin-bottom: 15px;
-        }
-
-        .score-row {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 18px;
-          margin: 18px 0;
-        }
-
-        .score-box {
-          font-size: 2.2em;
-          font-weight: 900;
-          color: #1578e2;
-          background: linear-gradient(90deg, #d9f6ff, #ffffff);
-          padding: 12px 20px;
-          border-radius: 14px;
-          box-shadow: 0 2px 10px #d9f6ff;
-        }
-
-        .score-vs {
-          font-size: 1.6em;
-          font-weight: bold;
-          color: #888;
-        }
-
-        .winner-name {
-          color: #ff3c00;
-        }
-
-        .winner-goal-box {
-          background: #fff8e8;
-          margin: 20px 0;
-          border-radius: 12px;
-          padding: 12px 18px;
-          font-weight: 900;
-          letter-spacing: 1.5px;
-          color: #ff871c;
-          font-size: 1.1em;
-        }
-
-        .restart-btn {
-          font-size: 1.1em;
-          padding: 10px 24px;
-          border-radius: 8px;
-          border: none;
-          background: linear-gradient(90deg, #1677ff, #3dc7ff);
-          color: white;
-          font-weight: 700;
-          box-shadow: 0 2px 10px #1677ff40;
-          cursor: pointer;
-          margin-top: 25px;
-        }
-        .restart-btn:hover {
-          transform: scale(1.03);
-          background: linear-gradient(90deg, #146de2, #30b2e5);
-        }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-25px); } }
+        .result-title { font-size: 1.8em; font-weight: 900; margin-bottom: 15px; color: #1578e2; z-index: 1; position: relative; }
+        .time-row { font-size: 0.9em; color: #555; margin-bottom: 15px; }
+        .score-row { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 18px 0; }
+        .score-box { font-size: 2.2em; font-weight: 900; color: #1578e2; background: linear-gradient(90deg, #d9f6ff, #ffffff); padding: 12px 20px; border-radius: 14px; box-shadow: 0 2px 10px #d9f6ff; }
+        .score-vs { font-size: 1.6em; font-weight: bold; color: #888; }
+        .winner-name { color: #ff3c00; }
+        .winner-goal-box { background: #fff8e8; margin: 20px 0; border-radius: 12px; padding: 12px 18px; font-weight: 900; letter-spacing: 1.5px; color: #ff871c; font-size: 1.1em; }
+        .restart-btn, .rematch-btn { font-size: 1.1em; padding: 10px 24px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; margin-top: 25px; }
+        .restart-btn { background: linear-gradient(90deg, #1677ff, #3dc7ff); color: white; box-shadow: 0 2px 10px #1677ff40; }
+        .restart-btn:hover { transform: scale(1.03); background: linear-gradient(90deg, #146de2, #30b2e5); }
+        .rematch-btn { background: #f0f0f0; color: #444; margin-right: 10px; }
       </style>
 
       <div class="container">
@@ -2881,20 +2804,18 @@ cb();
 
         <div class="score-row">
           <div class="score-box">
-            ${p[winnerUid].totalWin || 0}
-            <div style="font-size:0.45em;font-weight:600;letter-spacing:1.5px;color:#1578e2;">${p[winnerUid].name}</div>
+            ${p[winnerUid]?.totalWin || 0}
+            <div style="font-size:0.45em;font-weight:600;letter-spacing:1.5px;color:#1578e2;">${p[winnerUid]?.name}</div>
           </div>
           <div class="score-vs">:</div>
-         <div class="score-box" style="background:linear-gradient(90deg, #ffe8d8, #ffffff); color:#ff7a3c;">
-
-
-            ${p[loserUid].totalWin || 0}
-            <div style="font-size:0.45em;font-weight:600;letter-spacing:1.5px;">${p[loserUid].name}</div>
+          <div class="score-box" style="background:linear-gradient(90deg, #ffe8d8, #ffffff); color:#ff7a3c;">
+            ${p[loserUid]?.totalWin || 0}
+            <div style="font-size:0.45em;font-weight:600;letter-spacing:1.5px;">${p[loserUid]?.name}</div>
           </div>
         </div>
 
         <div style="margin:13px 0 8px 0;font-size:1.23em;font-weight:900;color:#ff613e;">
-          🎉 優勝者：<span class="winner-name">${p[winnerUid].name}</span>
+          🎉 優勝者：<span class="winner-name">${p[winnerUid]?.name}</span>
         </div>
 
         <div class="winner-goal-box">
@@ -2902,9 +2823,83 @@ cb();
           <div style="font-size:1.3em;color:#ff871c;margin-top:4px;">${goalEmoji} ${goalText || '—'}</div>
         </div>
 
-       <button class="restart-btn" onclick="leaveRoom()">回首頁</button>
+        <button class="rematch-btn" id="rematch-btn">再一場！</button>
+        <button class="restart-btn" onclick="leaveRoom()">回首頁</button>
       </div>
     `;
+
+    // 再一場邏輯：簡化版
+    document.getElementById('rematch-btn').onclick = () => {
+      roomRef.child('rematchRequest').set({ timestamp: Date.now() });
+    };
+
+    // 雙方監聽 rematchRequest → 都跳視窗
+     let alreadyResponded = false;
+
+    setTimeout(() => {
+      document.getElementById('rematch-btn').onclick = () => {
+        roomRef.child('rematchRequest').set({
+          requesterWindowId: myWindowId,
+          requesterUid: myUid,
+          timestamp: Date.now()
+        });
+      };
+    }, 0);
+
+    // 監聽 rematchRequest → 若非自己發起，跳彈窗
+    roomRef.child('rematchRequest').on('value', snap => {
+      const val = snap.val();
+      if (!val || val.requesterUid === myUid || alreadyResponded) return;
+      alreadyResponded = true;
+
+      showModal('對方想再比一場，你願意嗎？', [
+        {
+          text: '好啊！',
+          class: 'btn-confirm',
+          onClick: () => {
+            roomRef.child('rematchResponse/' + myUid).set(true);
+            showModal('等待對方決定中...');
+          }
+        },
+        {
+          text: '不要',
+          class: 'btn-cancel',
+          onClick: () => {
+            roomRef.child('rematchResponse/' + myUid).set(false);
+          }
+        }
+      ]);
+    });
+
+    // 監聽雙方是否同意
+    roomRef.child('rematchResponse').on('value', snap => {
+      const data = snap.val();
+      if (!data) return;
+      const values = Object.values(data);
+      if (values.includes(false)) {
+        showModal('下次再比吧！');
+        setTimeout(() => {
+          roomRef.child('rematchRequest').remove();
+          roomRef.child('rematchResponse').remove();
+          alreadyResponded = false;
+        }, 2000);
+        return;
+      }
+
+      if (values.length === 2 && values.every(v => v === true)) {
+        showModal('重新開局中...');
+        setTimeout(() => {
+          // 清除前一場資料
+          roomRef.child('rematchRequest').remove();
+          roomRef.child('rematchResponse').remove();
+
+          // 自動輸入驗證碼與名稱，進入願望頁
+          document.getElementById('roomNameInput').value = roomCode;
+          document.getElementById('userNameInput').value = myName;
+          goToPage('page-pk-goal');
+        }, 1200);
+      }
+    });
   });
 }
 
