@@ -2995,7 +2995,14 @@ if (isWinner) {
 
       const values = Object.values(data);
       if (values.includes(false)) {
-        showModal('下次再比吧！');
+        showModal(`
+  <div style="position:relative;">
+    <div style="font-size:1.3em;font-weight:800;color:#ff430a;">下次再比吧！</div>
+    <button onclick="hideModal()" style="
+      position:absolute;top:6px;right:10px;
+      background:none;border:none;font-size:1.2em;color:#888;cursor:pointer;
+    " title="關閉">✖</button>
+  </div>
         setTimeout(() => {
           roomRef.child('rematchRequest').remove();
           roomRef.child('rematchResponse').remove();
