@@ -2801,11 +2801,38 @@ if (isWinner) {
         .score-box { font-size: 2.2em; font-weight: 900; color: #1578e2; background: linear-gradient(90deg, #d9f6ff, #ffffff); padding: 12px 20px; border-radius: 14px; box-shadow: 0 2px 10px #d9f6ff; }
         .score-vs { font-size: 1.6em; font-weight: bold; color: #888; }
         .winner-name { color: #ff3c00; }
-        .winner-goal-box { background: #fff8e8; margin: 20px 0; border-radius: 12px; padding: 12px 18px; font-weight: 900; letter-spacing: 1.5px; color: #ff871c; font-size: 1.1em; }
-        .restart-btn, .rematch-btn { font-size: 1.1em; padding: 10px 24px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; margin-top: 25px; }
-        .restart-btn { background: linear-gradient(90deg, #1677ff, #3dc7ff); color: white; box-shadow: 0 2px 10px #1677ff40; }
-        .restart-btn:hover { transform: scale(1.03); background: linear-gradient(90deg, #146de2, #30b2e5); }
-        .rematch-btn { background: #f0f0f0; color: #444; margin-right: 10px; }
+        .winner-goal-box { background: #fff8e8; margin: 20px 0; border-radius: 12px; padding: 12px 18px; font-weight: 900; letter-spacing: 1.5px; color: #ff871c; font-size: .rematch-btn {
+  background: linear-gradient(90deg, #c4f6dc, #a0eed1); /* 淡綠漸層 */
+  color: #105b38;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1.15em;
+  box-shadow: 0 0 10px rgba(255, 230, 120, 0.4); /* 黃光效果 */
+  animation: glow 1.8s ease-in-out infinite; /* 閃爍動畫 */
+  cursor: pointer;
+  transition: transform 0.25s ease-in-out;
+  margin-top: 25px;
+  margin-right: 10px;
+}
+
+.rematch-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #b2f1ce, #8ce8c1); /* hover 用稍深綠 */
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 6px rgba(255, 230, 120, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(255, 230, 120, 0.65);
+  }
+  100% {
+    box-shadow: 0 0 6px rgba(255, 230, 120, 0.3);
+  }
+}
       </style>
 
       <div class="container">
