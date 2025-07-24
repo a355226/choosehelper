@@ -3003,6 +3003,8 @@ if (isWinner) {
       background:none;border:none;font-size:1.2em;color:#888;cursor:pointer;
     " title="關閉">✖</button>
   </div>
+  `);
+
         setTimeout(() => {
           roomRef.child('rematchRequest').remove();
           roomRef.child('rematchResponse').remove();
