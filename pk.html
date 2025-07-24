@@ -2345,25 +2345,6 @@ function renderBombGame(roomRef, myUid, playerNames) {
   }
 
 
-  window.__bombModalShown__ = false;
-
-  roomRef.child('bombGame').on('value', snap => {
-    let data = snap.val() || {};
-    let remain = data.remain ?? totalTime;
-    let turn = data.turn ?? 0;
-    let ended = data.ended;
-    let log = data.log || [];
-    let winCounted = data.winCounted || false;
-    let resultModalShown = data.resultModalShown || false;
-    let winnerUid = data.winnerUid;
-    let loserUid = data.loserUid;
-    let nowTurn = turn % 2;
-    let isMyTurn = playersArr[nowTurn] === myUid;
-    let $bar = document.getElementById('bomb-timer-bar');
-    let $status = document.getElementById('bomb-status-msg');
-    let $action = document.getElementById('bomb-action-area');
-    let $canvas = document.getElementById('bomb-canvas-area');
-
     drawBombCanvas($canvas, remain, totalTime, ended);
     $bar.textContent = remain.toFixed(3) + ' s';
 
