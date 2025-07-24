@@ -1985,7 +1985,7 @@ function showTensionAnim(target, duration=2500, onEnd) {
 function camelAnimHTML() {
   return `
     <div id="camel-anim-wrap" style="position:relative;width:100%;height:62px;overflow:hidden;background:linear-gradient(180deg,#fde3b2 65%,#c8ad7f 100%);border-radius:15px;border:2px solid #f9e1b0;box-shadow:0 2px 16px #eac1732c;margin:12px auto;">
-      <div style="position:absolute;left:61%;bottom:10px;width:38px;height:23px;z-index:0;">
+      <div style="position:absolute rubbish;left:61%;bottom:10px;width:38px;height:23px;z-index:0;">
         <svg viewBox="0 0 40 23" style="display:block;"><polygon points="0,23 20,2 40,23" fill="#f6e19e" stroke="#dab964" stroke-width="2"/></svg>
       </div>
       <div style="position:absolute;right:10%;top:8px;font-size:1.1em;color:#d2b069;font-weight:bold;opacity:.33;z-index:0;">☀️</div>
@@ -2318,24 +2318,24 @@ function renderBombGame(roomRef, myUid, playerNames) {
     </div>
   `;
 
-  // ===== 遊戲參數 =====
-   const totalTime = 10.0;
-  const tickInterval = 1;
-  let playersArr = Object.keys(playerNames).sort();
-  let myIdx = playersArr.indexOf(myUid);
+const totalTime = 10.0;
+const tickInterval = 1;
+let playersArr = Object.keys(playerNames).sort();
+let myIdx = playersArr.indexOf(myUid);
 
 window.__bombModalShown__ = false;
 
 roomRef.child('bombGame').on('value', snap => {
   let data = snap.val();
 
-  // ✅ 若尚未初始化，且是房主（playersArr[0]）才初始化一次
+  // ✅ 初始化一次（只有房主）
   if (!data && myUid === playersArr[0]) {
     console.log('[🧨 房主初始化 bombGame]');
     roomRef.child('bombGame').set({ remain: totalTime, turn: 0, ended: false, log: [] });
-    return; // ⚠️ 避免畫面進一步處理，等下一輪再跑一次 on(value)
+    return;
   }
 
+  // ⬇️ 以下為遊戲邏輯與畫面更新區域
   data = data || {};
   let remain = data.remain ?? totalTime;
   let turn = data.turn ?? 0;
@@ -2347,58 +2347,59 @@ roomRef.child('bombGame').on('value', snap => {
   let loserUid = data.loserUid;
   let nowTurn = turn % 2;
   let isMyTurn = playersArr[nowTurn] === myUid;
+
   let $bar = document.getElementById('bomb-timer-bar');
   let $status = document.getElementById('bomb-status-msg');
   let $action = document.getElementById('bomb-action-area');
   let $canvas = document.getElementById('bomb-canvas-area');
 
-  // ✅ 以下邏輯照舊（畫面更新、結果顯示、按鈕處理等）
-});
+  drawBombCanvas($canvas, remain, totalTime, ended);
+  $bar.textContent = remain.toFixed(3) + ' s';
 
-    drawBombCanvas($canvas, remain, totalTime, ended);
-    $bar.textContent = remain.toFixed(3) + ' s';
+  if (ended && !winCounted && myUid === playersArr[0]) {
+    roomRef.child('participants/' + winnerUid + '/totalWin').transaction(x => (x || 0) + 1);
+    roomRef.child('bombGame').update({ winCounted: true });
+    console.log('[🏆 房主加分]', winnerUid);
+  }
 
-    if (ended && !winCounted && myUid === playersArr[0]) {
-      roomRef.child('participants/' + winnerUid + '/totalWin').transaction(x => (x || 0) + 1);
-      roomRef.child('bombGame').update({ winCounted: true });
-      console.log('[🏆 房主加分]', winnerUid);
-    }
-
-    if (ended && winnerUid && loserUid && playerNames[loserUid] && playerNames[winnerUid]) {
-      if (!resultModalShown && !window.__bombModalShown__) {
-        if (myUid === playersArr[0]) {
-          roomRef.child('bombGame').update({ resultModalShown: true });
-        }
-        window.__bombModalShown__ = true;
-        console.log('[🎬 顯示炸彈結果 modal]', { winnerUid, loserUid });
-        const tryShow = () => {
-          if (document.getElementById('see-result-btn')) return; // 已綁定過
-          showModal(`
-            <div style="font-size:1.34em;font-weight:900;color:#ff430a;">
-              💣 <span style="color:#ff430a">${playerNames[loserUid]}</span> 引爆了炸彈！<br>
-              <span style="color:#304fff;">${playerNames[winnerUid]} 獲得勝利！</span><br>
-              <button id="see-result-btn" style="margin-top:15px;">看結果</button>
-            </div>
-          `);
-          setTimeout(() => {
-            const btn = document.getElementById('see-result-btn');
-            if (btn) {
-              btn.onclick = () => {
-                console.log('[👆 點擊看結果]');
-                hideModal();
-                showResultPage(roomRef, playerNames);
-              };
-            } else {
-              console.warn('[⚠️ 未找到 see-result-btn，重試綁定]');
-              setTimeout(tryShow, 100);
-            }
-          }, 0);
-        };
-        setTimeout(tryShow, 400);
+  if (ended && winnerUid && loserUid && playerNames[loserUid] && playerNames[winnerUid]) {
+    if (!resultModalShown && !window.__bombModalShown__) {
+      if (myUid === playersArr[0]) {
+        roomRef.child('bombGame').update({ resultModalShown: true });
       }
-      return;
-    }
+      window.__bombModalShown__ = true;
+      console.log('[🎬 顯示炸彈結果 modal]', { winnerUid, loserUid });
 
+      const tryShow = () => {
+        if (document.getElementById('see-result-btn')) return;
+        showModal(`
+          <div style="font-size:1.34em;font-weight:900;color:#ff430a;">
+            💣 <span style="color:#ff430a">${playerNames[loserUid]}</span> 引爆了炸彈！<br>
+            <span style="color:#304fff;">${playerNames[winnerUid]} 獲得勝利！</span><br>
+            <button id="see-result-btn" style="margin-top:15px;">看結果</button>
+          </div>
+        `);
+        setTimeout(() => {
+          const btn = document.getElementById('see-result-btn');
+          if (btn) {
+            btn.onclick = () => {
+              console.log('[👆 點擊看結果]');
+              hideModal();
+              showResultPage(roomRef, playerNames);
+            };
+          } else {
+            console.warn('[⚠️ 未找到 see-result-btn，重試綁定]');
+            setTimeout(tryShow, 100);
+          }
+        }, 0);
+      };
+
+      setTimeout(tryShow, 400);
+    }
+    return;
+  }
+
+  
     if (isMyTurn) {
       $status.innerHTML = `<b>你的回合！<span style="color:#FFD24D;">千萬別把炸彈引爆</span>...</b>`;
       $action.innerHTML = `<button id="hold-btn" style="font-size:1.1em;background:#29282a;color:#FFD24D;font-weight:900;padding:9px 36px;border-radius:14px;border:2px solid #FFD24D;box-shadow:0 2px 11px #ff450043;letter-spacing:2px;transition:background 0.2s;outline:none;cursor:pointer;">按住！</button>`;
@@ -3129,3 +3130,9 @@ async function updateRoomActivity(roomRef) {
 </script>
 </body>
 </html>
+
+
+
+
+
+
