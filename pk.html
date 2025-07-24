@@ -2324,11 +2324,26 @@ function renderBombGame(roomRef, myUid, playerNames) {
   let playersArr = Object.keys(playerNames).sort();
   let myIdx = playersArr.indexOf(myUid);
 
-  roomRef.child('bombGame').once('value').then(snap => {
-    if (!snap.val() && myUid === playersArr[0]) {
-      roomRef.child('bombGame').set({ remain: totalTime, turn: 0, ended: false, log: [] });
-    }
-  });
+  roomRef.child('bombGame').on('value', snap => {
+  const data = snap.val();
+  const remain = data?.remain ?? totalTime;
+  const turn = data?.turn ?? 0;
+  const ended = data?.ended;
+  const log = data?.log || [];
+  const winCounted = data?.winCounted || false;
+  const resultModalShown = data?.resultModalShown || false;
+  const winnerUid = data?.winnerUid;
+  const loserUid = data?.loserUid;
+  const nowTurn = turn % 2;
+  const isMyTurn = playersArr[nowTurn] === myUid;
+
+  // ✅ 避免 race condition：只有第一位（房主）負責初始化
+  if (!data && myUid === playersArr[0]) {
+    console.log('[🧨 初始化 bombGame]');
+    roomRef.child('bombGame').set({ remain: totalTime, turn: 0, ended: false, log: [] });
+    return; // ⚠️ 回傳後不再執行下方畫面邏輯，等下次 update 再進來
+  }
+
 
   window.__bombModalShown__ = false;
 
