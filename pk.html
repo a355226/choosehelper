@@ -653,7 +653,7 @@ window.addEventListener('DOMContentLoaded', () => {
       // 檢查參與者數量
       const participantCount = roomData.participants ? Object.keys(roomData.participants).length : 0;
       if (participantCount >= 2) {
-        alert('該房間已滿（已有兩人），請輸入新的驗證碼');
+        alert('此房已過期，請更換驗證碼');
         document.getElementById('pk-code').value = ''; // 清空驗證碼
         return;
       }
